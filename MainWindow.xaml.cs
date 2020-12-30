@@ -33,19 +33,17 @@ namespace KMS
 
         private void ThreadTest_Click(object sender, RoutedEventArgs e)
         {
-            Logger.v(TAG, $"ThreadTest_Click, current thread id:{Thread.CurrentThread.ManagedThreadId}");
-            Thread t = new Thread(ThreadProc);
-            t.Name = "Thread_test";
-            t.Start();
-            Console.WriteLine($"thread {t.Name} started");
+            //Thread t = new Thread(StatisticThread.ThreadProc);
+            //t.Start();
         }
 
         private void ThreadTest_Click2(object sender, RoutedEventArgs e)
         {
-            mre.Set();
+            //mre.Set();
+            StatisticThread.CanThreadRun = false;
         }
 
-        private ManualResetEvent mre = new ManualResetEvent(false);
+/*        private ManualResetEvent mre = new ManualResetEvent(false);
         private void ThreadProc()
         {
             string name = Thread.CurrentThread.Name;
@@ -59,6 +57,6 @@ namespace KMS
                 Console.WriteLine(name + " ends.");
                 Thread.Sleep(500);
             }
-        }
+        }*/
     }
 }
