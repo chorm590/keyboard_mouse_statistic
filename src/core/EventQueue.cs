@@ -2,11 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace KMS.src.core
 {
     static class EventQueue
     {
+        private const int EQ_STEP_IDLE = 0;
+        private const int EQ_STEP_READY = 1;
+        private const int EQ_STEP_ENQUEUING = 2;
+
         internal struct KMEvent
         {
             internal sbyte type; //keyboard event or mouse event
@@ -19,13 +24,76 @@ namespace KMS.src.core
         //storage the event.
         private static KMEvent[] events = new KMEvent[1000];
         private static int amount;
+        private static int enqueueStep;
+        private static bool isMigrating;
 
         /// <summary>
         /// Can only be call by KMEventHook to storage the original keyboard and mouse event.
         /// </summary>
-        internal static void enqueue()
+        internal static void enqueue(sbyte type, short eventCode, short keyCode, short x, short y)
         {
-            
+            int loopCounter = 0;
+        BEGIN:
+            if (enqueueStep == EQ_STEP_IDLE)
+            {
+                if (isMigrating)
+                {
+                    if (loopCounter < 10)
+                    {
+                        loopCounter++;
+                        Thread.Sleep(1);
+                        goto BEGIN;
+                    }
+                    else
+                    {
+                        Logger.v("EventQueue", "wait for enqueue event timeout1");
+                    }
+                }
+                else
+                {
+                    enqueueStep = EQ_STEP_READY;
+                    if (isMigrating)
+                    {
+                        if (loopCounter < 10)
+                        {
+                            loopCounter++;
+                            Thread.Sleep(1);
+                            goto BEGIN;
+                        }
+                        else
+                        {
+                            Logger.v("EventQueue", "wait for enqueue event timeout2");
+                        }
+                    }
+                    else
+                    {
+                        enqueueStep = EQ_STEP_ENQUEUING;
+
+                        events[amount].type = type;
+                        events[amount].eventCode = eventCode;
+                        events[amount].keyCode = keyCode;
+                        events[amount].x = x;
+                        events[amount].y = y;
+
+                        amount++;
+                    }
+                }
+            }
+            else
+            {
+                if (loopCounter < 10)
+                {
+                    loopCounter++;
+                    Thread.Sleep(1);
+                    goto BEGIN;
+                }
+                else
+                {
+                    Logger.v("EventQueue", "wait for enqueue event timeout3");
+                }
+            }
+
+            enqueueStep = EQ_STEP_IDLE;
         }
 
         /// <summary>
@@ -34,15 +102,20 @@ namespace KMS.src.core
         /// </summary>
         internal static void migrate(ref KMEvent[] e, ref int amount)
         {
-            for(int i = 0; i < 1000; i++)
+            isMigrating = true;
+
+            for (int i = 0; i < EventQueue.amount; i++)
             {
-                e[i].type = (sbyte)i;
+                e[i].type = events[i].type;
                 e[i].eventCode = events[i].eventCode;
                 e[i].keyCode = events[i].keyCode;
                 e[i].x = events[i].x;
                 e[i].y = events[i].y;
             }
-            amount = 1000;
+            amount = EventQueue.amount;
+            EventQueue.amount = 0;
+
+            isMigrating = false;
         }
     }
 }
