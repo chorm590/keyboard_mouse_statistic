@@ -54,6 +54,9 @@ namespace KMS.src.core
         private static HookProc keyboardHookProc;
         private static HookProc mouseHookProc;
 
+        private static Keyboard_LL_Hook_Data khd;
+        private static Mouse_LL_Hook_Data mhd;
+
         //安装钩子
         [DllImport("user32.dll")]
         public static extern IntPtr SetWindowsHookEx(int idHook, HookProc lpfn, IntPtr pInstance, int threadID);
@@ -76,19 +79,8 @@ namespace KMS.src.core
             }
             else
             {
-                Keyboard_LL_Hook_Data khd = (Keyboard_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Keyboard_LL_Hook_Data));
-                if (wParam.ToInt32() == WM_KEYDOWN || wParam.ToInt32() == WM_SYSKEYDOWN)
-                {
-                    Logger.v(TAG, $"key down:{khd.vkCode}");
-                }
-                else if (wParam.ToInt32() == WM_KEYUP || wParam.ToInt32() == WM_SYSKEYUP)
-                {
-                    Logger.v(TAG, $"key up:{khd.vkCode}, keys:{khd.vkCode}, scanCode:{khd.scanCode}, flags:{khd.flags}, time:{khd.time}");
-                }
-                else
-                {
-                    //TODO 记录下来。
-                }
+                khd = (Keyboard_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Keyboard_LL_Hook_Data));
+                EventQueue.enqueue(EventQueue.EVENT_TYPE_KEYBOARD, (short)wParam.ToInt32(), (short)khd.vkCode, 0, 0);
             }
 
             return 0;
@@ -103,20 +95,8 @@ namespace KMS.src.core
             }
             else
             {
-                Mouse_LL_Hook_Data mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
-                Console.WriteLine();
-                int x = (int)(mhd.yx & 0xffffffff);
-                Logger.v(TAG, $"({x},{mhd.yx >> 32}), key event:{wParam}");
-                if (wParam.ToInt32() == WM_MOUSEWHEEL)
-                {
-                    short delta = (short)(mhd.mouseData >> 16);
-                    Logger.v(TAG, $"wheel delta:{delta}");
-                }
-                else
-                {
-                    Logger.v(TAG, $"mouse data:{mhd.mouseData}");
-                }
-                Logger.v(TAG, $"time:{mhd.time}, flags:{mhd.flags}");
+                mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
+                EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)mhd.mouseData, (short)(mhd.yx >> 32), (short)(mhd.yx & 0xffffffff));
             }
 
             return 0;

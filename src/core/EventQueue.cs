@@ -1,7 +1,4 @@
 ﻿using KMS.src.tool;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace KMS.src.core
@@ -11,6 +8,16 @@ namespace KMS.src.core
         private const int EQ_STEP_IDLE = 0;
         private const int EQ_STEP_READY = 1;
         private const int EQ_STEP_ENQUEUING = 2;
+
+        private const int SLEEP_DURATION = 5; //5ms
+        private const int MAX_WAIT_TIMES = 4;
+
+        private static int amount;
+        private static int enqueueStep;
+        private static bool isMigrating;
+
+        internal const sbyte EVENT_TYPE_KEYBOARD = 5;
+        internal const sbyte EVENT_TYPE_MOUSE = 6;
 
         internal struct KMEvent
         {
@@ -22,10 +29,8 @@ namespace KMS.src.core
         }
 
         //storage the event.
-        private static KMEvent[] events = new KMEvent[1000];
-        private static int amount;
-        private static int enqueueStep;
-        private static bool isMigrating;
+        internal const int MAX_EVENT_AMOUNT = 1000;
+        private static KMEvent[] events = new KMEvent[MAX_EVENT_AMOUNT];
 
         /// <summary>
         /// Can only be call by KMEventHook to storage the original keyboard and mouse event.
@@ -38,10 +43,10 @@ namespace KMS.src.core
             {
                 if (isMigrating)
                 {
-                    if (loopCounter < 10)
+                    if (loopCounter < MAX_WAIT_TIMES)
                     {
                         loopCounter++;
-                        Thread.Sleep(1);
+                        Thread.Sleep(SLEEP_DURATION);
                         goto BEGIN;
                     }
                     else
@@ -54,10 +59,10 @@ namespace KMS.src.core
                     enqueueStep = EQ_STEP_READY;
                     if (isMigrating)
                     {
-                        if (loopCounter < 10)
+                        if (loopCounter < MAX_WAIT_TIMES)
                         {
                             loopCounter++;
-                            Thread.Sleep(1);
+                            Thread.Sleep(SLEEP_DURATION);
                             goto BEGIN;
                         }
                         else
@@ -81,10 +86,10 @@ namespace KMS.src.core
             }
             else
             {
-                if (loopCounter < 10)
+                if (loopCounter < MAX_WAIT_TIMES)
                 {
                     loopCounter++;
-                    Thread.Sleep(1);
+                    Thread.Sleep(SLEEP_DURATION);
                     goto BEGIN;
                 }
                 else

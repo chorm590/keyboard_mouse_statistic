@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
-
+using System.Windows.Controls;
+using System.Windows.Data;
 using KMS.src.core;
 using KMS.src.tool;
 
@@ -15,6 +16,8 @@ namespace KMS
 
         private const string TAG = "KMS";
 
+        private Thread statisticThread;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -23,40 +26,25 @@ namespace KMS
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
+            statisticThread = new Thread(StatisticThread.ThreadProc);
+            statisticThread.Start();
+            Logger.v(TAG, "Statistic thread started");
+
             KMEventHook.InsertHook();
+            Logger.v(TAG, "KM-event listening");
+
+            Binding bding = new Binding();
+            bding.Source = StatisticThread.statisticResult;
+            bding.Path = new PropertyPath("EventAmount");
+            BindingOperations.SetBinding(tbStr, TextBlock.TextProperty, bding);
         }
 
         private void Select_Click(object sender, RoutedEventArgs e)
         {
-            //GlobalEventListener.RemoveHook();
+            if (statisticThread != null)
+                StatisticThread.CanThreadRun = false;
+            KMEventHook.RemoveHook();
+            Logger.v(TAG, "Hook removed");
         }
-
-        private void ThreadTest_Click(object sender, RoutedEventArgs e)
-        {
-            //Thread t = new Thread(StatisticThread.ThreadProc);
-            //t.Start();
-        }
-
-        private void ThreadTest_Click2(object sender, RoutedEventArgs e)
-        {
-            //mre.Set();
-            StatisticThread.CanThreadRun = false;
-        }
-
-/*        private ManualResetEvent mre = new ManualResetEvent(false);
-        private void ThreadProc()
-        {
-            string name = Thread.CurrentThread.Name;
-            while (true)
-            {
-                Console.WriteLine(name + " starts and calls mre.WaitOne(), thread id:" + Thread.CurrentThread.ManagedThreadId);
-
-                mre.WaitOne();
-                mre.Reset();
-
-                Console.WriteLine(name + " ends.");
-                Thread.Sleep(500);
-            }
-        }*/
     }
 }
