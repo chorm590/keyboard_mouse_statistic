@@ -11,24 +11,6 @@ namespace KMS.src.core
         private const int WH_KEYBOARD_LL = 13; //low-level keyboard event symbol.
         private const int WH_MOUSE_LL = 14; //mouse event as above.
 
-        private const int WM_KEYDOWN = 0x100;
-        private const int WM_KEYUP = 0x101;
-        private const int WM_SYSKEYDOWN = 0x0104;
-        private const int WM_SYSKEYUP = 0x105;
-
-        private const int WM_MOUSEMOVE = 0x200;
-        private const int WM_LBUTTONDOWN = 0x201;
-        private const int WM_LBUTTONUP = 0x202;
-        private const int WM_RBUTTONDOWN = 0x204;
-        private const int WM_RBUTTONUP = 0x205;
-        private const int WM_MOUSEWHEEL = 0x20a;
-        private const int WM_MOUSESIDEDOWN = 0x20b; //鼠标侧键按下事件（猜测）。
-        private const int WM_MOUSESIDEUP = 0x20c; //鼠标侧键抬起事件（猜测）。
-        private const int WM_MOUSEHWHEEL = 0x20e; //水平方向的滚动，一般鼠标没有这个事件。
-
-        private const int WM_MOUSEDATA_HO_FORWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
-        private const int WM_MOUSEDATA_HO_BACKWARD = 0x10; //鼠标侧键后退标志。high-order in DWORD
-
         internal struct Keyboard_LL_Hook_Data
         {
             public UInt32 vkCode;
