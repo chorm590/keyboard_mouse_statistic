@@ -4,26 +4,25 @@ namespace KMS.src.core
     class Keys
     {
         internal int Code;
-        internal string PrimaryFun;
-        internal string SecondaryFun;
-        internal string DescEn;
-        internal string DescCn;
+        internal string PriDescEn;
+        internal string PriDescCn;
+        internal string SecDescEn;
+        internal string SecDescCn;
 
-        internal Keys(int code, string priFun, string descEn, string descCn)
+        internal Keys(int code, string priDescEn, string priDescCn)
         {
             Code = code;
-            PrimaryFun = priFun;
-            DescEn = descEn;
-            DescCn = descCn;
+            PriDescEn = priDescEn;
+            PriDescCn = priDescCn;
         }
 
-        internal Keys(int code, string priFun, string secFun, string descEn, string descCn)
+        internal Keys(int code, string priDescEn, string priDescCn, string secDescEn, string secDescCn)
         {
             Code = code;
-            PrimaryFun = priFun;
-            SecondaryFun = secFun;
-            DescEn = descEn;
-            DescCn = descCn;
+            PriDescCn = priDescCn;
+            PriDescEn = priDescEn;
+            SecDescEn = secDescEn;
+            SecDescCn = secDescCn;
         }
     }
 }
