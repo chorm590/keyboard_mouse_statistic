@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows;
 using KMS.src.core;
 using KMS.src.tool;
+using KMS.src.db;
 
 namespace KMS
 {
@@ -25,7 +26,7 @@ namespace KMS
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
-            
+            IDatabase sqlite = SQLiteManager.getInstance();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

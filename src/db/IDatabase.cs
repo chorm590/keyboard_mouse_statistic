@@ -4,7 +4,8 @@ using System.Text;
 
 namespace KMS.src.db
 {
-    class DBManager
+    interface IDatabase
     {
+
     }
 }
