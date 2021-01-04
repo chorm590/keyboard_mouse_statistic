@@ -4,6 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace KMS.src.core
 {
+    /// <summary>
+    /// Catch the global keyboard and mouse event.
+    /// </summary>
     internal static class KMEventHook
     {
         private const string TAG = "GlobalEventListener";

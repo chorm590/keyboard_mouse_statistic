@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using KMS.src.core;
 using KMS.src.tool;
 
@@ -22,9 +20,21 @@ namespace KMS
         {
             InitializeComponent();
             Logger.v(TAG, "hello world");
+            startWatching();
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Logger.v(TAG, "Window closing");
+            stopAll();
+        }
+
+        private void startWatching()
         {
             statisticThread = new Thread(StatisticThread.ThreadProc);
             statisticThread.Start();
@@ -32,18 +42,13 @@ namespace KMS
 
             KMEventHook.InsertHook();
             Logger.v(TAG, "KM-event listening");
-
-            Binding bding = new Binding();
-            bding.Source = StatisticThread.statisticResult;
-            bding.Path = new PropertyPath("EventAmount");
-            BindingOperations.SetBinding(tbStr, TextBlock.TextProperty, bding);
         }
 
-        private void Select_Click(object sender, RoutedEventArgs e)
+        private void stopAll()
         {
+            KMEventHook.RemoveHook();
             if (statisticThread != null)
                 StatisticThread.CanThreadRun = false;
-            KMEventHook.RemoveHook();
             Logger.v(TAG, "Hook removed");
         }
     }

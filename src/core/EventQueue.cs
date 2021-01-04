@@ -3,6 +3,9 @@ using System.Threading;
 
 namespace KMS.src.core
 {
+    /// <summary>
+    /// Manage the keyboard and mouse event, storage and migrate it
+    /// </summary>
     static class EventQueue
     {
         private const int EQ_STEP_IDLE = 0;
