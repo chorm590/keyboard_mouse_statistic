@@ -16,17 +16,19 @@ namespace KMS
         private const string TAG = "KMS";
 
         private Thread statisticThread;
+        private SQLiteManager sqliteManager;
 
         public MainWindow()
         {
             InitializeComponent();
             Logger.v(TAG, "hello world");
+            sqliteManager = SQLiteManager.getInstance();
             startWatching();
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
         {
-            IDatabase sqlite = SQLiteManager.getInstance();
+            
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

@@ -1,53 +1,92 @@
 ﻿using KMS.src.tool;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Windows;
 
 namespace KMS.src.db
 {
-    class SQLiteManager : IDatabase
+    class SQLiteManager
     {
         private const string TAG = "SQLiteManager";
 
-        private const string MAIN_DIR_NAME = "db";
-
         private static SQLiteManager instance;
 
-        private SQLiteManager()
-        {
-            prepareDir();
-            DateTime dateTime = DateTime.Now;
-            string today = dateTime.ToShortDateString();
-            Logger.v(TAG, "today:" + today + "," + dateTime.ToShortTimeString());
+        private SQLiteHelper sqliteHelper;
 
+        private string dbFilePath
+        {
+            get
+            {
+                //One file per month. ok? I don't known...
+                DateTime current = DateTime.Now;
+                return "db/" + current.Year + "/" + "kms" + current.ToString("yyyyMM") + ".db";
+            }
         }
 
-        internal static IDatabase getInstance()
+        private string todayInMonth
         {
-            //if(instance == null)
+            get
+            {
+                return DateTime.Now.Day.ToString();
+            }
+        }
+
+        internal static SQLiteManager getInstance()
+        {
+            if (instance == null)
                 instance = new SQLiteManager();
 
             return instance;
         }
 
-        private void prepareDir()
+        private SQLiteManager()
         {
-            if (Directory.Exists(MAIN_DIR_NAME))
+            string curDbFile = dbFilePath;
+            //make sure the directories.
+            try
             {
-                Logger.v(TAG, "exis");
+                prepareDir(curDbFile);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Database initialization failed");
+                Application.Current.Shutdown();
+            }
 
+            //open db.
+            sqliteHelper = new SQLiteHelper();
+            if (!sqliteHelper.openDatabase(curDbFile))
+            {
+                MessageBox.Show("Database open failed");
+                Application.Current.Shutdown();
+            }
+
+            string today = "day" + todayInMonth;
+            Logger.v(TAG, "today:" + today);
+            if (!sqliteHelper.isTableExist(today))
+            {
+                sqliteHelper.createTable(today);
+            }
+        }
+
+        private void prepareDir(string fp)
+        {
+            Logger.v(TAG, "cur db file:" + fp);
+            if (File.Exists(fp))
+            {
+                Logger.v(TAG, "456");
             }
             else
             {
-                Logger.v(TAG, "creating");
-                if (File.Exists(MAIN_DIR_NAME))
+                Logger.v(TAG, "123");
+                string parentPath = fp.Substring(0, fp.LastIndexOf('/')); //Exception? I don't care...
+                if (!Directory.Exists(parentPath))
                 {
-                    DateTime dt = DateTime.Now;
-                    File.Move(MAIN_DIR_NAME, MAIN_DIR_NAME + "_" + dt.Year + dt.Month + dt.Day + dt.Hour + dt.Minute + dt.Second);
+                    Directory.CreateDirectory(parentPath); //Exception? I don't wanna care...
                 }
-                Directory.CreateDirectory(MAIN_DIR_NAME);
             }
         }
+
+
     }
 }
