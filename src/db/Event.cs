@@ -1,9 +1,11 @@
-﻿
-using System;
+﻿using System;
 
 namespace KMS.src.db
 {
-    class EventDetail
+    /// <summary>
+    /// 一个键鼠事件，包含：1、具体的时间信息；2、事件类型。
+    /// </summary>
+    class Event
     {
         private const short DEF_YEAR = 0;
         private const byte DEF_MONTH = 0;
@@ -18,8 +20,6 @@ namespace KMS.src.db
         private byte hour;
         private byte minute;
         private byte second;
-        private ushort type;
-        private ushort value;
 
         internal short Year
         {
@@ -71,7 +71,7 @@ namespace KMS.src.db
                 }
             }
         }
-        
+
         internal byte Hour
         {
             get { return hour; }
@@ -90,7 +90,7 @@ namespace KMS.src.db
                 }
             }
         }
-        
+
         internal byte Minute
         {
             get { return minute; }
@@ -110,7 +110,7 @@ namespace KMS.src.db
                 }
             }
         }
-        
+
         internal byte Second
         {
             get { return second; }
@@ -134,28 +134,20 @@ namespace KMS.src.db
 
         internal ushort Type
         {
-            get
-            {
-                return type;
-            }
-
-            set
-            {
-                type = value;
-            }
+            get;
+            set;
         }
 
         internal ushort Value
         {
-            get
-            {
-                return this.value;
-            }
+            get;
+            set;
+        }
 
-            set
-            {
-                this.value = value;
-            }
+        internal string Desc
+        {
+            get;
+            set;
         }
 
         internal void setTime(DateTime time)
