@@ -4,12 +4,87 @@ namespace KMS.src.core
     static class Constants
     {
 
-        internal static class KeyEventCode
+        internal static class KeyEvent
         {
-            internal const int WM_KEYDOWN = 0x100;
-            internal const int WM_KEYUP = 0x101;
-            internal const int WM_SYSKEYDOWN = 0x0104;
-            internal const int WM_SYSKEYUP = 0x105;
+            internal const short WM_KEYDOWN = 0x100;
+            internal const short WM_KEYUP = 0x101;
+            internal const short WM_SYSKEYDOWN = 0x0104;
+            internal const short WM_SYSKEYUP = 0x105;
+        }
+
+        internal static class KeyCode
+        {
+            internal const byte BACKSPACE = 0x8;
+            internal const byte TAB = 0x9;
+            internal const byte ENTER = 0xd;
+            internal const byte PAUSE_BREAK = 0x13;
+            internal const byte CAPS_LOCK = 0x14;
+            internal const byte ESC = 0x1B;
+            internal const byte SPACE_BAR = 0x20;
+            internal const byte PAGE_UP = 0x21;
+            internal const byte PAGE_DOWN = 0x22;
+            internal const byte END = 0x23;
+            internal const byte HOME = 0x24;
+            internal const byte LEFT = 0x25;
+            internal const byte UP = 0x26;
+            internal const byte RIGHT = 0x27;
+            internal const byte DOWN = 0x28;
+            internal const byte DELETE = 0x2E;
+            internal const byte NUM0 = 0x30;
+            internal const byte NUM1 = 0x31;
+            internal const byte NUM2 = 0x32;
+            internal const byte NUM3 = 0x33;
+            internal const byte NUM4 = 0x34;
+            internal const byte NUM5 = 0x35;
+            internal const byte NUM6 = 0x36;
+            internal const byte NUM7 = 0x37;
+            internal const byte NUM8 = 0x38;
+            internal const byte NUM9 = 0x39;
+            internal const byte A = 0x41;
+            internal const byte B = 0x42;
+            internal const byte C = 0x43;
+            internal const byte D = 0x44;
+            internal const byte E = 0x45;
+            internal const byte F = 0x46;
+            internal const byte G = 0x47;
+            internal const byte H = 0x48;
+            internal const byte I = 0x49;
+            internal const byte J = 0x4A;
+            internal const byte K = 0x4B;
+            internal const byte L = 0x4C;
+            internal const byte M = 0x4D;
+            internal const byte N = 0x4E;
+            internal const byte O = 0x4F;
+            internal const byte P = 0x50;
+            internal const byte Q = 0x51;
+            internal const byte R = 0x52;
+            internal const byte S = 0x53;
+            internal const byte T = 0x54;
+            internal const byte U = 0x55;
+            internal const byte V = 0x56;
+            internal const byte W = 0x57;
+            internal const byte X = 0x58;
+            internal const byte Y = 0x59;
+            internal const byte Z = 0x5A;
+            internal const byte LEFT_WIN = 0x5B;
+            internal const byte RIGHT_WIN = 0x5C;
+            internal const byte LEFT_SHIFT = 0xA0;
+            internal const byte RIGHT_SHIFT = 0xA1;
+            internal const byte LEFT_CTRL = 0xA2;
+            internal const byte RIGHT_CTRL = 0xA3;
+            internal const byte LEFT_ALT = 0xA4;
+            internal const byte RIGHT_ALT = 0xA5;
+            internal const byte EF_A = 0xBA;   //;
+            internal const byte EF_B = 0xBB;  //=
+            internal const byte EF_C = 0xBC;   //,
+            internal const byte EF_D = 0xBD;  //-
+            internal const byte EF_E = 0xBE;  //.
+            internal const byte EF_F = 0xBF;   // /
+            internal const byte EF_G = 0xC0;   //`
+            internal const byte EF_H = 0xDB;   //[
+            internal const byte EF_I = 0xDC;   // \
+            internal const byte EF_J = 0xDD;   //]
+            internal const byte EF_K = 0xDE;   //'
         }
 
         internal static Keys[] keyset =
@@ -31,9 +106,9 @@ namespace KMS.src.core
             new Keys(0x0e,"",""),
             new Keys(0x0f,"",""),
 
-            new Keys(0x10,     "SHIFT",                             "Shift"),
-            new Keys(0x11,     "CTRL",                              "Ctrl"),
-            new Keys(0x12,     "ALT",                               "ALT"),
+            new Keys(0x10, "", ""),
+            new Keys(0x11, "", ""),
+            new Keys(0x12, "", ""),
             new Keys(0x13,     "PAUSE/BREAK",                       "pause/break"),
             new Keys(0x14,     "CAPS LOCK",                         "Caps lock"),
             new Keys(0x15,"",""),
@@ -246,10 +321,10 @@ namespace KMS.src.core
             new Keys(0xd8,"",""),
             new Keys(0xd9,"",""),
             new Keys(0xda,"",""),
-            new Keys(0xdb,      "[",                                "["),
-            new Keys(0xdc,     @"\",                               @"\"),
-            new Keys(0xdd,      "]",                                "]"),
-            new Keys(0xde,      "'",                                "'"),
+            new Keys(0xdb,      "[",                                "[",                "{",                "{"),
+            new Keys(0xdc,     @"\",                               @"\",                "|",                "|"),
+            new Keys(0xdd,      "]",                                "]",                "}",                "}"),
+            new Keys(0xde,      "'",                                "'",                "\"",                "\""),
             new Keys(0xdf,"",""),
 
             new Keys(0xe0,"",""),
@@ -287,7 +362,7 @@ namespace KMS.src.core
             new Keys(0xff,"",""),
         };
 
-        internal static class MouseEventCode
+        internal static class MouseEvent
         {
             internal const int WM_MOUSEMOVE = 0x200;
             internal const int WM_LBUTTONDOWN = 0x201;
@@ -304,6 +379,118 @@ namespace KMS.src.core
         {
             internal const int SIDE_FORWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
             internal const int SIDE_BACKWARD = 0x10; //鼠标侧键后退标志。high-order in DWORD
+        }
+
+        internal enum DbType
+        {
+            //0 ~ 255 was reserved by keyboard code
+            //0x100 ~ 0x10f was reserved by keyboard event
+            EF_1 = 0x110, //数字1键的额外功能，即感叹号。
+            EF_2,
+            EF_3,
+            EF_4,
+            EF_5,
+            EF_6,
+            EF_7,
+            EF_8,
+            EF_9,
+            EF_0,
+            EF_A, //:
+            EF_B, //+
+            EF_C, //<
+            EF_D, //_
+            EF_E, //>
+            EF_F, //?
+            EF_G, //~
+            EF_H, //{
+            EF_I, //|
+            EF_J, //}
+            EF_K, //"
+            LCTRL_LSHIFT = 0x170,
+            RCTRL_RSHIFT,
+            LCTRL_RSHIFT,
+            RCTRL_LSHIFT,
+            LCTRL_ENTER,
+            RCTRL_ENTER,
+            LSHIFT_ENTER,
+            RSHIFT_ENTER,
+            LALT_ENTER,
+            RALT_ENTER,
+            LALT_TAB,
+            RALT_TAB,
+            LCTRL_LSHIFT_ESC,
+            RCTRL_RSHIFT_ESC,
+            LSHIFT_HOME,
+            RSHIFT_HOME,
+            LSHIFT_END,
+            RSHIFT_END,
+            LSHIFT_LEFT,
+            RSHIFT_LEFT,
+            LSHIFT_UP,
+            RSHIFT_UP,
+            LSHIFT_RIGHT,
+            RSHIFT_RIGHT,
+            LSHIFT_DOWN,
+            RSHIFT_DOWN,
+            LCTRL_A,
+            RCTRL_A,
+            LCTRL_S,
+            RCTRL_S,
+            LCTRL_F,
+            RCTRL_F,
+            LCTRL_C,
+            RCTRL_C,
+            LCTRL_V,
+            RCTRL_V,
+            OTHERS_DOUBLE_COMBO = 0x1f0,
+            OTHERS_TRIPLE_COMBO,
+            OTHERS_QUADRA_COMBO,
+            //0x200 ~ 0x20f was reserved by mouse event
+            MOUSE_FORWARD_SK = 0x210,
+            MOUSE_BACKWARD_SK,
+            MOUSE_WHEEL_FORWARD,
+            MOUSE_WHEEL_BACKWARD,
+            MOUSE_LBTN_AREA,
+            MOUSE_RBTN_AREA,
+            KB_ALL = 0x300,
+            KB_COMBO_ALL,
+            MOUSE_ALL,
+            HOUR_KB_FIRST = 0x310,
+            HOUR_KB_SECOND,
+            HOUR_KB_THIRD,
+            HOUR_KB_COMBO_FIRST,
+            HOUR_KB_COMBO_SECOND,
+            HOUR_KB_COMBO_THIRD,
+            HOUR_MS_LB_FIRST,
+            HOUR_MS_LB_SECOND,
+            HOUR_MS_LB_THIRD,
+            HOUR_MS_RB_FIRST,
+            HOUR_MS_RB_SECOND,
+            HOUR_MS_RB_THIRD,
+            MONTH_KB_FIRST = 0x330,
+            MONTH_KB_SECOND,
+            MONTH_KB_THIRD,
+            MONTH_KB_COMBO_FIRST,
+            MONTH_KB_COMBO_SECOND,
+            MONTH_KB_COMBO_THIRD,
+            MONTH_MS_LB_FIRST,
+            MONTH_MS_LB_SECOND,
+            MONTH_MS_LB_THIRD,
+            MONTH_MS_RB_FIRST,
+            MONTH_MS_RB_SECOND,
+            MONTH_MS_RB_THIRD,
+            YEAR_KB_FIRST = 0x350,
+            YEAR_KB_SECOND,
+            YEAR_KB_THIRD,
+            YEAR_KB_COMBO_FIRST,
+            YEAR_KB_COMBO_SECOND,
+            YEAR_KB_COMBO_THIRD,
+            YEAR_MS_LB_FIRST,
+            YEAR_MS_LB_SECOND,
+            YEAR_MS_LB_THIRD,
+            YEAR_MS_RB_FIRST,
+            YEAR_MS_RB_SECOND,
+            YEAR_MS_RB_THIRD,
         }
     }
 }

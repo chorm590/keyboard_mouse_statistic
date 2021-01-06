@@ -12,6 +12,7 @@ namespace KMS.src.db
         private static SQLiteManager instance;
 
         private SQLiteHelper sqliteHelper;
+        private string curTable;
 
         private string dbFilePath
         {
@@ -31,6 +32,7 @@ namespace KMS.src.db
             }
         }
 
+
         internal static SQLiteManager getInstance()
         {
             if (instance == null)
@@ -45,12 +47,13 @@ namespace KMS.src.db
             //make sure the directories.
             try
             {
-                prepareDir(curDbFile);
+                initDbFilePath(curDbFile);
             }
             catch (Exception e)
             {
                 MessageBox.Show("Database initialization failed");
                 Application.Current.Shutdown();
+                return;
             }
 
             //open db.
@@ -59,34 +62,47 @@ namespace KMS.src.db
             {
                 MessageBox.Show("Database open failed");
                 Application.Current.Shutdown();
+                return;
             }
 
-            string today = "day" + todayInMonth;
-            Logger.v(TAG, "today:" + today);
-            if (!sqliteHelper.isTableExist(today))
+            curTable = "day" + todayInMonth + "_detail";
+            Logger.v(TAG, "current table:" + curTable);
+            try
             {
-                sqliteHelper.createTable(today);
+                if (!sqliteHelper.isTableExist(curTable))
+                {
+                    sqliteHelper.createTable(curTable);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Database exception");
+                Application.Current.Shutdown();
+                return;
             }
         }
 
-        private void prepareDir(string fp)
+        private void initDbFilePath(string fp)
         {
-            Logger.v(TAG, "cur db file:" + fp);
-            if (File.Exists(fp))
+            Logger.v(TAG, "path:" + fp);
+            if (fp == null || fp.Length == 0)
+                throw new ArgumentNullException("file path cannot be null or empty");
+
+            if (!File.Exists(fp))
             {
-                Logger.v(TAG, "456");
-            }
-            else
-            {
-                Logger.v(TAG, "123");
-                string parentPath = fp.Substring(0, fp.LastIndexOf('/')); //Exception? I don't care...
+                string parentPath = Toolset.GetParentPath(fp);
+                Logger.v(TAG, "parent path:" + parentPath);
                 if (!Directory.Exists(parentPath))
                 {
-                    Directory.CreateDirectory(parentPath); //Exception? I don't wanna care...
+                    Directory.CreateDirectory(parentPath);
                 }
             }
         }
 
-
+        internal void close()
+        {
+            if (sqliteHelper != null)
+                sqliteHelper.closeDababase();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using KMS.src.tool;
+using System;
 using System.Threading;
 
 namespace KMS.src.core
@@ -29,6 +30,7 @@ namespace KMS.src.core
             internal short keyCode; //which key
             internal short x; //for mouse event
             internal short y; //for mouse event
+            internal DateTime time;
         }
 
         //storage the event.
@@ -82,6 +84,7 @@ namespace KMS.src.core
                         events[amount].keyCode = keyCode;
                         events[amount].x = x;
                         events[amount].y = y;
+                        events[amount].time = DateTime.Now;
 
                         amount++;
                     }
@@ -119,6 +122,7 @@ namespace KMS.src.core
                 e[i].keyCode = events[i].keyCode;
                 e[i].x = events[i].x;
                 e[i].y = events[i].y;
+                e[i].time = events[i].time;
             }
             amount = EventQueue.amount;
             EventQueue.amount = 0;

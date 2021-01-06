@@ -75,13 +75,16 @@ namespace KMS.src.core
         {
             if (code < 0)
             {
-                //TODO record it.
                 return CallNextHookEx(IntPtr.Zero, code, wParam, lParam);
             }
             else
             {
-                mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
-                EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)mhd.mouseData, (short)(mhd.yx >> 32), (short)(mhd.yx & 0xffffffff));
+                //Ignore the mouse-move event.
+                if (wParam.ToInt32() != Constants.MouseEvent.WM_MOUSEMOVE)
+                {
+                    mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
+                    EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)mhd.mouseData, (short)(mhd.yx >> 32), (short)(mhd.yx & 0xffffffff));
+                }
             }
 
             return 0;

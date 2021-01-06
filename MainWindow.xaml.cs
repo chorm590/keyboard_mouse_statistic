@@ -34,6 +34,7 @@ namespace KMS
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logger.v(TAG, "Window closing");
+            sqliteManager.close();
             stopAll();
         }
 

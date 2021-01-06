@@ -35,8 +35,11 @@ namespace KMS.src.db
             }
 
             SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "CREATE TABLE " + name + "()";
-            return false;
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name + "(_id INTEGER PRIMARY KEY autoincrement, year SMALLINT NOT NULL, month TINYINT NOT NULL, day TINYINT NOT NULL" +
+                ",hour TINYINT NOT NULL, minute TINYINT NOT NULL, second TINYINT NOT NULL, type SMALLINT NOT NULL, value MEDIUMINT NOT NULL)";
+            cmd.ExecuteNonQuery();
+
+            return true;
         }
 
         internal bool isTableExist(string name)
@@ -56,6 +59,12 @@ namespace KMS.src.db
             reader.Close();
 
             return hasRows;
+        }
+
+        public void closeDababase()
+        {
+            if (sqliteConnection != null)
+                sqliteConnection.Close();
         }
     }
 }
