@@ -12,14 +12,16 @@ namespace KMS.src.core
             internal const short WM_SYSKEYUP = 0x105;
         }
 
-        internal static class KeyCode
+        internal static class Keyboard
         {
             internal const byte BACKSPACE = 0x8;
             internal const byte TAB = 0x9;
             internal const byte ENTER = 0xd;
+
             internal const byte PAUSE_BREAK = 0x13;
             internal const byte CAPS_LOCK = 0x14;
             internal const byte ESC = 0x1B;
+
             internal const byte SPACE_BAR = 0x20;
             internal const byte PAGE_UP = 0x21;
             internal const byte PAGE_DOWN = 0x22;
@@ -29,17 +31,21 @@ namespace KMS.src.core
             internal const byte UP = 0x26;
             internal const byte RIGHT = 0x27;
             internal const byte DOWN = 0x28;
-            internal const byte DELETE = 0x2E;
-            internal const byte NUM0 = 0x30;
-            internal const byte NUM1 = 0x31;
-            internal const byte NUM2 = 0x32;
-            internal const byte NUM3 = 0x33;
-            internal const byte NUM4 = 0x34;
-            internal const byte NUM5 = 0x35;
-            internal const byte NUM6 = 0x36;
-            internal const byte NUM7 = 0x37;
-            internal const byte NUM8 = 0x38;
-            internal const byte NUM9 = 0x39;
+            internal const byte PrtSc = 0x2c;
+            internal const byte Insert = 0x2d;
+            internal const byte DELETE = 0x2e;
+
+            internal const byte Num0 = 0x30;
+            internal const byte Num1 = 0x31;
+            internal const byte Num2 = 0x32;
+            internal const byte Num3 = 0x33;
+            internal const byte Num4 = 0x34;
+            internal const byte Num5 = 0x35;
+            internal const byte Num6 = 0x36;
+            internal const byte Num7 = 0x37;
+            internal const byte Num8 = 0x38;
+            internal const byte Num9 = 0x39;
+
             internal const byte A = 0x41;
             internal const byte B = 0x42;
             internal const byte C = 0x43;
@@ -55,6 +61,7 @@ namespace KMS.src.core
             internal const byte M = 0x4D;
             internal const byte N = 0x4E;
             internal const byte O = 0x4F;
+
             internal const byte P = 0x50;
             internal const byte Q = 0x51;
             internal const byte R = 0x52;
@@ -68,299 +75,67 @@ namespace KMS.src.core
             internal const byte Z = 0x5A;
             internal const byte LEFT_WIN = 0x5B;
             internal const byte RIGHT_WIN = 0x5C;
+
+            internal const byte NumPad0 = 0x60;
+            internal const byte NumPad1 = 0x61;
+            internal const byte NumPad2 = 0x62;
+            internal const byte NumPad3 = 0x63;
+            internal const byte NumPad4 = 0x64;
+            internal const byte NumPad5 = 0x65;
+            internal const byte NumPad6 = 0x66;
+            internal const byte NumPad7 = 0x67;
+            internal const byte NumPad8 = 0x68;
+            internal const byte NumPad9 = 0x69;
+            internal const byte NumPad_Multiply = 0x6a;
+            internal const byte NumPad_Add = 0x6b;
+            internal const byte NumPad_Enter = 0x6c;
+            internal const byte NumPad_Minus = 0x6d;
+            internal const byte NumPad_Dot = 0x6e;
+            internal const byte NumPad_Division = 0x6f;
+
+            internal const byte F1 = 0x70;
+            internal const byte F2 = 0x71;
+            internal const byte F3 = 0x72;
+            internal const byte F4 = 0x73;
+            internal const byte F5 = 0x74;
+            internal const byte F6 = 0x75;
+            internal const byte F7 = 0x76;
+            internal const byte F8 = 0x77;
+            internal const byte F9 = 0x78;
+            internal const byte F10 = 0x79;
+            internal const byte F11 = 0x7A;
+            internal const byte F12 = 0x7B;
+
+            internal const byte NumLock = 0x90;
+            internal const byte ScrLock = 0x91;
+
             internal const byte LEFT_SHIFT = 0xA0;
             internal const byte RIGHT_SHIFT = 0xA1;
             internal const byte LEFT_CTRL = 0xA2;
             internal const byte RIGHT_CTRL = 0xA3;
             internal const byte LEFT_ALT = 0xA4;
             internal const byte RIGHT_ALT = 0xA5;
+
             internal const byte EF_A = 0xBA;   //;
             internal const byte EF_B = 0xBB;  //=
             internal const byte EF_C = 0xBC;   //,
             internal const byte EF_D = 0xBD;  //-
             internal const byte EF_E = 0xBE;  //.
             internal const byte EF_F = 0xBF;   // /
+
             internal const byte EF_G = 0xC0;   //`
+
             internal const byte EF_H = 0xDB;   //[
             internal const byte EF_I = 0xDC;   // \
             internal const byte EF_J = 0xDD;   //]
             internal const byte EF_K = 0xDE;   //'
+
+
+            internal static readonly Key[] Keys =
+            {
+
+            };
         }
-
-        internal static Type[] keys =
-        {
-            new Type(0x00,null),
-            new Type(0x01,null),
-            new Type(0x02,null),
-            new Type(0x03,null),
-            new Type(0x04,null),
-            new Type(0x05,null),
-            new Type(0x06,null),
-            new Type(0x07,null),
-            new Type(0x08,      "BACKSPACE"),
-            new Type(0x09,      "TAB"),
-            new Type(0x0a,null),
-            new Type(0x0b,null),
-            new Type(0x0c,      "CLEAR"),
-            new Type(0x0d,      "ENTER"),
-            new Type(0x0e,null),
-            new Type(0x0f,null),
-
-            new Type(0x10, null),
-            new Type(0x11, null),
-            new Type(0x12, null),
-            new Type(0x13,      "PAUSE/BREAK"),
-            new Type(0x14,      "CAPS LOCK"),
-            new Type(0x15,null),
-            new Type(0x16,null),
-            new Type(0x17,null),
-            new Type(0x18,null),
-            new Type(0x19,null),
-            new Type(0x1a,null),
-            new Type(0x1b,      "ESC"),
-            new Type(0x1c,null),
-            new Type(0x1d,null),
-            new Type(0x1e,null),
-            new Type(0x1f,null),
-
-            new Type(0x20,      "SPACE BAR"),
-            new Type(0x21,      "PAGE UP"),
-            new Type(0x22,      "PAGE DOWN"),
-            new Type(0x23,      "END"),
-            new Type(0x24,      "HOME"),
-            new Type(0x25,      "LEFT ARROW"),
-            new Type(0x26,      "UP ARROW"),
-            new Type(0x27,      "RIGHT ARROW"),
-            new Type(0x28,      "DOWN ARROW"),
-            new Type(0x29,      "SELECT"),
-            new Type(0x2a,      "PRINT"),
-            new Type(0x2b,      "EXECUTE"),
-            new Type(0x2c,      "PrtSc"),
-            new Type(0x2d,      "Insert"),
-            new Type(0x2e,      "Delete"),
-            new Type(0x2f,      "HELP"),
-
-            new Type(0x30,      "0"),
-            new Type(0x31,      "1"),
-            new Type(0x32,      "2"),
-            new Type(0x33,      "3"),
-            new Type(0x34,      "4"),
-            new Type(0x35,      "5"),
-            new Type(0x36,      "6"),
-            new Type(0x37,      "7"),
-            new Type(0x38,      "8"),
-            new Type(0x39,      "9"),
-            new Type(0x3a,null),
-            new Type(0x3b,null),
-            new Type(0x3c,null),
-            new Type(0x3d,null),
-            new Type(0x3e,null),
-            new Type(0x3f,null),
-
-            new Type(0x40,null),
-            new Type(0x41,      "A"),
-            new Type(0x42,      "B"),
-            new Type(0x43,      "C"),
-            new Type(0x44,      "D"),
-            new Type(0x45,      "E"),
-            new Type(0x46,      "F"),
-            new Type(0x47,      "G"),
-            new Type(0x48,      "H"),
-            new Type(0x49,      "I"),
-            new Type(0x4a,      "J"),
-            new Type(0x4b,      "K"),
-            new Type(0x4c,      "L"),
-            new Type(0x4d,      "M"),
-            new Type(0x4e,      "N"),
-            new Type(0x4f,      "O"),
-
-            new Type(0x50,      "P"),
-            new Type(0x51,      "Q"),
-            new Type(0x52,      "R"),
-            new Type(0x53,      "S"),
-            new Type(0x54,      "T"),
-            new Type(0x55,      "U"),
-            new Type(0x56,      "V"),
-            new Type(0x57,      "W"),
-            new Type(0x58,      "X"),
-            new Type(0x59,      "Y"),
-            new Type(0x5a,      "Z"),
-            new Type(0x5b,      "left win key"),
-            new Type(0x5c,      "right win key"),
-            new Type(0x5d,      "app key"),
-            new Type(0x5e,null),
-            new Type(0x5f,      "sleep key"),
-
-            new Type(0x60,      "NUM_0"),
-            new Type(0x61,      "NUM_1"),
-            new Type(0x62,      "NUM_2"),
-            new Type(0x63,      "NUM_3"),
-            new Type(0x64,      "NUM_4"),
-            new Type(0x65,      "NUM_5"),
-            new Type(0x66,      "NUM_6"),
-            new Type(0x67,      "NUM_7"),
-            new Type(0x68,      "NUM_8"),
-            new Type(0x69,      "NUM_9"),
-            new Type(0x6a,      "NUM_*"),
-            new Type(0x6b,      "NUM_+"),
-            new Type(0x6c,      "NUM_ENT"),
-            new Type(0x6d,      "NUM_-"),
-            new Type(0x6e,      "NUM_."),
-            new Type(0x6f,      "NUM_/"),
-
-            new Type(0x70,      "F1"),
-            new Type(0x71,      "F2"),
-            new Type(0x72,      "F3"),
-            new Type(0x73,      "F4"),
-            new Type(0x74,      "F5"),
-            new Type(0x75,      "F6"),
-            new Type(0x76,      "F7"),
-            new Type(0x77,      "F8"),
-            new Type(0x78,      "F9"),
-            new Type(0x79,      "F10"),
-            new Type(0x7a,      "F11"),
-            new Type(0x7b,      "F12"),
-            new Type(0x7c,null),
-            new Type(0x7d,null),
-            new Type(0x7e,null),
-            new Type(0x7f,null),
-
-            new Type(0x80,null),
-            new Type(0x81,null),
-            new Type(0x82,null),
-            new Type(0x83,null),
-            new Type(0x84,null),
-            new Type(0x85,null),
-            new Type(0x86,null),
-            new Type(0x87,null),
-            new Type(0x88,null),
-            new Type(0x89,null),
-            new Type(0x8a,null),
-            new Type(0x8b,null),
-            new Type(0x8c,null),
-            new Type(0x8d,null),
-            new Type(0x8e,null),
-            new Type(0x8f,null),
-
-            new Type(0x90,      "NUM LOCK"),
-            new Type(0x91,      "SCROLL LOCK"),
-            new Type(0x92,null),
-            new Type(0x93,null),
-            new Type(0x94,null),
-            new Type(0x95,null),
-            new Type(0x96,null),
-            new Type(0x97,null),
-            new Type(0x98,null),
-            new Type(0x99,null),
-            new Type(0x9a,null),
-            new Type(0x9b,null),
-            new Type(0x9c,null),
-            new Type(0x9d,null),
-            new Type(0x9e,null),
-            new Type(0x9f,null),
-
-            new Type(0xa0,      "LEFT SHIFT"),
-            new Type(0xa1,      "RIGHT SHIFT"),
-            new Type(0xa2,      "LEFT CTRL"),
-            new Type(0xa3,      "RIGHT CTRL"),
-            new Type(0xa4,      "LEFT ALT"),
-            new Type(0xa5,      "RIGHT ALT"),
-            new Type(0xa6,null),
-            new Type(0xa7,null),
-            new Type(0xa8,null),
-            new Type(0xa9,null),
-            new Type(0xaa,null),
-            new Type(0xab,null),
-            new Type(0xac,null),
-            new Type(0xad,null),
-            new Type(0xae,null),
-            new Type(0xaf,null),
-
-            new Type(0xb0,null),
-            new Type(0xb1,null),
-            new Type(0xb2,null),
-            new Type(0xb3,null),
-            new Type(0xb4,null),
-            new Type(0xb5,null),
-            new Type(0xb6,null),
-            new Type(0xb7,null),
-            new Type(0xb8,null),
-            new Type(0xb9,null),
-            new Type(0xba,      ";"),
-            new Type(0xbb,      "="),
-            new Type(0xbc,      ","),
-            new Type(0xbd,      "-"),
-            new Type(0xbe,      "."),
-            new Type(0xbf,      "/"),
-
-            new Type(0xc0,      "`"),
-            new Type(0xc1,null),
-            new Type(0xc2,null),
-            new Type(0xc3,null),
-            new Type(0xc4,null),
-            new Type(0xc5,null),
-            new Type(0xc6,null),
-            new Type(0xc7,null),
-            new Type(0xc8,null),
-            new Type(0xc9,null),
-            new Type(0xca,null),
-            new Type(0xcb,null),
-            new Type(0xcc,null),
-            new Type(0xcd,null),
-            new Type(0xce,null),
-            new Type(0xcf,null),
-
-            new Type(0xd0,null),
-            new Type(0xd1,null),
-            new Type(0xd2,null),
-            new Type(0xd3,null),
-            new Type(0xd4,null),
-            new Type(0xd5,null),
-            new Type(0xd6,null),
-            new Type(0xd7,null),
-            new Type(0xd8,null),
-            new Type(0xd9,null),
-            new Type(0xda,null),
-            new Type(0xdb,      "["),
-            new Type(0xdc,      @"\"),
-            new Type(0xdd,      "]"),
-            new Type(0xde,      "'"),
-            new Type(0xdf,null),
-
-            new Type(0xe0,null),
-            new Type(0xe1,null),
-            new Type(0xe2,null),
-            new Type(0xe3,null),
-            new Type(0xe4,null),
-            new Type(0xe5,null),
-            new Type(0xe6,null),
-            new Type(0xe7,null),
-            new Type(0xe8,null),
-            new Type(0xe9,null),
-            new Type(0xea,null),
-            new Type(0xeb,null),
-            new Type(0xec,null),
-            new Type(0xed,null),
-            new Type(0xee,null),
-            new Type(0xef,null),
-
-            new Type(0xf0,null),
-            new Type(0xf1,null),
-            new Type(0xf2,null),
-            new Type(0xf3,null),
-            new Type(0xf4,null),
-            new Type(0xf5,null),
-            new Type(0xf6,null),
-            new Type(0xf7,null),
-            new Type(0xf8,null),
-            new Type(0xf9,null),
-            new Type(0xfa,null),
-            new Type(0xfb,null),
-            new Type(0xfc,null),
-            new Type(0xfd,null),
-            new Type(0xfe,null),
-            new Type(0xff,null)
-        };
 
         internal static Type[] MultiFunKey =
         {
@@ -387,279 +162,47 @@ namespace KMS.src.core
             new Type(0x124,     "\"")
         };
 
-        internal static Keys[] keyset =
+        internal static Type[] ComboKeyType =
         {
-            new Keys(0x00,"",""),
-            new Keys(0x01,"",""),
-            new Keys(0x02,"",""),
-            new Keys(0x03,"",""),
-            new Keys(0x04,"",""),
-            new Keys(0x05,"",""),
-            new Keys(0x06,"",""),
-            new Keys(0x07,"",""),
-            new Keys(0x08,     "BACKSPACE",                        "回退键"),
-            new Keys(0x09,     "TAB",                              "TAB"),
-            new Keys(0x0a,"",""),
-            new Keys(0x0b,"",""),
-            new Keys(0x0c,     "CLEAR",                             "清除键"),
-            new Keys(0x0d,     "ENTER",                             "回车键"),
-            new Keys(0x0e,"",""),
-            new Keys(0x0f,"",""),
-
-            new Keys(0x10, "", ""),
-            new Keys(0x11, "", ""),
-            new Keys(0x12, "", ""),
-            new Keys(0x13,     "PAUSE/BREAK",                       "pause/break"),
-            new Keys(0x14,     "CAPS LOCK",                         "Caps lock"),
-            new Keys(0x15,"",""),
-            new Keys(0x16,"",""),
-            new Keys(0x17,"",""),
-            new Keys(0x18,"",""),
-            new Keys(0x19,"",""),
-            new Keys(0x1a,"",""),
-            new Keys(0x1b,     "ESC",                               "ESC键"),
-            new Keys(0x1c,"",""),
-            new Keys(0x1d,"",""),
-            new Keys(0x1e,"",""),
-            new Keys(0x1f,"",""),
-
-            new Keys(0x20,     "SPACE BAR",                         "空格键"),
-            new Keys(0x21,     "PAGE UP",                           "Page up"),
-            new Keys(0x22,     "PAGE DOWN",                         "Page down"),
-            new Keys(0x23,     "END",                               "END"),
-            new Keys(0x24,     "HOME",                              "HOME"),
-            new Keys(0x25,     "LEFT ARROW",                        "左方向"),
-            new Keys(0x26,     "UP ARROW",                          "上方向"),
-            new Keys(0x27,     "RIGHT ARROW",                       "右方向"),
-            new Keys(0x28,     "DOWN ARROW",                        "下方向"),
-            new Keys(0x29,     "SELECT",                            "select键"),
-            new Keys(0x2a,     "PRINT",                             "print键"),
-            new Keys(0x2b,     "EXECUTE",                           "EXECUTE键"),
-            new Keys(0x2c,     "PrtSc",                             "PrtSc"),
-            new Keys(0x2d,     "Insert",                            "Insert"),
-            new Keys(0x2e,     "Delete",                            "Delete"),
-            new Keys(0x2f,     "HELP",                              "帮助键"),
-
-            new Keys(0x30,     "0",                                "数字0",           ")",                    ")"),
-            new Keys(0x31,     "1",                                "数字1",           "!",                    "!"),
-            new Keys(0x32,     "2",                                "数字2",           "@",                    "@"),
-            new Keys(0x33,     "3",                                "数字3",           "#",                    "#"),
-            new Keys(0x34,     "4",                                "数字4",           "$",                    "$"),
-            new Keys(0x35,     "5",                                "数字5",           "%",                    "%"),
-            new Keys(0x36,     "6",                                "数字6",           "^",                    "^"),
-            new Keys(0x37,     "7",                                "数字7",           "&",                    "&"),
-            new Keys(0x38,     "8",                                "数字8",           "*",                    "*"),
-            new Keys(0x39,     "9",                                "数字9",           "(",                    "("),
-            new Keys(0x3a,"",""),
-            new Keys(0x3b,"",""),
-            new Keys(0x3c,"",""),
-            new Keys(0x3d,"",""),
-            new Keys(0x3e,"",""),
-            new Keys(0x3f,"",""),
-
-            new Keys(0x40,"",""),
-            new Keys(0x41,     "A",                                "A"),
-            new Keys(0x42,     "B",                                "B"),
-            new Keys(0x43,     "C",                                "C"),
-            new Keys(0x44,     "D",                                "D"),
-            new Keys(0x45,     "E",                                "E"),
-            new Keys(0x46,     "F",                                "F"),
-            new Keys(0x47,     "G",                                "G"),
-            new Keys(0x48,     "H",                                "H"),
-            new Keys(0x49,     "I",                                "I"),
-            new Keys(0x4a,     "J",                                "J"),
-            new Keys(0x4b,     "K",                                "K"),
-            new Keys(0x4c,     "L",                                "L"),
-            new Keys(0x4d,     "M",                                "M"),
-            new Keys(0x4e,     "N",                                "N"),
-            new Keys(0x4f,     "O",                                "O"),
-
-            new Keys(0x50,     "P",                                "P"),
-            new Keys(0x51,     "Q",                                "Q"),
-            new Keys(0x52,     "R",                                "R"),
-            new Keys(0x53,     "S",                                "S"),
-            new Keys(0x54,     "T",                                "T"),
-            new Keys(0x55,     "U",                                "U"),
-            new Keys(0x56,     "V",                                "V"),
-            new Keys(0x57,     "W",                                "W"),
-            new Keys(0x58,     "X",                                "X"),
-            new Keys(0x59,     "Y",                                "Y"),
-            new Keys(0x5a,     "Z",                                "Z"),
-            new Keys(0x5b,      "left win key",                     "左WIN"),
-            new Keys(0x5c,      "right win key",                    "右WIN"),
-            new Keys(0x5d,      "app key",                          "应用键"),
-            new Keys(0x5e,"",""),
-            new Keys(0x5f,      "sleep key",                        "睡眠键"),
-
-            new Keys(0x60,      "NUM_0",                            "小键盘0"),
-            new Keys(0x61,      "NUM_1",                            "小键盘1"),
-            new Keys(0x62,      "NUM_2",                            "小键盘2"),
-            new Keys(0x63,      "NUM_3",                            "小键盘3"),
-            new Keys(0x64,      "NUM_4",                            "小键盘4"),
-            new Keys(0x65,      "NUM_5",                            "小键盘5"),
-            new Keys(0x66,      "NUM_6",                            "小键盘6"),
-            new Keys(0x67,      "NUM_7",                            "小键盘7"),
-            new Keys(0x68,      "NUM_8",                            "小键盘8"),
-            new Keys(0x69,      "NUM_9",                            "小键盘9"),
-            new Keys(0x6a,      "NUM_*",                            "小键盘*"),
-            new Keys(0x6b,      "NUM_+",                            "小键盘+"),
-            new Keys(0x6c,      "NUM_ENT",                          "小键盘ENT"),
-            new Keys(0x6d,      "NUM_-",                            "小键盘-"),
-            new Keys(0x6e,      "NUM_.",                            "小键盘."),
-            new Keys(0x6f,      "NUM_/",                            "小键盘/"),
-
-            new Keys(0x70,      "F1",                               "F1"),
-            new Keys(0x71,      "F2",                               "F2"),
-            new Keys(0x72,      "F3",                               "F3"),
-            new Keys(0x73,      "F4",                               "F4"),
-            new Keys(0x74,      "F5",                               "F5"),
-            new Keys(0x75,      "F6",                               "F6"),
-            new Keys(0x76,      "F7",                               "F7"),
-            new Keys(0x77,      "F8",                               "F8"),
-            new Keys(0x78,      "F9",                               "F9"),
-            new Keys(0x79,      "F10",                              "F10"),
-            new Keys(0x7a,      "F11",                              "F11"),
-            new Keys(0x7b,      "F12",                              "F12"),
-            new Keys(0x7c,"",""),
-            new Keys(0x7d,"",""),
-            new Keys(0x7e,"",""),
-            new Keys(0x7f,"",""),
-
-            new Keys(0x80,"",""),
-            new Keys(0x81,"",""),
-            new Keys(0x82,"",""),
-            new Keys(0x83,"",""),
-            new Keys(0x84,"",""),
-            new Keys(0x85,"",""),
-            new Keys(0x86,"",""),
-            new Keys(0x87,"",""),
-            new Keys(0x88,"",""),
-            new Keys(0x89,"",""),
-            new Keys(0x8a,"",""),
-            new Keys(0x8b,"",""),
-            new Keys(0x8c,"",""),
-            new Keys(0x8d,"",""),
-            new Keys(0x8e,"",""),
-            new Keys(0x8f,"",""),
-
-            new Keys(0x90,      "NUM LOCK",                         "NUM LOCK"),
-            new Keys(0x91,      "SCROLL LOCK",                      "SCROLL LOCK"),
-            new Keys(0x92,"",""),
-            new Keys(0x93,"",""),
-            new Keys(0x94,"",""),
-            new Keys(0x95,"",""),
-            new Keys(0x96,"",""),
-            new Keys(0x97,"",""),
-            new Keys(0x98,"",""),
-            new Keys(0x99,"",""),
-            new Keys(0x9a,"",""),
-            new Keys(0x9b,"",""),
-            new Keys(0x9c,"",""),
-            new Keys(0x9d,"",""),
-            new Keys(0x9e,"",""),
-            new Keys(0x9f,"",""),
-
-            new Keys(0xa0,      "LEFT SHIFT",                       "左SHIFT"),
-            new Keys(0xa1,      "RIGHT SHIFT",                      "右SHIFT"),
-            new Keys(0xa2,      "LEFT CTRL",                        "左CTRL"),
-            new Keys(0xa3,      "RIGHT CTRL",                       "右CTRL"),
-            new Keys(0xa4,      "LEFT ALT",                        "左ALT"),
-            new Keys(0xa5,      "RIGHT ALT",                       "右ALT"),
-            new Keys(0xa6,"",""),
-            new Keys(0xa7,"",""),
-            new Keys(0xa8,"",""),
-            new Keys(0xa9,"",""),
-            new Keys(0xaa,"",""),
-            new Keys(0xab,"",""),
-            new Keys(0xac,"",""),
-            new Keys(0xad,"",""),
-            new Keys(0xae,"",""),
-            new Keys(0xaf,"",""),
-
-            new Keys(0xb0,"",""),
-            new Keys(0xb1,"",""),
-            new Keys(0xb2,"",""),
-            new Keys(0xb3,"",""),
-            new Keys(0xb4,"",""),
-            new Keys(0xb5,"",""),
-            new Keys(0xb6,"",""),
-            new Keys(0xb7,"",""),
-            new Keys(0xb8,"",""),
-            new Keys(0xb9,"",""),
-            new Keys(0xba,      ";",                                ";",                ":",                ":"),
-            new Keys(0xbb,      "=",                                "=",                "+",                "+"),
-            new Keys(0xbc,      ",",                                ",",                "<",                "<"),
-            new Keys(0xbd,      "-",                                "-",                "_",                "_"),
-            new Keys(0xbe,      ".",                                ".",                ">",                ">"),
-            new Keys(0xbf,      "/",                                "/",                "?",                "?"),
-
-            new Keys(0xc0,      "`",                                "`",                "~",                "~"),
-            new Keys(0xc1,"",""),
-            new Keys(0xc2,"",""),
-            new Keys(0xc3,"",""),
-            new Keys(0xc4,"",""),
-            new Keys(0xc5,"",""),
-            new Keys(0xc6,"",""),
-            new Keys(0xc7,"",""),
-            new Keys(0xc8,"",""),
-            new Keys(0xc9,"",""),
-            new Keys(0xca,"",""),
-            new Keys(0xcb,"",""),
-            new Keys(0xcc,"",""),
-            new Keys(0xcd,"",""),
-            new Keys(0xce,"",""),
-            new Keys(0xcf,"",""),
-
-            new Keys(0xd0,"",""),
-            new Keys(0xd1,"",""),
-            new Keys(0xd2,"",""),
-            new Keys(0xd3,"",""),
-            new Keys(0xd4,"",""),
-            new Keys(0xd5,"",""),
-            new Keys(0xd6,"",""),
-            new Keys(0xd7,"",""),
-            new Keys(0xd8,"",""),
-            new Keys(0xd9,"",""),
-            new Keys(0xda,"",""),
-            new Keys(0xdb,      "[",                                "[",                "{",                "{"),
-            new Keys(0xdc,     @"\",                               @"\",                "|",                "|"),
-            new Keys(0xdd,      "]",                                "]",                "}",                "}"),
-            new Keys(0xde,      "'",                                "'",                "\"",                "\""),
-            new Keys(0xdf,"",""),
-
-            new Keys(0xe0,"",""),
-            new Keys(0xe1,"",""),
-            new Keys(0xe2,"",""),
-            new Keys(0xe3,"",""),
-            new Keys(0xe4,"",""),
-            new Keys(0xe5,"",""),
-            new Keys(0xe6,"",""),
-            new Keys(0xe7,"",""),
-            new Keys(0xe8,"",""),
-            new Keys(0xe9,"",""),
-            new Keys(0xea,"",""),
-            new Keys(0xeb,"",""),
-            new Keys(0xec,"",""),
-            new Keys(0xed,"",""),
-            new Keys(0xee,"",""),
-            new Keys(0xef,"",""),
-
-            new Keys(0xf0,"",""),
-            new Keys(0xf1,"",""),
-            new Keys(0xf2,"",""),
-            new Keys(0xf3,"",""),
-            new Keys(0xf4,"",""),
-            new Keys(0xf5,"",""),
-            new Keys(0xf6,"",""),
-            new Keys(0xf7,"",""),
-            new Keys(0xf8,"",""),
-            new Keys(0xf9,"",""),
-            new Keys(0xfa,"",""),
-            new Keys(0xfb,"",""),
-            new Keys(0xfc,"",""),
-            new Keys(0xfd,"",""),
-            new Keys(0xfe,"",""),
-            new Keys(0xff,"",""),
+            new Type(0x170,     "LCTRL_LSHIFT"),
+            new Type(0x171,     "RCTRL_RSHIFT"),
+            new Type(0x172,     "LCTRL_RSHIFT"),
+            new Type(0x173,     "RCTRL_LSHIFT"),
+            new Type(0x174,     "LCTRL_ENTER"),
+            new Type(0x175,     "RCTRL_ENTER"),
+            new Type(0x176,     "LSHIFT_ENTER"),
+            new Type(0x177,     "RSHIFT_ENTER"),
+            new Type(0x178,     "LALT_ENTER"),
+            new Type(0x179,     "RALT_ENTER"),
+            new Type(0x17A,     "LALT_TAB"),
+            new Type(0x17B,     "RALT_TAB"),
+            new Type(0x17C,     "LCTRL_LSHIFT_ESC"),
+            new Type(0x17D,     "RCTRL_RSHIFT_ESC"),
+            new Type(0x17E,     "LSHIFT_HOME"),
+            new Type(0x17F,     "RSHIFT_HOME"),
+            new Type(0x180,     "LSHIFT_END"),
+            new Type(0x181,     "RSHIFT_END"),
+            new Type(0x182,     "LSHIFT_LEFT"),
+            new Type(0x183,     "RSHIFT_LEFT"),
+            new Type(0x184,     "LSHIFT_UP"),
+            new Type(0x185,     "RSHIFT_UP"),
+            new Type(0x186,     "LSHIFT_RIGHT"),
+            new Type(0x187,     "RSHIFT_RIGHT"),
+            new Type(0x188,     "LSHIFT_DOWN"),
+            new Type(0x189,     "RSHIFT_DOWN"),
+            new Type(0x18A,     "LCTRL_A"),
+            new Type(0x18B,     "RCTRL_A"),
+            new Type(0x18C,     "LCTRL_S"),
+            new Type(0x18D,     "RCTRL_S"),
+            new Type(0x18E,     "LCTRL_F"),
+            new Type(0x18F,     "RCTRL_F"),
+            new Type(0x190,     "LCTRL_C"),
+            new Type(0x191,     "RCTRL_C"),
+            new Type(0x192,     "LCTRL_V"),
+            new Type(0x193,     "RCTRL_V"),
+            new Type(0x1F0,     "OTHER_DOUBLE_COMBO"),
+            new Type(0x1F1,     "OTHER_TRIPLE_COMBO"),
+            new Type(0x1F2,     "OTHER_QUADRA_COMBO")
         };
 
         internal static class MouseEvent
@@ -674,6 +217,18 @@ namespace KMS.src.core
             internal const int WM_MOUSESIDEUP = 0x20c; //鼠标侧键抬起事件（猜测）。
             internal const int WM_MOUSEHWHEEL = 0x20e; //水平方向的滚动，一般鼠标没有这个事件。
         }
+
+        internal static Type[] MouseKey =
+        {
+            new Type(0x201,"MOUSE_LEFT_BTN"),
+            new Type(0x202,"MOUSE_RIGHT_BTN"),
+            new Type(0x210,"MOUSE_SIDE_KEY_FORWARD"),
+            new Type(0x211,"MOUSE_SIDE_KEY_BACKWARD"),
+            new Type(0x212,"MOUSE_WHEEL_FORWARD"),
+            new Type(0x213,"MOUSE_WHEEL_BACKWARD"),
+            new Type(0x214,"MOUSE_LEFT_BTN_AREA"),
+            new Type(0x215,"MOUSE_RIGHT_BTN_AREA"),
+        };
 
         internal static class MouseDataHighOrder
         {
@@ -706,6 +261,7 @@ namespace KMS.src.core
             EF_I, //|
             EF_J, //}
             EF_K, //"
+            //combo key begin...
             LCTRL_LSHIFT = 0x170,
             RCTRL_RSHIFT,
             LCTRL_RSHIFT,
@@ -792,5 +348,7 @@ namespace KMS.src.core
             YEAR_MS_RB_SECOND,
             YEAR_MS_RB_THIRD,
         }
+
+        internal static Type KbAll = new Type((int)DbType.KB_ALL, "键盘按键");
     }
 }

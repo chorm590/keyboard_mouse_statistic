@@ -1,7 +1,7 @@
 ﻿namespace KMS.src.core
 {
     /// <summary>
-    /// 描述一个按键或一个组合键。
+    /// 描述存储到数据库中去的记录类型。具体请参考《软件设计.md》
     /// </summary>
     class Type
     {

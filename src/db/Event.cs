@@ -1,12 +1,16 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace KMS.src.db
 {
     /// <summary>
     /// 一个键鼠事件，包含：1、具体的时间信息；2、事件类型。
     /// </summary>
-    class Event
+    class Event : IComparable, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        private PropertyChangedEventArgs pcaValue;
+
         private const short DEF_YEAR = 0;
         private const byte DEF_MONTH = 0;
         private const byte DEF_DAY = 0;
@@ -20,6 +24,19 @@ namespace KMS.src.db
         private byte hour;
         private byte minute;
         private byte second;
+        private ushort value;
+
+
+        internal Event() : this(null)
+        {
+        
+        }
+
+        internal Event(core.Type type)
+        {
+            Type = type;
+            pcaValue = new PropertyChangedEventArgs("Value");
+        }
 
         internal short Year
         {
@@ -132,22 +149,27 @@ namespace KMS.src.db
             }
         }
 
-        internal ushort Type
+        internal core.Type Type
         {
             get;
             set;
         }
 
-        internal ushort Value
+        public ushort Value
         {
-            get;
-            set;
-        }
+            get
+            {
+                return value;
+            }
 
-        internal string Desc
-        {
-            get;
-            set;
+            set
+            {
+                this.value = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, pcaValue);
+                }
+            }
         }
 
         internal void setTime(DateTime time)
@@ -158,6 +180,24 @@ namespace KMS.src.db
             Hour = (byte)time.Hour;
             Minute = (byte)time.Minute;
             Second = (byte)time.Second;
+        }
+
+        public int CompareTo(Object obj)
+        {
+            if (obj is Event)
+            {
+                Event evt = (Event)obj;
+                if (evt.Value > Value)
+                    return 1;
+                else if (evt.Value == Value)
+                    return 0;
+                else
+                    return -1;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

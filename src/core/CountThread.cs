@@ -10,26 +10,26 @@ namespace KMS.src.core
     /// <summary>
     /// created at 2020-12-30 19:54
     /// </summary>
-    static class StatisticThread
+    static class CountThread
     {
-        private const string TAG = "StatisticThread";
+        private const string TAG = "CountThread";
 
-        private static EventQueue.KMEvent[] events = new EventQueue.KMEvent[EventQueue.MAX_EVENT_AMOUNT];
+        private static EventQueue.KMEvent[] events;
         private static int eventAmount;
         private static int idx;
 
         internal static bool CanThreadRun;
         internal static SpecifyKeyDown skd;
 
-
         internal static void ThreadProc()
         {
             Logger.v(TAG, "ThreadProc() run");
+            events = new EventQueue.KMEvent[EventQueue.MAX_EVENT_AMOUNT];
             CanThreadRun = true;
             while (CanThreadRun)
             {
                 statistic();
-                Thread.Sleep(2000); //Check every 2s.
+                Thread.Sleep(2000);
             }
             Logger.v(TAG, "ThreadProc() end");
         }
@@ -120,7 +120,7 @@ namespace KMS.src.core
 
         private static void keyUpProcess(short keycode, DateTime time)
         {
-            Event evt;
+            int typeCode = -1;
 
             switch (keycode)
             {
@@ -152,172 +152,138 @@ namespace KMS.src.core
                 case Constants.KeyCode.NUM0:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_0;
+                        typeCode = (int)Constants.DbType.EF_0;
                     }
                     break;
                 case Constants.KeyCode.NUM1:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_1;
+                        typeCode = (int)Constants.DbType.EF_1;
                     }
                     break;
                 case Constants.KeyCode.NUM2:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_2;
+                        typeCode = (int)Constants.DbType.EF_2;
+
                     }
                     break;
                 case Constants.KeyCode.NUM3:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_3;
+                        typeCode = (int)Constants.DbType.EF_3;
                     }
                     break;
                 case Constants.KeyCode.NUM4:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_4;
+                        typeCode = (int)Constants.DbType.EF_4;
                     }
                     break;
                 case Constants.KeyCode.NUM5:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_5;
+                        typeCode = (int)Constants.DbType.EF_5;
                     }
                     break;
                 case Constants.KeyCode.NUM6:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_6;
+                        typeCode = (int)Constants.DbType.EF_6;
                     }
                     break;
                 case Constants.KeyCode.NUM7:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_7;
+                        typeCode = (int)Constants.DbType.EF_7;
                     }
                     break;
                 case Constants.KeyCode.NUM8:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_8;
+                        typeCode = (int)Constants.DbType.EF_8;
                     }
                     break;
                 case Constants.KeyCode.NUM9:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_9;
+                        typeCode = (int)Constants.DbType.EF_9;
                     }
                     break;
                 case Constants.KeyCode.EF_A:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_A;
+                        typeCode = (int)Constants.DbType.EF_A;
                     }
                     break;
                 case Constants.KeyCode.EF_B:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_B;
+                        typeCode = (int)Constants.DbType.EF_B;
                     }
                     break;
                 case Constants.KeyCode.EF_C:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_C;
+                        typeCode = (int)Constants.DbType.EF_C;
                     }
                     break;
                 case Constants.KeyCode.EF_D:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_D;
+                        typeCode = (int)Constants.DbType.EF_D;
                     }
                     break;
                 case Constants.KeyCode.EF_E:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_E;
+                        typeCode = (int)Constants.DbType.EF_E;
                     }
                     break;
                 case Constants.KeyCode.EF_F:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_F;
+                        typeCode = (int)Constants.DbType.EF_F;
                     }
                     break;
                 case Constants.KeyCode.EF_G:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_G;
+                        typeCode = (int)Constants.DbType.EF_G;
                     }
                     break;
                 case Constants.KeyCode.EF_H:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_H;
+                        typeCode = (int)Constants.DbType.EF_H;
                     }
                     break;
                 case Constants.KeyCode.EF_I:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_I;
+                        typeCode = (int)Constants.DbType.EF_I;
                     }
                     break;
                 case Constants.KeyCode.EF_J:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_J;
+                        typeCode = (int)Constants.DbType.EF_J;
                     }
                     break;
                 case Constants.KeyCode.EF_K:
                     if (skd.isLShiftDown || skd.isRShiftDown)
                     {
-                        evt = new Event();
-                        evt.setTime(time);
-                        evt.Type = (ushort)Constants.DbType.EF_K;
+                        typeCode = (int)Constants.DbType.EF_K;
                     }
                     break;
+            } // switch -- end
+
+            if (typeCode == -1)
+            {
+                typeCode = keycode;
             }
+
+            SQLiteManager.GetInstance.AddEvent(typeCode, time);
         }
 
         /// <summary>

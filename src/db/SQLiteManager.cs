@@ -1,6 +1,9 @@
-﻿using KMS.src.tool;
+﻿using KMS.src.core;
+using KMS.src.tool;
 using System;
 using System.IO;
+using System.Reflection.Metadata;
+using System.Threading;
 using System.Windows;
 
 namespace KMS.src.db
@@ -9,36 +12,31 @@ namespace KMS.src.db
     {
         private const string TAG = "SQLiteManager";
 
+        private const string DATABASE_DIR = "db";
+
         private static SQLiteManager instance;
 
-        private SQLiteHelper sqliteHelper;
         private string curTable;
+        private SQLiteHelper sqliteHelper;
+        private StatisticManager statisticManager;
 
         private string dbFilePath
         {
             get
             {
-                //One file per month. ok? I don't known...
-                DateTime current = DateTime.Now;
-                return "db/" + current.Year + "/" + "kms" + current.ToString("yyyyMM") + ".db";
+                return DATABASE_DIR + "/" + TimeManager.TimeUsing.Year + "/" + "kms" + TimeManager.TimeUsing.ToString("yyyyMM") + ".db";
             }
         }
 
-        private string todayInMonth
+        internal static SQLiteManager GetInstance
         {
             get
             {
-                return DateTime.Now.Day.ToString();
+                if (instance == null)
+                    instance = new SQLiteManager();
+
+                return instance;
             }
-        }
-
-
-        internal static SQLiteManager getInstance()
-        {
-            if (instance == null)
-                instance = new SQLiteManager();
-
-            return instance;
         }
 
         private SQLiteManager()
@@ -65,7 +63,7 @@ namespace KMS.src.db
                 return;
             }
 
-            curTable = "day" + todayInMonth + "_detail";
+            curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
             Logger.v(TAG, "current table:" + curTable);
             try
             {
@@ -80,6 +78,10 @@ namespace KMS.src.db
                 Application.Current.Shutdown();
                 return;
             }
+
+            statisticManager = StatisticManager.GetInstance;
+
+            refreshStatistic();
         }
 
         private void initDbFilePath(string fp)
@@ -103,6 +105,97 @@ namespace KMS.src.db
         {
             if (sqliteHelper != null)
                 sqliteHelper.closeDababase();
+
+            if (statisticManager != null)
+            {
+                statisticManager.shutdown();
+                statisticManager = null;
+            }
+        }
+
+        /// <summary>
+        /// 从各年度统计数据库、各月度统计数据库中累加数值。
+        /// </summary>
+        private void refreshStatistic()
+        {
+            if (Directory.Exists(DATABASE_DIR))
+            {
+                string[] dirs = Directory.GetDirectories(DATABASE_DIR);
+                int idx;
+                string year;
+                foreach (string dir in dirs)
+                {
+                    idx = dir.LastIndexOf("\\");
+                    if (idx < 0)
+                        continue;
+
+                    idx++;
+                    year = dir.Substring(idx);
+
+                    if (File.Exists(dir + "\\kms" + year + ".db"))
+                    {
+                        //TODO 从年度统计表中取出数据。
+                    }
+                    else
+                    {
+                        //TODO 查询各月度统计表。
+                        refreshFromMonthDb(dir);
+                    }
+                }
+            }
+        }
+
+        private void refreshFromMonthDb(string dir)
+        {
+            if (dir == null || dir.Length == 0)
+                return;
+
+            if (!Directory.Exists(dir))
+                return;
+
+            string[] dbs = Directory.GetFiles(dir);
+            foreach (string db in dbs)
+            {
+                if (db.Contains("kms") && db.Contains(".db"))
+                { 
+                    //TODO 从各月份数据库中取出统计数据，当前日实时计算总数，非当前月查询统计表。
+                }
+            }
+        }
+
+        /// <summary>
+        /// 一个事件更新到所有统计表中去。
+        /// </summary>
+        /// <param name="typeCode">事件类型</param>
+        /// <param name="time">事件发生时间</param>
+        internal void AddEvent(int typeCode, DateTime time)
+        {
+            // This call may from sub-thread.
+            statisticManager.SttKeyboardTotal.Value++;
+            // single key statistic.
+            if (typeCode <= (int)Constants.DbType.EF_K)
+            {
+                addKeyboardEvent(typeCode, time);
+            }
+            else if ((typeCode >= (int)Constants.DbType.LCTRL_LSHIFT) && (typeCode <= (int)Constants.DbType.OTHERS_QUADRA_COMBO))
+            {
+                addComboKeyEvent(typeCode, time);
+            }
+        }
+
+        private void addKeyboardEvent(int typeCode, DateTime time)
+        {
+            
+        }
+
+        private void addComboKeyEvent(int typeCode, DateTime time)
+        {
+        
+        }
+
+        internal Event GetKbTotal()
+        {
+            return statisticManager.SttKeyboardTotal;
         }
     }
 }
