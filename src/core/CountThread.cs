@@ -81,7 +81,7 @@ namespace KMS.src.core
 
         private static void keyDownProcess(short keycode, DateTime time)
         {
-            switch (keycode)
+            /*switch (keycode)
             {
                 case Constants.KeyCode.LEFT_SHIFT:
                     skd.isLShiftDown = true;
@@ -115,14 +115,14 @@ namespace KMS.src.core
                     skd.isRWinDown = true;
                     skd.rWinDownTime = time;
                     break;
-            }
+            }*/
         }
 
         private static void keyUpProcess(short keycode, DateTime time)
         {
             int typeCode = -1;
 
-            switch (keycode)
+            /*switch (keycode)
             {
                 case Constants.KeyCode.LEFT_SHIFT:
                     skd.isLShiftDown = false;
@@ -276,7 +276,7 @@ namespace KMS.src.core
                         typeCode = (int)Constants.DbType.EF_K;
                     }
                     break;
-            } // switch -- end
+            } // switch -- end*/
 
             if (typeCode == -1)
             {

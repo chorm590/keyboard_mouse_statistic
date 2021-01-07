@@ -65,7 +65,7 @@ namespace KMS.src.db
                 Type = Constants.KbAll
             };
 
-            // 2
+            /*// 2
             sttKbSingleKey = new List<Event>(130);
             foreach (core.Type tp in Constants.keys)
             {
@@ -82,8 +82,7 @@ namespace KMS.src.db
             {
                 sttKbComboKey.Add(new Event(tp));
             }
-
-            
+            */
         }
 
         internal void shutdown()
