@@ -10,7 +10,7 @@
         <GroupBox
             Header="全局键盘统计"
             Margin="5,2,5,10"
-            Height="145">
+            Height="150">
 
             <Grid Margin="0, 5, 0, 0">
                 

@@ -26,8 +26,15 @@ namespace KMS.src.core
 
         private Event sttKbTotal; //键盘总计数。
         private Event sttComboKeyTotal; //组合键总计数。
+        private Event sttKbSkTop1;
+        private Event sttKbSkTop2;
+        private Event sttKbSkTop3;
+        private Event sttKbCkTop1;
+        private Event sttKbCkTop2;
+        private Event sttKbCkTop3;
         private List<Event> sttKbSingleKey; //键盘各单键的敲击总数。
         private List<Event> sttKbComboKey; //键盘组合键敲击总数。
+        
 
         private List<Event> sttMsKey; //鼠标单键点击总数。
 
@@ -58,6 +65,54 @@ namespace KMS.src.core
             }
         }
 
+        internal Event SttKeyboardSingleKeyTop1
+        {
+            get
+            {
+                return sttKbSkTop1;
+            }
+        }
+
+        internal Event SttKeyboardSingleKeyTop2
+        {
+            get
+            {
+                return sttKbSkTop2;
+            }
+        }
+
+        internal Event SttKeyboardSingleKeyTop3
+        {
+            get
+            {
+                return sttKbSkTop3;
+            }
+        }
+
+        internal Event SttKeyboardComboKeyTop1
+        {
+            get
+            {
+                return sttKbCkTop1;
+            }
+        }
+
+        internal Event SttKeyboardComboKeyTop2
+        {
+            get
+            {
+                return sttKbCkTop2;
+            }
+        }
+
+        internal Event SttKeyboardComboKeyTop3
+        {
+            get
+            {
+                return sttKbCkTop3;
+            }
+        }
+
         internal List<Event> SttKeyboardComboKey
         {
             get
@@ -77,6 +132,36 @@ namespace KMS.src.core
             sttComboKeyTotal = new Event
             {
                 Type = Constants.Statistic.KbCombo
+            };
+
+            sttKbSkTop1 = new Event
+            {
+                Type = Constants.Statistic.KbSkTop1
+            };
+
+            sttKbSkTop2 = new Event
+            {
+                Type = Constants.Statistic.KbSkTop2
+            };
+
+            sttKbSkTop3 = new Event
+            {
+                Type = Constants.Statistic.KbSkTop3
+            };
+
+            sttKbCkTop1 = new Event
+            {
+                Type = Constants.Statistic.KbCkTop1
+            };
+
+            sttKbCkTop2 = new Event
+            {
+                Type = Constants.Statistic.KbCkTop2
+            };
+
+            sttKbCkTop3 = new Event
+            {
+                Type = Constants.Statistic.KbCkTop3
             };
 
             // 2
@@ -108,10 +193,14 @@ namespace KMS.src.core
         internal void EventHappen(int typeCode, DateTime time)
         {
             // This call may from sub-thread.
-            
+
             //TODO 窗体没在前台运行的时候不要实时刷新统计数据，不要实时重新排序。
 
-            if (typeCode < 256)
+            if (typeCode < 1)
+            {
+                // Do nothing
+            }
+            else if (typeCode < 256)
             {
                 kbSingleKeyPressed(typeCode);
                 sttKbTotal.Value++;
@@ -120,6 +209,10 @@ namespace KMS.src.core
             {
                 sttComboKeyTotal.Value++;
                 kbComboKeyPressed(typeCode);
+            }
+            else
+            {
+                // Do nothing
             }
         }
 
@@ -133,6 +226,22 @@ namespace KMS.src.core
                     break;
                 }
             }
+
+            sttKbSingleKey.Sort();
+            if (sttKbSingleKey[0].Value > 0)
+            {
+                sttKbSkTop1.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + "次]";
+            }
+
+            if (sttKbSingleKey[1].Value > 0)
+            {
+                sttKbSkTop2.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + "次]";
+            }
+
+            if (sttKbSingleKey[2].Value > 0)
+            {
+                sttKbSkTop3.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + "次]";
+            }
         }
 
         private void kbComboKeyPressed(int typeValue)
@@ -144,6 +253,22 @@ namespace KMS.src.core
                     ckevt.Value++;
                     break;
                 }
+            }
+
+            sttKbComboKey.Sort();
+            if (sttKbComboKey[0].Value > 0)
+            {
+                sttKbCkTop1.Desc = sttKbComboKey[0].Type.Desc + " [" + sttKbComboKey[0].Value + "次]";
+            }
+
+            if (sttKbComboKey[1].Value > 0)
+            {
+                sttKbCkTop2.Desc = sttKbComboKey[1].Type.Desc + " [" + sttKbComboKey[1].Value + "次]";
+            }
+
+            if (sttKbComboKey[2].Value > 0)
+            {
+                sttKbCkTop3.Desc = sttKbComboKey[2].Type.Desc + " [" + sttKbComboKey[2].Value + "次]";
             }
         }
     }

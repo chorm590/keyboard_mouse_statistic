@@ -10,6 +10,7 @@ namespace KMS.src.db
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private PropertyChangedEventArgs pcaValue;
+        private PropertyChangedEventArgs pcaDesc;
 
         private const short DEF_YEAR = 0;
         private const byte DEF_MONTH = 0;
@@ -25,6 +26,7 @@ namespace KMS.src.db
         private byte minute;
         private byte second;
         private ushort value;
+        private string desc;
 
 
         internal Event() : this(null)
@@ -36,6 +38,7 @@ namespace KMS.src.db
         {
             Type = type;
             pcaValue = new PropertyChangedEventArgs("Value");
+            pcaDesc = new PropertyChangedEventArgs("Desc");
         }
 
         internal short Year
@@ -168,6 +171,23 @@ namespace KMS.src.db
                 if (PropertyChanged != null)
                 {
                     PropertyChanged.Invoke(this, pcaValue);
+                }
+            }
+        }
+
+        public string Desc
+        {
+            get
+            {
+                return desc;
+            }
+
+            set
+            {
+                desc = value;
+                if (PropertyChanged != null)
+                {
+                    PropertyChanged.Invoke(this, pcaDesc);
                 }
             }
         }

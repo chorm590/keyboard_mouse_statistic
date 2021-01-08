@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 
 namespace KMS.src.core
@@ -457,13 +456,19 @@ namespace KMS.src.core
             YEAR_MS_RB_FIRST,
             YEAR_MS_RB_SECOND,
             YEAR_MS_RB_THIRD,
+            //0x1000 ~ 0xffff is free
         }
 
         internal static class Statistic
         {
             internal static Type KbAll = new Type((int)DbType.KB_ALL, "键盘按键");
             internal static Type KbCombo = new Type((int)DbType.KB_COMBO_ALL, "组合键总计");
+            internal static Type KbSkTop1 = new Type(0x1000, "Single key top1");
+            internal static Type KbSkTop2 = new Type(0x1001, "Single key top2");
+            internal static Type KbSkTop3 = new Type(0x1002, "Single key top3");
+            internal static Type KbCkTop1 = new Type(0x1003, "Combo key top3");
+            internal static Type KbCkTop2 = new Type(0x1004, "Combo key top3");
+            internal static Type KbCkTop3 = new Type(0x1005, "Combo key top3");
         }
-
     }
 }

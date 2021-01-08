@@ -167,24 +167,25 @@ namespace KMS.src.core
                     comboKeyCount = 0; //reset it.
                     break;
                 case 2:
+                    //coomboKeyCount数值与case标签值相等表示此时刚开始松开组合键，此时统计键入的组合键类型是最适合的。
                     if (comboKeyCount == 2)
                     {
                         //双键组合键事件。
-                        ushort typeTmp = doubleComboDetect();
-                        StatisticManager.GetInstance.EventHappen(typeTmp, time);
+                        StatisticManager.GetInstance.EventHappen(doubleComboDetect(), time);
                     }
                     break;
                 case 3:
                     if (comboKeyCount == 3)
                     {
                         //三键组合键事件。
-                        ushort type = tripleComboDetect();
+                        StatisticManager.GetInstance.EventHappen(tripleComboDetect(), time);
                     }
                     break;
                 case 4:
                     if (comboKeyCount == 4)
                     {
                         //四键组合键事件。
+                        StatisticManager.GetInstance.EventHappen(quadraComboDetect(), time);
                     }
                     break;
                 default:
@@ -272,6 +273,12 @@ namespace KMS.src.core
             {
                 switch (b)
                 {
+                    case Constants.Keyboard.LEFT_CTRL:
+                        comboKeyType = Constants.ComboKey.LC_LS;
+                        break;
+                    case Constants.Keyboard.RIGHT_CTRL:
+                        comboKeyType = Constants.ComboKey.RC_LS;
+                        break;
                     case Constants.Keyboard.ENTER:
                         comboKeyType = Constants.ComboKey.LS_ENTER;
                         break;
@@ -299,6 +306,12 @@ namespace KMS.src.core
             {
                 switch (b)
                 {
+                    case Constants.Keyboard.LEFT_CTRL:
+                        comboKeyType = Constants.ComboKey.LC_RS;
+                        break;
+                    case Constants.Keyboard.RIGHT_CTRL:
+                        comboKeyType = Constants.ComboKey.RC_RS;
+                        break;
                     case Constants.Keyboard.ENTER:
                         comboKeyType = Constants.ComboKey.RS_ENTER;
                         break;
@@ -346,6 +359,11 @@ namespace KMS.src.core
                         break;
                 }
             }
+            else
+            {
+                //Not a valid combo-key
+                comboKeyType = (ushort)Constants.DbType.INVALID;
+            }
 
             return comboKeyType;
         }
@@ -357,37 +375,47 @@ namespace KMS.src.core
                 return (ushort)Constants.DbType.INVALID;
             }
 
-            short a = keyChain[0].keycode;
-            short b = keyChain[1].keycode;
-            short c = keyChain[2].keycode;
-            ushort typeCode = Constants.ComboKey.TRIPLE;
-
-            if (a == Constants.Keyboard.LEFT_CTRL)
+            switch (keyChain[0].keycode)
             {
-
-            }
-            else if (a == Constants.Keyboard.RIGHT_CTRL)
-            {
-
-            }
-            else if (a == Constants.Keyboard.LEFT_SHIFT)
-            {
-
-            }
-            else if (a == Constants.Keyboard.RIGHT_SHIFT)
-            {
-
-            }
-            else if (a == Constants.Keyboard.LEFT_ALT)
-            {
-
-            }
-            else if (a == Constants.Keyboard.RIGHT_ALT)
-            {
-            
+                case Constants.Keyboard.LEFT_CTRL:
+                case Constants.Keyboard.RIGHT_CTRL:
+                case Constants.Keyboard.LEFT_SHIFT:
+                case Constants.Keyboard.RIGHT_SHIFT:
+                case Constants.Keyboard.LEFT_ALT:
+                case Constants.Keyboard.RIGHT_ALT:
+                case Constants.Keyboard.LEFT_WIN:
+                case Constants.Keyboard.RIGHT_WIN:
+                    break;
+                default:
+                    return (ushort)Constants.DbType.INVALID;
             }
 
-            return typeCode;
+            return Constants.ComboKey.TRIPLE;
+        }
+
+        private static ushort quadraComboDetect()
+        {
+            if (keyChainCount != 4)
+            {
+                return (ushort)Constants.DbType.INVALID;
+            }
+
+            switch (keyChain[0].keycode)
+            {
+                case Constants.Keyboard.LEFT_CTRL:
+                case Constants.Keyboard.RIGHT_CTRL:
+                case Constants.Keyboard.LEFT_SHIFT:
+                case Constants.Keyboard.RIGHT_SHIFT:
+                case Constants.Keyboard.LEFT_ALT:
+                case Constants.Keyboard.RIGHT_ALT:
+                case Constants.Keyboard.LEFT_WIN:
+                case Constants.Keyboard.RIGHT_WIN:
+                    break;
+                default:
+                    return (ushort)Constants.DbType.INVALID;
+            }
+
+            return Constants.ComboKey.QUADRA;
         }
 
         /// <summary>

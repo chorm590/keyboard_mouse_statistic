@@ -45,6 +45,36 @@ namespace KMS
             binding.Source = statisticManager.SttComboKeyTotal;
             binding.Path = new PropertyPath("Value");
             BindingOperations.SetBinding(ComboTotal, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardSingleKeyTop1;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(SkTop1, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardSingleKeyTop2;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(SkTop2, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardSingleKeyTop3;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(SkTop3, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardComboKeyTop1;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(CkTop1, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardComboKeyTop2;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(CkTop2, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardComboKeyTop3;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(CkTop3, TextBlock.TextProperty, binding);
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
