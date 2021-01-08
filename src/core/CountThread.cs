@@ -170,7 +170,6 @@ namespace KMS.src.core
                     if (comboKeyCount == 2)
                     {
                         //双键组合键事件。
-                        //检查是哪种双键组合键事件。
                         ushort typeTmp = doubleComboDetect();
                         StatisticManager.GetInstance.EventHappen(typeTmp, time);
                     }
@@ -179,6 +178,7 @@ namespace KMS.src.core
                     if (comboKeyCount == 3)
                     {
                         //三键组合键事件。
+                        ushort type = tripleComboDetect();
                     }
                     break;
                 case 4:
@@ -348,6 +348,46 @@ namespace KMS.src.core
             }
 
             return comboKeyType;
+        }
+
+        private static ushort tripleComboDetect()
+        {
+            if (keyChainCount != 3)
+            {
+                return (ushort)Constants.DbType.INVALID;
+            }
+
+            short a = keyChain[0].keycode;
+            short b = keyChain[1].keycode;
+            short c = keyChain[2].keycode;
+            ushort typeCode = Constants.ComboKey.TRIPLE;
+
+            if (a == Constants.Keyboard.LEFT_CTRL)
+            {
+
+            }
+            else if (a == Constants.Keyboard.RIGHT_CTRL)
+            {
+
+            }
+            else if (a == Constants.Keyboard.LEFT_SHIFT)
+            {
+
+            }
+            else if (a == Constants.Keyboard.RIGHT_SHIFT)
+            {
+
+            }
+            else if (a == Constants.Keyboard.LEFT_ALT)
+            {
+
+            }
+            else if (a == Constants.Keyboard.RIGHT_ALT)
+            {
+            
+            }
+
+            return typeCode;
         }
 
         /// <summary>
