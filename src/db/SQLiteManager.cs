@@ -1,5 +1,4 @@
-﻿using KMS.src.core;
-using KMS.src.tool;
+﻿using KMS.src.tool;
 using System;
 using System.IO;
 using System.Reflection.Metadata;
@@ -18,7 +17,6 @@ namespace KMS.src.db
 
         private string curTable;
         private SQLiteHelper sqliteHelper;
-        private StatisticManager statisticManager;
 
         private string dbFilePath
         {
@@ -79,8 +77,6 @@ namespace KMS.src.db
                 return;
             }
 
-            statisticManager = StatisticManager.GetInstance;
-
             refreshStatistic();
         }
 
@@ -105,12 +101,6 @@ namespace KMS.src.db
         {
             if (sqliteHelper != null)
                 sqliteHelper.closeDababase();
-
-            if (statisticManager != null)
-            {
-                statisticManager.shutdown();
-                statisticManager = null;
-            }
         }
 
         /// <summary>
@@ -163,39 +153,9 @@ namespace KMS.src.db
             }
         }
 
-        /// <summary>
-        /// 一个事件更新到所有统计表中去。
-        /// </summary>
-        /// <param name="typeCode">事件类型</param>
-        /// <param name="time">事件发生时间</param>
-        internal void AddEvent(int typeCode, DateTime time)
+        internal void EventHappen(int typeCode, DateTime time)
         {
-            // This call may from sub-thread.
-            statisticManager.SttKeyboardTotal.Value++;
-            // single key statistic.
-            if (typeCode <= (int)Constants.DbType.EF_K)
-            {
-                addKeyboardEvent(typeCode, time);
-            }
-            else if ((typeCode >= (int)Constants.DbType.LCTRL_LSHIFT) && (typeCode <= (int)Constants.DbType.OTHERS_QUADRA_COMBO))
-            {
-                addComboKeyEvent(typeCode, time);
-            }
-        }
 
-        private void addKeyboardEvent(int typeCode, DateTime time)
-        {
-            
-        }
-
-        private void addComboKeyEvent(int typeCode, DateTime time)
-        {
-        
-        }
-
-        internal Event GetKbTotal()
-        {
-            return statisticManager.SttKeyboardTotal;
         }
     }
 }

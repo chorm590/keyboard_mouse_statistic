@@ -21,7 +21,7 @@ namespace KMS
         private const string TAG = "KMS";
 
         private Thread countThread;
-        private SQLiteManager sqliteManager;
+        private StatisticManager statisticManager;
 
         public MainWindow()
         {
@@ -29,7 +29,7 @@ namespace KMS
             Logger.v(TAG, "hello world");
             TimeManager.TimeUsing = DateTime.Now;
 
-            sqliteManager = SQLiteManager.GetInstance;
+            statisticManager = StatisticManager.GetInstance;
             startWatching();
             bindData();
         }
@@ -37,9 +37,14 @@ namespace KMS
         private void bindData()
         {
             Binding binding = new Binding();
-            binding.Source = sqliteManager.GetKbTotal();
+            binding.Source = statisticManager.SttKeyboardTotal;
             binding.Path = new PropertyPath("Value");
-            BindingOperations.SetBinding(kball, TextBlock.TextProperty, binding);
+            BindingOperations.SetBinding(KbTotal, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttComboKeyTotal;
+            binding.Path = new PropertyPath("Value");
+            BindingOperations.SetBinding(ComboTotal, TextBlock.TextProperty, binding);
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)
@@ -50,8 +55,6 @@ namespace KMS
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logger.v(TAG, "Window closing");
-            sqliteManager.close();
-            sqliteManager = null;
             stopAll();
         }
 

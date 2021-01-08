@@ -5,10 +5,62 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KMS"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
-    <Grid>
-        <Button Content="Open" HorizontalAlignment="Left" Margin="83,26,0,0" VerticalAlignment="Top" Width="75" Click="Open_Click"/>
-        <TextBlock Name="kball" HorizontalAlignment="Left" Margin="288,84,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
-        <TextBlock Name="kbcombo" HorizontalAlignment="Left" Margin="288,114,0,0" Text="TextBlock" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
-    </Grid>
+        Title="键鼠计数器" Height="400" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <StackPanel>
+        <GroupBox
+            Header="全局键盘统计"
+            Margin="5,2,5,10"
+            Height="145">
+
+            <Grid Margin="0, 5, 0, 0">
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="键盘按键总计：" HorizontalAlignment="Right" Grid.Row="0"/>
+                <TextBlock Text="组合键总计：" HorizontalAlignment="Right" Grid.Row="1"/>
+                <TextBlock Text="单键Top1：" HorizontalAlignment="Right" Grid.Row="2"/>
+                <TextBlock Text="单键Top2：" HorizontalAlignment="Right" Grid.Row="3"/>
+                <TextBlock Text="单键Top3：" HorizontalAlignment="Right" Grid.Row="4"/>
+                <TextBlock Text="组合键Top1：" HorizontalAlignment="Right" Grid.Row="5"/>
+                <TextBlock Text="组合键Top2：" HorizontalAlignment="Right" Grid.Row="6"/>
+                <TextBlock Text="组合键Top3：" HorizontalAlignment="Right" Grid.Row="7"/>
+
+                <TextBlock Name="KbTotal" Text="" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="1"/>
+                <TextBlock Name="ComboTotal" Text="" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="1"/>
+                <TextBlock Name="SkTop1" Text="" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1"/>
+                <TextBlock Name="SkTop2" Text="" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1"/>
+                <TextBlock Name="SkTop3" Text="" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="1"/>
+                <TextBlock Name="CkTop1" Text="" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="1"/>
+                <TextBlock Name="CkTop2" Text="" HorizontalAlignment="Left" Grid.Row="6" Grid.Column="1"/>
+                <TextBlock Name="CkTop3" Text="" HorizontalAlignment="Left" Grid.Row="7" Grid.Column="1"/>
+
+            </Grid>
+        </GroupBox>
+        
+        <GroupBox
+            Header="全局鼠标统计"
+            Margin="5,2,5,10"
+            Height="100">
+        </GroupBox>
+        
+        <GroupBox
+            Header="今日统计"
+            Margin="5,2,5,10"
+            Height="100">
+        </GroupBox>
+    </StackPanel>
 </Window>

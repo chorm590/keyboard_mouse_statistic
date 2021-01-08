@@ -34,20 +34,20 @@ namespace KMS.src.core
             internal const byte UP = 0x26;
             internal const byte RIGHT = 0x27;
             internal const byte DOWN = 0x28;
-            internal const byte PrtSc = 0x2c;
-            internal const byte Insert = 0x2d;
+            internal const byte PRTSC = 0x2c;
+            internal const byte INSERT = 0x2d;
             internal const byte DELETE = 0x2e;
 
-            internal const byte Num0 = 0x30;
-            internal const byte Num1 = 0x31;
-            internal const byte Num2 = 0x32;
-            internal const byte Num3 = 0x33;
-            internal const byte Num4 = 0x34;
-            internal const byte Num5 = 0x35;
-            internal const byte Num6 = 0x36;
-            internal const byte Num7 = 0x37;
-            internal const byte Num8 = 0x38;
-            internal const byte Num9 = 0x39;
+            internal const byte NUM0 = 0x30;
+            internal const byte NUM1 = 0x31;
+            internal const byte NUM2 = 0x32;
+            internal const byte NUM3 = 0x33;
+            internal const byte NUM4 = 0x34;
+            internal const byte NUM5 = 0x35;
+            internal const byte NUM6 = 0x36;
+            internal const byte NUM7 = 0x37;
+            internal const byte NUM8 = 0x38;
+            internal const byte NUM9 = 0x39;
 
             internal const byte A = 0x41;
             internal const byte B = 0x42;
@@ -79,22 +79,22 @@ namespace KMS.src.core
             internal const byte LEFT_WIN = 0x5B;
             internal const byte RIGHT_WIN = 0x5C;
 
-            internal const byte NumPad0 = 0x60;
-            internal const byte NumPad1 = 0x61;
-            internal const byte NumPad2 = 0x62;
-            internal const byte NumPad3 = 0x63;
-            internal const byte NumPad4 = 0x64;
-            internal const byte NumPad5 = 0x65;
-            internal const byte NumPad6 = 0x66;
-            internal const byte NumPad7 = 0x67;
-            internal const byte NumPad8 = 0x68;
-            internal const byte NumPad9 = 0x69;
-            internal const byte NumPad_Multiply = 0x6a;
-            internal const byte NumPad_Add = 0x6b;
-            internal const byte NumPad_Enter = 0x6c;
-            internal const byte NumPad_Minus = 0x6d;
-            internal const byte NumPad_Dot = 0x6e;
-            internal const byte NumPad_Division = 0x6f;
+            internal const byte NUMPAD0 = 0x60;
+            internal const byte NUMPAD1 = 0x61;
+            internal const byte NUMPAD2 = 0x62;
+            internal const byte NUMPAD3 = 0x63;
+            internal const byte NUMPAD4 = 0x64;
+            internal const byte NUMPAD5 = 0x65;
+            internal const byte NUMPAD6 = 0x66;
+            internal const byte NUMPAD7 = 0x67;
+            internal const byte NUMPAD8 = 0x68;
+            internal const byte NUMPAD9 = 0x69;
+            internal const byte NUMPAD_MULTIPLY = 0x6a;
+            internal const byte NUMPAD_ADD = 0x6b;
+            internal const byte NUMPAD_ENTER = 0x6c;
+            internal const byte NUMPAD_MINUS = 0x6d;
+            internal const byte NUMPAD_DOT = 0x6e;
+            internal const byte NUMPAD_DIVISION = 0x6f;
 
             internal const byte F1 = 0x70;
             internal const byte F2 = 0x71;
@@ -109,8 +109,8 @@ namespace KMS.src.core
             internal const byte F11 = 0x7A;
             internal const byte F12 = 0x7B;
 
-            internal const byte NumLock = 0x90;
-            internal const byte ScrLock = 0x91;
+            internal const byte NUMLOCK = 0x90;
+            internal const byte SCRLOCK = 0x91;
 
             internal const byte LEFT_SHIFT = 0xA0;
             internal const byte RIGHT_SHIFT = 0xA1;
@@ -150,19 +150,19 @@ namespace KMS.src.core
                 {UP,                   new Key(UP,                     "Up",                       "上方向键")},
                 {RIGHT,                new Key(RIGHT,                  "Right",                    "右方向键")},
                 {DOWN,                 new Key(DOWN,                   "Down",                     "下方向键")},
-                {PrtSc,                new Key(PrtSc,                  "PrtSc",                    "PrtSc")},
-                {Insert,               new Key(Insert,                 "Insert",                   "Ins")},
+                {PRTSC,                new Key(PRTSC,                  "PrtSc",                    "PrtSc")},
+                {INSERT,               new Key(INSERT,                 "Insert",                   "Ins")},
                 {DELETE,               new Key(DELETE,                 "Delete",                   "Del")},
-                {Num0,                 new Key(Num0,                   "0",                        "0")},
-                {Num1,                 new Key(Num1,                   "1",                        "1")},
-                {Num2,                 new Key(Num2,                   "2",                        "2")},
-                {Num3,                 new Key(Num3,                   "3",                        "3")},
-                {Num4,                 new Key(Num4,                   "4",                        "4")},
-                {Num5,                 new Key(Num5,                   "5",                        "5")},
-                {Num6,                 new Key(Num6,                   "6",                        "6")},
-                {Num7,                 new Key(Num7,                   "7",                        "7")},
-                {Num8,                 new Key(Num8,                   "8",                        "8")},
-                {Num9,                 new Key(Num9,                   "9",                        "9")},
+                {NUM0,                 new Key(NUM0,                   "0",                        "0")},
+                {NUM1,                 new Key(NUM1,                   "1",                        "1")},
+                {NUM2,                 new Key(NUM2,                   "2",                        "2")},
+                {NUM3,                 new Key(NUM3,                   "3",                        "3")},
+                {NUM4,                 new Key(NUM4,                   "4",                        "4")},
+                {NUM5,                 new Key(NUM5,                   "5",                        "5")},
+                {NUM6,                 new Key(NUM6,                   "6",                        "6")},
+                {NUM7,                 new Key(NUM7,                   "7",                        "7")},
+                {NUM8,                 new Key(NUM8,                   "8",                        "8")},
+                {NUM9,                 new Key(NUM9,                   "9",                        "9")},
                 {A,                    new Key(A,                      "A",                        "A")},
                 {B,                    new Key(B,                      "B",                        "B")},
                 {C,                    new Key(C,                      "C",                        "C")},
@@ -191,22 +191,22 @@ namespace KMS.src.core
                 {Z,                    new Key(Z,                      "Z",                        "Z")},
                 {LEFT_WIN,             new Key(LEFT_WIN,               "Left win",                 "左Win")},
                 {RIGHT_WIN,            new Key(RIGHT_WIN,              "Right win",                "右Win")},
-                {NumPad0,              new Key(NumPad0,                "Num0",                     "小键盘0")},
-                {NumPad1,              new Key(NumPad1,                "Num1",                     "小键盘1")},
-                {NumPad2,              new Key(NumPad2,                "Num2",                     "小键盘2")},
-                {NumPad3,              new Key(NumPad3,                "Num3",                     "小键盘3")},
-                {NumPad4,              new Key(NumPad4,                "Num4",                     "小键盘4")},
-                {NumPad5,              new Key(NumPad5,                "Num5",                     "小键盘5")},
-                {NumPad6,              new Key(NumPad6,                "Num6",                     "小键盘6")},
-                {NumPad7,              new Key(NumPad7,                "Num7",                     "小键盘7")},
-                {NumPad8,              new Key(NumPad8,                "Num8",                     "小键盘8")},
-                {NumPad9,              new Key(NumPad9,                "Num9",                     "小键盘9")},
-                {NumPad_Multiply,      new Key(NumPad_Multiply,        "Num_*",                    "小键盘*")},
-                {NumPad_Add,           new Key(NumPad_Add,             "Num_+",                    "小键盘+")},
-                {NumPad_Enter,         new Key(NumPad_Enter,           "Num_Enter",                "小键盘Enter")},
-                {NumPad_Minus,         new Key(NumPad_Minus,           "Num_-",                    "小键盘-")},
-                {NumPad_Dot,           new Key(NumPad_Dot,             "Num_.",                    "小键盘.")},
-                {NumPad_Division,      new Key(NumPad_Division,        "Num_/",                    "小键盘/")},
+                {NUMPAD0,              new Key(NUMPAD0,                "Num0",                     "小键盘0")},
+                {NUMPAD1,              new Key(NUMPAD1,                "Num1",                     "小键盘1")},
+                {NUMPAD2,              new Key(NUMPAD2,                "Num2",                     "小键盘2")},
+                {NUMPAD3,              new Key(NUMPAD3,                "Num3",                     "小键盘3")},
+                {NUMPAD4,              new Key(NUMPAD4,                "Num4",                     "小键盘4")},
+                {NUMPAD5,              new Key(NUMPAD5,                "Num5",                     "小键盘5")},
+                {NUMPAD6,              new Key(NUMPAD6,                "Num6",                     "小键盘6")},
+                {NUMPAD7,              new Key(NUMPAD7,                "Num7",                     "小键盘7")},
+                {NUMPAD8,              new Key(NUMPAD8,                "Num8",                     "小键盘8")},
+                {NUMPAD9,              new Key(NUMPAD9,                "Num9",                     "小键盘9")},
+                {NUMPAD_MULTIPLY,      new Key(NUMPAD_MULTIPLY,        "Num_*",                    "小键盘*")},
+                {NUMPAD_ADD,           new Key(NUMPAD_ADD,             "Num_+",                    "小键盘+")},
+                {NUMPAD_ENTER,         new Key(NUMPAD_ENTER,           "Num_Enter",                "小键盘Enter")},
+                {NUMPAD_MINUS,         new Key(NUMPAD_MINUS,           "Num_-",                    "小键盘-")},
+                {NUMPAD_DOT,           new Key(NUMPAD_DOT,             "Num_.",                    "小键盘.")},
+                {NUMPAD_DIVISION,      new Key(NUMPAD_DIVISION,        "Num_/",                    "小键盘/")},
                 {F1,                   new Key(F1,                     "F1",                       "F1")},
                 {F2,                   new Key(F2,                     "F2",                       "F2")},
                 {F3,                   new Key(F3,                     "F3",                       "F3")},
@@ -219,8 +219,8 @@ namespace KMS.src.core
                 {F10,                  new Key(F10,                    "F10",                      "F10")},
                 {F11,                  new Key(F11,                    "F11",                      "F11")},
                 {F12,                  new Key(F12,                    "F12",                      "F12")},
-                {NumLock,              new Key(NumLock,                "Num Lock",                 "Num Lock")},
-                {ScrLock,              new Key(ScrLock,                "Scroll Lock",              "Scroll Lock")},
+                {NUMLOCK,              new Key(NUMLOCK,                "Num Lock",                 "Num Lock")},
+                {SCRLOCK,              new Key(SCRLOCK,                "Scroll Lock",              "Scroll Lock")},
                 {LEFT_SHIFT,           new Key(LEFT_SHIFT,             "Left Shift",               "左Shift")},
                 {RIGHT_SHIFT,          new Key(RIGHT_SHIFT,            "Right Shift",              "右Shift")},
                 {LEFT_CTRL,            new Key(LEFT_CTRL,              "Left Ctrl",                "左Ctrl")},
@@ -294,46 +294,89 @@ namespace KMS.src.core
         }
 
         internal static class ComboKey
-        {Dictionary instead~
-            internal static Type LC_LS              = new Type(0x170,     "LCTRL_LSHIFT");
-            internal static Type RC_RS              = new Type(0x171,     "RCTRL_RSHIFT");
-            internal static Type LC_RS              = new Type(0x172,     "LCTRL_RSHIFT");
-            internal static Type RC_LS              = new Type(0x173,     "RCTRL_LSHIFT");
-            internal static Type LC_ENTER           = new Type(0x174,     "LCTRL_ENTER");
-            internal static Type RC_ENTER           = new Type(0x175,     "RCTRL_ENTER");
-            internal static Type LS_ENTER           = new Type(0x176,     "LSHIFT_ENTER");
-            internal static Type RS_ENTER           = new Type(0x177,     "RSHIFT_ENTER");
-            internal static Type LA_ENTER           = new Type(0x178,     "LALT_ENTER");
-            internal static Type RA_ENTER           = new Type(0x179,     "RALT_ENTER");
-            internal static Type LA_TAB             = new Type(0x17A,     "LALT_TAB");
-            internal static Type RA_TAB             = new Type(0x17B,     "RALT_TAB");
-            internal static Type LC_LS_ESC          = new Type(0x17C,     "LCTRL_LSHIFT_ESC");
-            internal static Type RC_RS_ESC          = new Type(0x17D,     "RCTRL_RSHIFT_ESC");
-            internal static Type LS_HOME            = new Type(0x17E,     "LSHIFT_HOME");
-            internal static Type RS_HOME            = new Type(0x17F,     "RSHIFT_HOME");
-            internal static Type LS_END             = new Type(0x180,     "LSHIFT_END");
-            internal static Type RS_END             = new Type(0x181,     "RSHIFT_END");
-            internal static Type LS_LEFT            = new Type(0x182,     "LSHIFT_LEFT");
-            internal static Type RS_LEFT            = new Type(0x183,     "RSHIFT_LEFT");
-            internal static Type LS_UP              = new Type(0x184,     "LSHIFT_UP");
-            internal static Type RS_UP              = new Type(0x185,     "RSHIFT_UP");
-            internal static Type LS_RIGHT           = new Type(0x186,     "LSHIFT_RIGHT");
-            internal static Type RS_RIGHT           = new Type(0x187,     "RSHIFT_RIGHT");
-            internal static Type LS_DOWN            = new Type(0x188,     "LSHIFT_DOWN");
-            internal static Type RS_DOWN            = new Type(0x189,     "RSHIFT_DOWN");
-            internal static Type LC_A               = new Type(0x18A,     "LCTRL_A");
-            internal static Type RC_A               = new Type(0x18B,     "RCTRL_A");
-            internal static Type LC_S               = new Type(0x18C,     "LCTRL_S");
-            internal static Type RC_S               = new Type(0x18D,     "RCTRL_S");
-            internal static Type LC_F               = new Type(0x18E,     "LCTRL_F");
-            internal static Type RC_F               = new Type(0x18F,     "RCTRL_F");
-            internal static Type LC_C               = new Type(0x190,     "LCTRL_C");
-            internal static Type RC_C               = new Type(0x191,     "RCTRL_C");
-            internal static Type LC_V               = new Type(0x192,     "LCTRL_V");
-            internal static Type RC_V               = new Type(0x193,     "RCTRL_V");
-            internal static Type DOUBLE             = new Type(0x1F0,     "OTHER_DOUBLE_COMBO");
-            internal static Type TRIPLE             = new Type(0x1F1,     "OTHER_TRIPLE_COMBO");
-            internal static Type QUADRA             = new Type(0x1F2,     "OTHER_QUADRA_COMBO");
+        {
+            internal const ushort LC_LS = 0x170;
+            internal const ushort RC_RS = 0x171;
+            internal const ushort LC_RS = 0x172;
+            internal const ushort RC_LS = 0x173;
+            internal const ushort LC_ENTER = 0x174;
+            internal const ushort RC_ENTER = 0x175;
+            internal const ushort LS_ENTER = 0x176;
+            internal const ushort RS_ENTER = 0x177;
+            internal const ushort LA_ENTER = 0x178;
+            internal const ushort RA_ENTER = 0x179;
+            internal const ushort LA_TAB = 0x17A;
+            internal const ushort RA_TAB = 0x17B;
+            internal const ushort LC_LS_ESC = 0x17C;
+            internal const ushort RC_RS_ESC = 0x17D;
+            internal const ushort LS_HOME = 0x17E;
+            internal const ushort RS_HOME = 0x17F;
+            internal const ushort LS_END = 0x180;
+            internal const ushort RS_END = 0x181;
+            internal const ushort LS_LEFT = 0x182;
+            internal const ushort RS_LEFT = 0x183;
+            internal const ushort LS_UP = 0x184;
+            internal const ushort RS_UP = 0x185;
+            internal const ushort LS_RIGHT = 0x186;
+            internal const ushort RS_RIGHT = 0x187;
+            internal const ushort LS_DOWN = 0x188;
+            internal const ushort RS_DOWN = 0x189;
+            internal const ushort LC_A = 0x18A;
+            internal const ushort RC_A = 0x18B;
+            internal const ushort LC_S = 0x18C;
+            internal const ushort RC_S = 0x18D;
+            internal const ushort LC_F = 0x18E;
+            internal const ushort RC_F = 0x18F;
+            internal const ushort LC_C = 0x190;
+            internal const ushort RC_C = 0x191;
+            internal const ushort LC_V = 0x192;
+            internal const ushort RC_V = 0x193;
+            internal const ushort DOUBLE = 0x1F0;
+            internal const ushort TRIPLE = 0x1F1;
+            internal const ushort QUADRA = 0x1F2;
+
+            internal static readonly Dictionary<ushort, Type> Keys = new Dictionary<ushort, Type>
+            {
+                {LC_LS    ,     new Type(0x170,     "LCTRL_LSHIFT")},
+                {RC_RS    ,     new Type(0x171,     "RCTRL_RSHIFT")},
+                {LC_RS    ,     new Type(0x172,     "LCTRL_RSHIFT")},
+                {RC_LS    ,     new Type(0x173,     "RCTRL_LSHIFT")},
+                {LC_ENTER ,     new Type(0x174,     "LCTRL_ENTER")},
+                {RC_ENTER ,     new Type(0x175,     "RCTRL_ENTER")},
+                {LS_ENTER ,     new Type(0x176,     "LSHIFT_ENTER")},
+                {RS_ENTER ,     new Type(0x177,     "RSHIFT_ENTER")},
+                {LA_ENTER ,     new Type(0x178,     "LALT_ENTER")},
+                {RA_ENTER ,     new Type(0x179,     "RALT_ENTER")},
+                {LA_TAB   ,     new Type(0x17A,     "LALT_TAB")},
+                {RA_TAB   ,     new Type(0x17B,     "RALT_TAB")},
+                {LC_LS_ESC,     new Type(0x17C,     "LCTRL_LSHIFT_ESC")},
+                {RC_RS_ESC,     new Type(0x17D,     "RCTRL_RSHIFT_ESC")},
+                {LS_HOME  ,     new Type(0x17E,     "LSHIFT_HOME")},
+                {RS_HOME  ,     new Type(0x17F,     "RSHIFT_HOME")},
+                {LS_END   ,     new Type(0x180,     "LSHIFT_END")},
+                {RS_END   ,     new Type(0x181,     "RSHIFT_END")},
+                {LS_LEFT  ,     new Type(0x182,     "LSHIFT_LEFT")},
+                {RS_LEFT  ,     new Type(0x183,     "RSHIFT_LEFT")},
+                {LS_UP    ,     new Type(0x184,     "LSHIFT_UP")},
+                {RS_UP    ,     new Type(0x185,     "RSHIFT_UP")},
+                {LS_RIGHT ,     new Type(0x186,     "LSHIFT_RIGHT")},
+                {RS_RIGHT ,     new Type(0x187,     "RSHIFT_RIGHT")},
+                {LS_DOWN  ,     new Type(0x188,     "LSHIFT_DOWN")},
+                {RS_DOWN  ,     new Type(0x189,     "RSHIFT_DOWN")},
+                {LC_A     ,     new Type(0x18A,     "LCTRL_A")},
+                {RC_A     ,     new Type(0x18B,     "RCTRL_A")},
+                {LC_S     ,     new Type(0x18C,     "LCTRL_S")},
+                {RC_S     ,     new Type(0x18D,     "RCTRL_S")},
+                {LC_F     ,     new Type(0x18E,     "LCTRL_F")},
+                {RC_F     ,     new Type(0x18F,     "RCTRL_F")},
+                {LC_C     ,     new Type(0x190,     "LCTRL_C")},
+                {RC_C     ,     new Type(0x191,     "RCTRL_C")},
+                {LC_V     ,     new Type(0x192,     "LCTRL_V")},
+                {RC_V     ,     new Type(0x193,     "RCTRL_V")},
+                {DOUBLE   ,     new Type(0x1F0,     "OTHER_DOUBLE_COMBO")},
+                {TRIPLE   ,     new Type(0x1F1,     "OTHER_TRIPLE_COMBO")},
+                {QUADRA   ,     new Type(0x1F2,     "OTHER_QUADRA_COMBO")}
+            };
         }
 
         internal static class MouseEvent
@@ -366,79 +409,15 @@ namespace KMS.src.core
             internal const int SIDE_FORWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
             internal const int SIDE_BACKWARD = 0x10; //鼠标侧键后退标志。high-order in DWORD
         }
-
+        
         internal enum DbType
         {
+            INVALID = 0,
             //0 ~ 255 was reserved by keyboard code
             //0x100 ~ 0x10f was reserved by keyboard event
-            EF_1 = 0x110, //数字1键的额外功能，即感叹号。
-            EF_2,
-            EF_3,
-            EF_4,
-            EF_5,
-            EF_6,
-            EF_7,
-            EF_8,
-            EF_9,
-            EF_0,
-            EF_A, //:
-            EF_B, //+
-            EF_C, //<
-            EF_D, //_
-            EF_E, //>
-            EF_F, //?
-            EF_G, //~
-            EF_H, //{
-            EF_I, //|
-            EF_J, //}
-            EF_K, //"
-            //combo key begin...
-            LCTRL_LSHIFT = 0x170,
-            RCTRL_RSHIFT,
-            LCTRL_RSHIFT,
-            RCTRL_LSHIFT,
-            LCTRL_ENTER,
-            RCTRL_ENTER,
-            LSHIFT_ENTER,
-            RSHIFT_ENTER,
-            LALT_ENTER,
-            RALT_ENTER,
-            LALT_TAB,
-            RALT_TAB,
-            LCTRL_LSHIFT_ESC,
-            RCTRL_RSHIFT_ESC,
-            LSHIFT_HOME,
-            RSHIFT_HOME,
-            LSHIFT_END,
-            RSHIFT_END,
-            LSHIFT_LEFT,
-            RSHIFT_LEFT,
-            LSHIFT_UP,
-            RSHIFT_UP,
-            LSHIFT_RIGHT,
-            RSHIFT_RIGHT,
-            LSHIFT_DOWN,
-            RSHIFT_DOWN,
-            LCTRL_A,
-            RCTRL_A,
-            LCTRL_S,
-            RCTRL_S,
-            LCTRL_F,
-            RCTRL_F,
-            LCTRL_C,
-            RCTRL_C,
-            LCTRL_V,
-            RCTRL_V,
-            OTHERS_DOUBLE_COMBO = 0x1f0,
-            OTHERS_TRIPLE_COMBO,
-            OTHERS_QUADRA_COMBO,
+            //0x110 ~ 0x1ff was reserved, you can found the definition in others class in this file.
             //0x200 ~ 0x20f was reserved by mouse event
-            MOUSE_FORWARD_SK = 0x210,
-            MOUSE_BACKWARD_SK,
-            MOUSE_WHEEL_FORWARD,
-            MOUSE_WHEEL_BACKWARD,
-            MOUSE_LBTN_AREA,
-            MOUSE_RBTN_AREA,
+            //0x210 ~ 0x2ff was reserved by other mouse type.
             KB_ALL = 0x300,
             KB_COMBO_ALL,
             MOUSE_ALL,
@@ -480,6 +459,11 @@ namespace KMS.src.core
             YEAR_MS_RB_THIRD,
         }
 
-        internal static Type KbAll = new Type((int)DbType.KB_ALL, "键盘按键");
+        internal static class Statistic
+        {
+            internal static Type KbAll = new Type((int)DbType.KB_ALL, "键盘按键");
+            internal static Type KbCombo = new Type((int)DbType.KB_COMBO_ALL, "组合键总计");
+        }
+
     }
 }
