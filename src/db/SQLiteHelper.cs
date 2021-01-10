@@ -10,6 +10,8 @@ namespace KMS.src.db
         private const string TAG = "SQLiteHelper";
 
         private SQLiteConnection sqliteConnection;
+        private SQLiteTransaction sqliteTransaction;
+        private SQLiteCommand detailCmd;
 
         public bool openDatabase(string path)
         {
@@ -23,6 +25,8 @@ namespace KMS.src.db
                 Logger.v(TAG, e.StackTrace);
                 return false;
             }
+
+            detailCmd = new SQLiteCommand();
 
             return true;
         }
@@ -53,7 +57,6 @@ namespace KMS.src.db
             cmd.Connection = sqliteConnection;
 
             cmd.CommandText = "SELECT name FROM sqlite_master where type='table' AND name='" + name + "'";
-            Logger.v(TAG, "cmd text:" + cmd.CommandText);
             SQLiteDataReader reader = cmd.ExecuteReader();
             bool hasRows = reader.HasRows;
             reader.Close();
@@ -65,6 +68,28 @@ namespace KMS.src.db
         {
             if (sqliteConnection != null)
                 sqliteConnection.Close();
+        }
+
+        internal bool BeginTransaction()
+        {
+            sqliteTransaction = sqliteConnection.BeginTransaction();
+            return sqliteTransaction != null;
+        }
+
+        internal bool CommitTransaction()
+        {
+            if (sqliteTransaction is null)
+                return false;
+
+            sqliteTransaction.Commit();
+            return true;
+        }
+
+        internal void InsertDetail(string sql)
+        {
+            detailCmd.Connection = sqliteConnection;
+            detailCmd.CommandText = sql;
+            detailCmd.ExecuteNonQuery();
         }
     }
 }

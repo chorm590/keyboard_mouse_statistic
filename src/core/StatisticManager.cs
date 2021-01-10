@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using KMS.src.db;
 using KMS.src.tool;
 
@@ -43,6 +45,9 @@ namespace KMS.src.core
         private Event sttMsWheelBw;
 
         private List<Event> sttOthers; //分时段的统计，每日、每月、每年。
+        private EventToDbManager eventToDbManager;
+        private double screenAreaWidth;
+        private double screenAreaHeight;
 
         
         internal Event SttKeyboardTotal
@@ -159,6 +164,7 @@ namespace KMS.src.core
 
         private StatisticManager()
         {
+            SQLiteManager sql = SQLiteManager.GetInstance;
             // 1
             sttKbTotal = new Event
             {
@@ -232,11 +238,24 @@ namespace KMS.src.core
             sttMsRBtn = sttMsKey[Constants.MouseKey.MOUSE_RIGHT_BTN];
             sttMsWheelFw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_FORWARD];
             sttMsWheelBw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_BACKWARD];
+
+            //Initialize timer
+            TimeManager.RegisterTimerCallback(TAG, sqliteTimerCallback);
+            eventToDbManager = new EventToDbManager();
+
+            screenAreaWidth = System.Windows.SystemParameters.PrimaryScreenWidth / 10;
+            screenAreaHeight = System.Windows.SystemParameters.PrimaryScreenHeight / 10;
+            Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
         }
 
         internal void shutdown()
         {
             //TODO flush all data to disk.
+        }
+
+        private void sqliteTimerCallback(object state)
+        {
+            eventToDbManager.storageRecord();
         }
 
         internal void KeyboardEventHappen(int typeCode, DateTime time)
@@ -254,12 +273,14 @@ namespace KMS.src.core
                 kbSingleKeyPressed(typeCode);
                 sttKbTotal.Value++;
                 sttKbTotal.Desc = sttKbTotal.Value + " 次";
+                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
             }
             else if ((typeCode >= Constants.ComboKey.LC_LS) && (typeCode <= Constants.ComboKey.QUADRA))
             {
                 kbComboKeyPressed(typeCode);
                 sttComboKeyTotal.Value++;
                 sttComboKeyTotal.Desc = sttComboKeyTotal.Value + " 次";
+                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
             }
             else
             {
@@ -267,7 +288,7 @@ namespace KMS.src.core
             }
         }
 
-        internal void MouseEventHappen(int typeCode, int mouseData, short x, short y)
+        internal void MouseEventHappen(int typeCode, int mouseData, short x, short y, DateTime time)
         {
             if (sttMsKey.TryGetValue((short)typeCode, out Event evt))
             {
@@ -279,16 +300,29 @@ namespace KMS.src.core
                 {
                     case Constants.MouseKey.MOUSE_WHEEL_BACKWARD:
                     case Constants.MouseKey.MOUSE_WHEEL_FORWARD:
-                        evt.Desc = evt.Value + " 格";
+                        evt.Desc = evt.Value + " 次";
                         break;
-                    case Constants.MouseKey.MOUSE_LEFT_BTN_AREA:
-                    case Constants.MouseKey.MOUSE_RIGHT_BTN_AREA:
+                    case Constants.MouseKey.MOUSE_LEFT_BTN:
+                        eventToDbManager.Add(Constants.MouseEvent.MOUSE_LEFT_BTN_AREA,
+                            (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                            getScreenArea(x, y));
+                        break;
+                    case Constants.MouseKey.MOUSE_RIGHT_BTN:
+                        eventToDbManager.Add(Constants.MouseEvent.MOUSE_RIGHT_BTN_AREA,
+                            (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                            getScreenArea(x, y));
                         break;
                     default:
                         evt.Desc = evt.Value + " 次";
                         break;
                 }
+                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
             }
+        }
+
+        private ushort getScreenArea(short x, short y)
+        {
+            return (ushort)(Math.Floor((float)x / (float)screenAreaWidth) + 10 * Math.Floor((float)y / (float)screenAreaHeight) + 1);
         }
 
         private void kbSingleKeyPressed(int keycode)
@@ -344,6 +378,140 @@ namespace KMS.src.core
             if (sttKbComboKey[2].Value > 0)
             {
                 sttKbCkTop3.Desc = sttKbComboKey[2].Type.Desc + " [" + sttKbComboKey[2].Value + " 次]";
+            }
+        }
+
+        private class EventToDbManager
+        {
+            private const short DEEPTH = 1000;
+
+            private EventToDb[] cur;
+            private short counter;
+            private byte status;
+
+            internal EventToDbManager()
+            {
+                cur = new EventToDb[DEEPTH];
+            }
+
+            internal void Add(short type, ushort year, byte month, byte day, byte hour, byte minute, byte second, ushort value)
+            {
+                if (status == 0)
+                    status = 1;
+                else
+                {
+                    int tmp = 0;
+                    while (tmp++ < 5)
+                    {
+                        Thread.Sleep(10);
+                        if (status == 0)
+                            break;
+                    }
+
+                    if (status == 0)
+                        status = 1;
+                    else
+                        return;
+                }
+
+                if (status != 1)
+                    return;
+
+                if(cur is null)
+                    return;
+
+                if (counter >= DEEPTH)
+                    return;
+
+                cur[counter].type = type;
+                cur[counter].year = year;
+                cur[counter].month = month;
+                cur[counter].day = day;
+                cur[counter].hour = hour;
+                cur[counter].minute = minute;
+                cur[counter].second = second;
+                cur[counter].value = value;
+
+                counter++;
+                status = 0;
+            }
+
+            /// <summary>
+            /// 由TimeManager中的定时器子线程触发调用。
+            /// 将前面积累到的事件存储到数据库中。
+            /// </summary>
+            internal void storageRecord()
+            {
+                if (status == 0)
+                    status = 2;
+                else
+                {
+                    int tmp = 0;
+                    while (tmp++ < 5)
+                    {
+                        Thread.Sleep(10);
+                        if (status == 0)
+                            break;
+                    }
+
+                    if (status == 0)
+                        status = 2;
+                    else
+                        return;
+                }
+
+                if (status != 2)
+                    return;
+
+                short counter2 = counter;
+                EventToDb[] tmp2 = new EventToDb[counter2];
+                for (int i = 0; i < counter2; i++)
+                {
+                    tmp2[i].type = cur[i].type;
+                    tmp2[i].year = cur[i].year;
+                    tmp2[i].month = cur[i].month;
+                    tmp2[i].day = cur[i].day;
+                    tmp2[i].hour = cur[i].hour;
+                    tmp2[i].minute = cur[i].minute;
+                    tmp2[i].second = cur[i].second;
+                    tmp2[i].value = cur[i].value;
+                }
+                counter = 0; //reset it.
+                status = 0; //Important
+
+                Logger.v(TAG, "There's " + counter2 + " records need to be storage.");
+                DateTime dt = DateTime.Now;
+                Logger.v(TAG, "[1] hour:" + dt.Hour + ",minute:" + dt.Minute + ",second:" + dt.Second + ",ms:" + dt.Millisecond);
+                if (SQLiteManager.GetInstance.BeginTransaction())
+                {
+                    string str;
+                    foreach (EventToDb etd in tmp2)
+                    {
+                        str = "VALUES(" + etd.year + "," + etd.month + "," + etd.day + "," + etd.hour + "," + etd.minute + "," + etd.second;
+                        str += "," + etd.type + "," + etd.value + ")";
+                        SQLiteManager.GetInstance.InsertDetail(str);
+                    }
+                    SQLiteManager.GetInstance.CommitTransaction();
+                    dt = DateTime.Now;
+                    Logger.v(TAG, "[2] hour:" + dt.Hour + ",minute:" + dt.Minute + ",second:" + dt.Second + ",ms:" + dt.Millisecond);
+                }
+                else
+                {
+                    //Do nothing
+                    Logger.v(TAG, "Transaction begin failed");
+                }
+            }
+
+            private struct EventToDb
+            {
+                internal short type;
+                internal ushort year;
+                internal byte month;
+                internal byte day;
+                internal byte hour;
+                internal byte minute;
+                internal byte second;
+                internal ushort value;
             }
         }
     }

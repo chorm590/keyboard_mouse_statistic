@@ -27,6 +27,7 @@ namespace KMS
         {
             InitializeComponent();
             Logger.v(TAG, "hello world");
+            TimeManager.Init();
             TimeManager.TimeUsing = DateTime.Now;
 
             statisticManager = StatisticManager.GetInstance;

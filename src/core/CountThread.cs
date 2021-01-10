@@ -53,7 +53,7 @@ namespace KMS.src.core
                 }
                 else if (events[idx].type == EventQueue.EVENT_TYPE_MOUSE)
                 {
-                    parseMouseEvent(events[idx].eventCode, events[idx].keyCode, events[idx].x, events[idx].y);
+                    parseMouseEvent(events[idx].eventCode, events[idx].keyCode, events[idx].x, events[idx].y, events[idx].time);
                 }
                 else
                 {
@@ -79,34 +79,34 @@ namespace KMS.src.core
             }
         }
 
-        private static void parseMouseEvent(short eventCode, short mouseData, short x, short y)
+        private static void parseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
         {
             switch (eventCode)
             {
                 case Constants.MouseEvent.WM_LBUTTONDOWN:
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_LEFT_BTN, 0, x, y);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_LEFT_BTN, 0, x, y, time);
                     break;
                 case Constants.MouseEvent.WM_RBUTTONDOWN:
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_RIGHT_BTN, 0, x, y);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_RIGHT_BTN, 0, x, y, time);
                     break;
                 case Constants.MouseEvent.WM_MOUSEWHEEL:
                     if (mouseData == -120)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, 0, 0, 0);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, 0, 0, 0, time);
                     }
                     else if (mouseData == 120)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, 0, 0, 0);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, 0, 0, 0, time);
                     }
                     break;
                 case Constants.MouseEvent.WM_MOUSESIDEDOWN:
                     if (mouseData == Constants.MouseDataHighOrder.SIDE_BACKWARD)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_BACKWARD, 0, 0, 0);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_BACKWARD, 0, 0, 0, time);
                     }
                     else if (mouseData == Constants.MouseDataHighOrder.SIDE_FORWARD)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_FORWARD, 0, 0, 0);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_FORWARD, 0, 0, 0, time);
                     }
                     break;
             }

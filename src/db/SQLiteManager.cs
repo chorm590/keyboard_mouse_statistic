@@ -153,9 +153,19 @@ namespace KMS.src.db
             }
         }
 
-        internal void EventHappen(int typeCode, DateTime time)
+        internal bool BeginTransaction()
         {
+            return sqliteHelper.BeginTransaction();
+        }
 
+        internal void InsertDetail(string str)
+        {
+            sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,value) " + str);
+        }
+
+        internal void CommitTransaction()
+        {
+            sqliteHelper.CommitTransaction();
         }
     }
 }

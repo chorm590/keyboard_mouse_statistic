@@ -83,7 +83,7 @@ namespace KMS.src.core
                 if (wParam.ToInt32() != Constants.MouseEvent.WM_MOUSEMOVE)
                 {
                     mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
-                    EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)(mhd.mouseData >> 16), (short)(mhd.yx >> 32), (short)(mhd.yx & 0xffffffff));
+                    EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)(mhd.mouseData >> 16), (short)(mhd.yx & 0xffffffff), (short)(mhd.yx >> 32));
                 }
             }
 
