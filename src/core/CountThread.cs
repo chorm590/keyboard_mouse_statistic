@@ -79,9 +79,37 @@ namespace KMS.src.core
             }
         }
 
-        private static void parseMouseEvent(short eventCode, short keyCode, short x, short y)
-        { 
-            
+        private static void parseMouseEvent(short eventCode, short mouseData, short x, short y)
+        {
+            switch (eventCode)
+            {
+                case Constants.MouseEvent.WM_LBUTTONDOWN:
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_LEFT_BTN, 0, x, y);
+                    break;
+                case Constants.MouseEvent.WM_RBUTTONDOWN:
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_RIGHT_BTN, 0, x, y);
+                    break;
+                case Constants.MouseEvent.WM_MOUSEWHEEL:
+                    if (mouseData == -120)
+                    {
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, 0, 0, 0);
+                    }
+                    else if (mouseData == 120)
+                    {
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, 0, 0, 0);
+                    }
+                    break;
+                case Constants.MouseEvent.WM_MOUSESIDEDOWN:
+                    if (mouseData == Constants.MouseDataHighOrder.SIDE_BACKWARD)
+                    {
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_BACKWARD, 0, 0, 0);
+                    }
+                    else if (mouseData == Constants.MouseDataHighOrder.SIDE_FORWARD)
+                    {
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_FORWARD, 0, 0, 0);
+                    }
+                    break;
+            }
         }
 
         private static void keyDownProcess(short keycode, DateTime time)
@@ -171,21 +199,21 @@ namespace KMS.src.core
                     if (comboKeyCount == 2)
                     {
                         //双键组合键事件。
-                        StatisticManager.GetInstance.EventHappen(doubleComboDetect(), time);
+                        StatisticManager.GetInstance.KeyboardEventHappen(doubleComboDetect(), time);
                     }
                     break;
                 case 3:
                     if (comboKeyCount == 3)
                     {
                         //三键组合键事件。
-                        StatisticManager.GetInstance.EventHappen(tripleComboDetect(), time);
+                        StatisticManager.GetInstance.KeyboardEventHappen(tripleComboDetect(), time);
                     }
                     break;
                 case 4:
                     if (comboKeyCount == 4)
                     {
                         //四键组合键事件。
-                        StatisticManager.GetInstance.EventHappen(quadraComboDetect(), time);
+                        StatisticManager.GetInstance.KeyboardEventHappen(quadraComboDetect(), time);
                     }
                     break;
                 default:
@@ -194,7 +222,7 @@ namespace KMS.src.core
                     return;
             }
 
-            StatisticManager.GetInstance.EventHappen(keycode, time);
+            StatisticManager.GetInstance.KeyboardEventHappen(keycode, time);
             keyChainCount--;
         }
 

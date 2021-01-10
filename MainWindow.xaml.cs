@@ -38,12 +38,12 @@ namespace KMS
         {
             Binding binding = new Binding();
             binding.Source = statisticManager.SttKeyboardTotal;
-            binding.Path = new PropertyPath("Value");
+            binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(KbTotal, TextBlock.TextProperty, binding);
 
             binding = new Binding();
             binding.Source = statisticManager.SttComboKeyTotal;
-            binding.Path = new PropertyPath("Value");
+            binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(ComboTotal, TextBlock.TextProperty, binding);
 
             binding = new Binding();
@@ -75,6 +75,26 @@ namespace KMS
             binding.Source = statisticManager.SttKeyboardComboKeyTop3;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(CkTop3, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMsLeftBtn;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MsLeftBtn, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMsRightBtn;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MsRightBtn, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMsWheelForward;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MsWheelForward, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMsWheelBackward;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MsWheelBackward, TextBlock.TextProperty, binding);
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)

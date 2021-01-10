@@ -391,17 +391,29 @@ namespace KMS.src.core
             internal const int WM_MOUSEHWHEEL = 0x20e; //水平方向的滚动，一般鼠标没有这个事件。
         }
 
-        internal static Type[] MouseKey =
+        internal static class MouseKey
         {
-            new Type(0x201,"MOUSE_LEFT_BTN"),
-            new Type(0x202,"MOUSE_RIGHT_BTN"),
-            new Type(0x210,"MOUSE_SIDE_KEY_FORWARD"),
-            new Type(0x211,"MOUSE_SIDE_KEY_BACKWARD"),
-            new Type(0x212,"MOUSE_WHEEL_FORWARD"),
-            new Type(0x213,"MOUSE_WHEEL_BACKWARD"),
-            new Type(0x214,"MOUSE_LEFT_BTN_AREA"),
-            new Type(0x215,"MOUSE_RIGHT_BTN_AREA"),
-        };
+            internal const short MOUSE_LEFT_BTN = 0x201;
+            internal const short MOUSE_RIGHT_BTN = 0x202;
+            internal const short MOUSE_SIDE_KEY_FORWARD = 0x210;
+            internal const short MOUSE_SIDE_KEY_BACKWARD = 0x211;
+            internal const short MOUSE_WHEEL_FORWARD = 0x212;
+            internal const short MOUSE_WHEEL_BACKWARD = 0x213;
+            internal const short MOUSE_LEFT_BTN_AREA = 0x214;
+            internal const short MOUSE_RIGHT_BTN_AREA = 0x215;
+
+            internal static readonly Dictionary<short, Type> Keys = new Dictionary<short, Type>
+            {
+                {MOUSE_LEFT_BTN,                new Type(0x201,"MOUSE_LEFT_BTN") },
+                {MOUSE_RIGHT_BTN,               new Type(0x202,"MOUSE_RIGHT_BTN")},
+                {MOUSE_SIDE_KEY_FORWARD,        new Type(0x210,"MOUSE_SIDE_KEY_FORWARD")},
+                {MOUSE_SIDE_KEY_BACKWARD,       new Type(0x211,"MOUSE_SIDE_KEY_BACKWARD")},
+                {MOUSE_WHEEL_FORWARD,           new Type(0x212,"MOUSE_WHEEL_FORWARD")},
+                {MOUSE_WHEEL_BACKWARD,          new Type(0x213,"MOUSE_WHEEL_BACKWARD")},
+                {MOUSE_LEFT_BTN_AREA,           new Type(0x214,"MOUSE_LEFT_BTN_AREA")},
+                {MOUSE_RIGHT_BTN_AREA,          new Type(0x215,"MOUSE_RIGHT_BTN_AREA")}
+            };
+        }
 
         internal static class MouseDataHighOrder
         {

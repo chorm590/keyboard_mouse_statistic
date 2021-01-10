@@ -36,7 +36,11 @@ namespace KMS.src.core
         private List<Event> sttKbComboKey; //键盘组合键敲击总数。
         
 
-        private List<Event> sttMsKey; //鼠标单键点击总数。
+        private Dictionary<short, Event> sttMsKey; //鼠标单键统计。
+        private Event sttMsLBtn;
+        private Event sttMsRBtn;
+        private Event sttMsWheelFw;
+        private Event sttMsWheelBw;
 
         private List<Event> sttOthers; //分时段的统计，每日、每月、每年。
 
@@ -121,6 +125,38 @@ namespace KMS.src.core
             }
         }
 
+        internal Event SttMsLeftBtn
+        {
+            get
+            {
+                return sttMsLBtn;
+            }
+        }
+
+        internal Event SttMsRightBtn
+        {
+            get
+            {
+                return sttMsRBtn;
+            }
+        }
+
+        internal Event SttMsWheelForward
+        {
+            get
+            {
+                return sttMsWheelFw;
+            }
+        }
+
+        internal Event SttMsWheelBackward
+        {
+            get
+            {
+                return sttMsWheelBw;
+            }
+        }
+
         private StatisticManager()
         {
             // 1
@@ -183,6 +219,19 @@ namespace KMS.src.core
                 sttKbComboKey.Add(new Event(ck));
             }
             Logger.v(TAG, "combo key count:" + sttKbComboKey.Count + ", capacity:" + sttKbComboKey.Capacity);
+
+            Dictionary<short, Type> msKeyDic = Constants.MouseKey.Keys;
+            sttMsKey = new Dictionary<short, Event>(msKeyDic.Count);
+            Dictionary<short, Type>.ValueCollection values3 = msKeyDic.Values;
+            foreach (Type tp in values3)
+            {
+                sttMsKey.Add((short)tp.Code, new Event(tp));
+            }
+            Logger.v(TAG, "mouse key count:" + sttMsKey.Count);
+            sttMsLBtn = sttMsKey[Constants.MouseKey.MOUSE_LEFT_BTN];
+            sttMsRBtn = sttMsKey[Constants.MouseKey.MOUSE_RIGHT_BTN];
+            sttMsWheelFw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_FORWARD];
+            sttMsWheelBw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_BACKWARD];
         }
 
         internal void shutdown()
@@ -190,7 +239,7 @@ namespace KMS.src.core
             //TODO flush all data to disk.
         }
 
-        internal void EventHappen(int typeCode, DateTime time)
+        internal void KeyboardEventHappen(int typeCode, DateTime time)
         {
             // This call may from sub-thread.
 
@@ -204,15 +253,41 @@ namespace KMS.src.core
             {
                 kbSingleKeyPressed(typeCode);
                 sttKbTotal.Value++;
+                sttKbTotal.Desc = sttKbTotal.Value + " 次";
             }
             else if ((typeCode >= Constants.ComboKey.LC_LS) && (typeCode <= Constants.ComboKey.QUADRA))
             {
-                sttComboKeyTotal.Value++;
                 kbComboKeyPressed(typeCode);
+                sttComboKeyTotal.Value++;
+                sttComboKeyTotal.Desc = sttComboKeyTotal.Value + " 次";
             }
             else
             {
                 // Do nothing
+            }
+        }
+
+        internal void MouseEventHappen(int typeCode, int mouseData, short x, short y)
+        {
+            if (sttMsKey.TryGetValue((short)typeCode, out Event evt))
+            {
+                if (evt is null)
+                    return;
+
+                evt.Value++;
+                switch (typeCode)
+                {
+                    case Constants.MouseKey.MOUSE_WHEEL_BACKWARD:
+                    case Constants.MouseKey.MOUSE_WHEEL_FORWARD:
+                        evt.Desc = evt.Value + " 格";
+                        break;
+                    case Constants.MouseKey.MOUSE_LEFT_BTN_AREA:
+                    case Constants.MouseKey.MOUSE_RIGHT_BTN_AREA:
+                        break;
+                    default:
+                        evt.Desc = evt.Value + " 次";
+                        break;
+                }
             }
         }
 
@@ -230,17 +305,17 @@ namespace KMS.src.core
             sttKbSingleKey.Sort();
             if (sttKbSingleKey[0].Value > 0)
             {
-                sttKbSkTop1.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + "次]";
+                sttKbSkTop1.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + " 次]";
             }
 
             if (sttKbSingleKey[1].Value > 0)
             {
-                sttKbSkTop2.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + "次]";
+                sttKbSkTop2.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + " 次]";
             }
 
             if (sttKbSingleKey[2].Value > 0)
             {
-                sttKbSkTop3.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + "次]";
+                sttKbSkTop3.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + " 次]";
             }
         }
 
@@ -258,17 +333,17 @@ namespace KMS.src.core
             sttKbComboKey.Sort();
             if (sttKbComboKey[0].Value > 0)
             {
-                sttKbCkTop1.Desc = sttKbComboKey[0].Type.Desc + " [" + sttKbComboKey[0].Value + "次]";
+                sttKbCkTop1.Desc = sttKbComboKey[0].Type.Desc + " [" + sttKbComboKey[0].Value + " 次]";
             }
 
             if (sttKbComboKey[1].Value > 0)
             {
-                sttKbCkTop2.Desc = sttKbComboKey[1].Type.Desc + " [" + sttKbComboKey[1].Value + "次]";
+                sttKbCkTop2.Desc = sttKbComboKey[1].Type.Desc + " [" + sttKbComboKey[1].Value + " 次]";
             }
 
             if (sttKbComboKey[2].Value > 0)
             {
-                sttKbCkTop3.Desc = sttKbComboKey[2].Type.Desc + " [" + sttKbComboKey[2].Value + "次]";
+                sttKbCkTop3.Desc = sttKbComboKey[2].Type.Desc + " [" + sttKbComboKey[2].Value + " 次]";
             }
         }
     }
