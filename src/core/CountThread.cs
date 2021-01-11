@@ -22,8 +22,9 @@ namespace KMS.src.core
 
         private const byte MAX_KEY_CHAIN_COUNT = 3;
         private static byte keyChainCount;
+        private static byte fkey; //function key,for day*_detail table.
         private static NormalKey[] keyChain = new NormalKey[MAX_KEY_CHAIN_COUNT]; //最多支持三连普通按键。
-        private static byte comboKeyCount; //记录最多按下的按键数
+        private static NormalKey[] keyChainForDownUp = new NormalKey[MAX_KEY_CHAIN_COUNT];
 
         private static short msWheelCounter; //同一方向的滚轮滚动聚合成一条记录以节约性能。负值表示向后滚动，正值表示向前滚动。
         private static DateTime msWheelTime; //与 msWheelCounter 配合使用，记录最后一次滚动事件的时间。
@@ -55,7 +56,7 @@ namespace KMS.src.core
             //Should only be call by sub-thread.
             eventAmount = 0; //Must do.
             EventQueue.migrate(ref events, ref eventAmount);
-            Logger.v(TAG, "event amount:" + eventAmount);
+            Logger.v(TAG, "event amount:" + eventAmount + ", keyChainCount:" + keyChainCount);
 
             for (int idx = 0; idx < eventAmount; idx++)
             {
@@ -92,7 +93,7 @@ namespace KMS.src.core
         }
 
         private static void parseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
-        {
+        {这个统计有问题
             if (eventCode != Constants.MouseEvent.WM_MOUSEWHEEL && msWheelCounter != 0)
             {
                 if (msWheelCounter < 0)
@@ -162,24 +163,21 @@ namespace KMS.src.core
             //清除普通按键过期事件记录。
             if (keyChainCount > 0)
             {
-                NormalKey[] tmp = new NormalKey[MAX_KEY_CHAIN_COUNT]; //记录需要保留的事件。
                 byte count = 0;
                 for (byte i = 0; i < keyChainCount; i++)
                 {
                     if (!isTimeout(keyChain[i].time, time))
                     {
-                        tmp[count].keycode = keyChain[i].keycode;
-                        tmp[count].time = keyChain[i].time;
+                        keyChainForDownUp[count].keycode = keyChain[i].keycode;
+                        keyChainForDownUp[count].time = keyChain[i].time;
 
                         count++;
                     }
                 }
-
-                Logger.v(TAG, "event not expired count:" + count);
                 for (byte i = 0; i < count; i++)
                 {
-                    keyChain[i].keycode = tmp[i].keycode;
-                    keyChain[i].time = tmp[i].time;
+                    keyChain[i].keycode = keyChainForDownUp[i].keycode;
+                    keyChain[i].time = keyChainForDownUp[i].time;
                 }
                 keyChainCount = count;
             }
@@ -225,12 +223,107 @@ namespace KMS.src.core
                 rwin.IsPress = false;
             }
 
-
             if (keyChainCount >= MAX_KEY_CHAIN_COUNT)
                 return;//忽略事件，不予记录。
 
             switch (keycode)
             {
+                case Constants.TypeNumber.LEFT_CTRL:
+                    if (lctrl.IsPress)
+                    {
+                        lctrl.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        lctrl.IsPress = true;
+                        lctrl.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.RIGHT_CTRL:
+                    if (rctrl.IsPress)
+                    {
+                        rctrl.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        rctrl.IsPress = true;
+                        rctrl.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.LEFT_SHIFT:
+                    if (lshift.IsPress)
+                    {
+                        lshift.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        lshift.IsPress = true;
+                        lshift.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.RIGHT_SHIFT:
+                    if (rshift.IsPress)
+                    {
+                        rshift.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        rshift.IsPress = true;
+                        rshift.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.LEFT_ALT:
+                    if (lalt.IsPress)
+                    {
+                        lalt.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        lalt.IsPress = true;
+                        lalt.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.RIGHT_ALT:
+                    if (ralt.IsPress)
+                    {
+                        ralt.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        ralt.IsPress = true;
+                        ralt.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.LEFT_WIN:
+                    if (lwin.IsPress)
+                    {
+                        lwin.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        lwin.IsPress = true;
+                        lwin.time = time;
+                    }
+                    break;
+                case Constants.TypeNumber.RIGHT_WIN:
+                    if (rwin.IsPress)
+                    {
+                        rwin.time = time;
+                        return;
+                    }
+                    else
+                    {
+                        rwin.IsPress = true;
+                        rwin.time = time;
+                    }
+                    break;
                 default:
                     //重复的按键不入链
                     if (keyChainCount > 0)
@@ -239,7 +332,7 @@ namespace KMS.src.core
                         {
                             if (keyChain[i].keycode == keycode)
                             {
-                                keyChain[i].time = time; //just upgrade event time.
+                                keyChain[i].time = time;
                                 return;
                             }
                         }
@@ -250,269 +343,130 @@ namespace KMS.src.core
                     keyChainCount++;
                     break;
             }
-            
         }
 
         private static void keyUpProcess(short keycode, DateTime time)
         {
-            if (comboKeyCount == 0)
-                comboKeyCount = keyChainCount;
-
-            switch (keyChainCount)
+            fkey = 0;
+            if (keyChainCount > 0)
             {
-                case 1:
-                    comboKeyCount = 0; //reset it.
-                    break;
-                case 2:
-                    //coomboKeyCount数值与case标签值相等表示此时刚开始松开组合键，此时统计键入的组合键类型是最适合的。
-                    if (comboKeyCount == 2)
+                //Remove the key event from 'keyChain'.
+                byte count = 0;
+                byte i;
+                for (i = 0; i < keyChainCount; i++)
+                {
+                    if (keyChain[i].keycode == keycode)
                     {
-                        //双键组合键事件。
-                        StatisticManager.GetInstance.KeyboardEventHappen(doubleComboDetect(), time);
+                        if (lctrl.IsPress)
+                        {
+                            fkey |= 1;
+                            lctrl.IsPress = false;
+                        }
+                        if (rctrl.IsPress)
+                        {
+                            fkey |= 2;
+                            rctrl.IsPress = false;
+                        }
+                        if (lshift.IsPress)
+                        {
+                            fkey |= 4;
+                            lshift.IsPress = false;
+                        }
+                        if (rshift.IsPress)
+                        {
+                            fkey |= 8;
+                            rshift.IsPress = false;
+                        }
+                        if (lalt.IsPress)
+                        {
+                            fkey |= 16;
+                            lalt.IsPress = false;
+                        }
+                        if (ralt.IsPress)
+                        {
+                            fkey |= 32;
+                            ralt.IsPress = false;
+                        }
+                        if (lwin.IsPress)
+                        {
+                            fkey |= 64;
+                            lwin.IsPress = false;
+                        }
+                        if (rwin.IsPress)
+                        {
+                            fkey |= 128;
+                            rwin.IsPress = false;
+                        }
+
+                        continue;
                     }
-                    break;
-                case 3:
-                    if (comboKeyCount == 3)
+                    else
                     {
-                        //三键组合键事件。
-                        StatisticManager.GetInstance.KeyboardEventHappen(tripleComboDetect(), time);
+                        keyChainForDownUp[count].keycode = keyChain[i].keycode;
+                        keyChainForDownUp[count++].time = keyChain[i].time;
                     }
-                    break;
-                case 4:
-                    if (comboKeyCount == 4)
-                    {
-                        //四键组合键事件。
-                        StatisticManager.GetInstance.KeyboardEventHappen(quadraComboDetect(), time);
-                    }
-                    break;
-                default:
-                    keyChainCount = 0;
-                    comboKeyCount = 0;
-                    return;
-            }
+                }
 
-            StatisticManager.GetInstance.KeyboardEventHappen(keycode, time);
-            keyChainCount--;
-        }
-
-        private static ushort doubleComboDetect()
-        {
-            if (keyChainCount != 2)
-            {
-                return (ushort)Constants.DbType.INVALID;
-            }
-
-            short a = keyChain[0].keycode;
-            short b = keyChain[1].keycode;
-            ushort comboKeyType = Constants.ComboKey.DOUBLE;
-
-            if (a == Constants.Keyboard.LEFT_CTRL)
-            {
-                switch (b)
+                for (i = 0; i < count; i++)
                 {
-                    case Constants.Keyboard.LEFT_SHIFT:
-                        comboKeyType = Constants.ComboKey.LC_LS;
-                        break;
-                    case Constants.Keyboard.RIGHT_SHIFT:
-                        comboKeyType = Constants.ComboKey.LC_RS;
-                        break;
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.LC_ENTER;
-                        break;
-                    case Constants.Keyboard.A:
-                        comboKeyType = Constants.ComboKey.LC_A;
-                        break;
-                    case Constants.Keyboard.S:
-                        comboKeyType = Constants.ComboKey.LC_S;
-                        break;
-                    case Constants.Keyboard.F:
-                        comboKeyType = Constants.ComboKey.LC_F;
-                        break;
-                    case Constants.Keyboard.C:
-                        comboKeyType = Constants.ComboKey.LC_C;
-                        break;
-                    case Constants.Keyboard.V:
-                        comboKeyType = Constants.ComboKey.LC_V;
-                        break;
+                    keyChain[i].keycode = keyChainForDownUp[i].keycode;
+                    keyChain[i].time = keyChainForDownUp[i].time;
                 }
-            }
-            else if (a == Constants.Keyboard.RIGHT_CTRL)
-            {
-                switch (b)
-                {
-                    case Constants.Keyboard.LEFT_SHIFT:
-                        comboKeyType = Constants.ComboKey.RC_LS;
-                        break;
-                    case Constants.Keyboard.RIGHT_SHIFT:
-                        comboKeyType = Constants.ComboKey.RC_RS;
-                        break;
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.RC_ENTER;
-                        break;
-                    case Constants.Keyboard.A:
-                        comboKeyType = Constants.ComboKey.RC_A;
-                        break;
-                    case Constants.Keyboard.S:
-                        comboKeyType = Constants.ComboKey.RC_S;
-                        break;
-                    case Constants.Keyboard.F:
-                        comboKeyType = Constants.ComboKey.RC_F;
-                        break;
-                    case Constants.Keyboard.C:
-                        comboKeyType = Constants.ComboKey.RC_C;
-                        break;
-                    case Constants.Keyboard.V:
-                        comboKeyType = Constants.ComboKey.RC_V;
-                        break;
-                }
-            }
-            else if (a == Constants.Keyboard.LEFT_SHIFT)
-            {
-                switch (b)
-                {
-                    case Constants.Keyboard.LEFT_CTRL:
-                        comboKeyType = Constants.ComboKey.LC_LS;
-                        break;
-                    case Constants.Keyboard.RIGHT_CTRL:
-                        comboKeyType = Constants.ComboKey.RC_LS;
-                        break;
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.LS_ENTER;
-                        break;
-                    case Constants.Keyboard.HOME:
-                        comboKeyType = Constants.ComboKey.LS_HOME;
-                        break;
-                    case Constants.Keyboard.END:
-                        comboKeyType = Constants.ComboKey.LS_END;
-                        break;
-                    case Constants.Keyboard.LEFT:
-                        comboKeyType = Constants.ComboKey.LS_LEFT;
-                        break;
-                    case Constants.Keyboard.UP:
-                        comboKeyType = Constants.ComboKey.LS_UP;
-                        break;
-                    case Constants.Keyboard.RIGHT:
-                        comboKeyType = Constants.ComboKey.LS_RIGHT;
-                        break;
-                    case Constants.Keyboard.DOWN:
-                        comboKeyType = Constants.ComboKey.LS_DOWN;
-                        break;
-                }
-            }
-            else if (a == Constants.Keyboard.RIGHT_SHIFT)
-            {
-                switch (b)
-                {
-                    case Constants.Keyboard.LEFT_CTRL:
-                        comboKeyType = Constants.ComboKey.LC_RS;
-                        break;
-                    case Constants.Keyboard.RIGHT_CTRL:
-                        comboKeyType = Constants.ComboKey.RC_RS;
-                        break;
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.RS_ENTER;
-                        break;
-                    case Constants.Keyboard.HOME:
-                        comboKeyType = Constants.ComboKey.RS_HOME;
-                        break;
-                    case Constants.Keyboard.END:
-                        comboKeyType = Constants.ComboKey.RS_END;
-                        break;
-                    case Constants.Keyboard.LEFT:
-                        comboKeyType = Constants.ComboKey.RS_LEFT;
-                        break;
-                    case Constants.Keyboard.UP:
-                        comboKeyType = Constants.ComboKey.RS_UP;
-                        break;
-                    case Constants.Keyboard.RIGHT:
-                        comboKeyType = Constants.ComboKey.RS_RIGHT;
-                        break;
-                    case Constants.Keyboard.DOWN:
-                        comboKeyType = Constants.ComboKey.RS_DOWN;
-                        break;
-                }
-            }
-            else if (a == Constants.Keyboard.LEFT_ALT)
-            {
-                switch (b)
-                {
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.LA_ENTER;
-                        break;
-                    case Constants.Keyboard.TAB:
-                        comboKeyType = Constants.ComboKey.LA_TAB;
-                        break;
-                }
-            }
-            else if (a == Constants.Keyboard.RIGHT_ALT)
-            {
-                switch (b)
-                {
-                    case Constants.Keyboard.ENTER:
-                        comboKeyType = Constants.ComboKey.RA_ENTER;
-                        break;
-                    case Constants.Keyboard.TAB:
-                        comboKeyType = Constants.ComboKey.RA_TAB;
-                        break;
-                }
+                keyChainCount = count;
             }
             else
             {
-                //Not a valid combo-key
-                comboKeyType = (ushort)Constants.DbType.INVALID;
+                if (lctrl.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.LEFT_CTRL)
+                        fkey |= 1;
+                    lctrl.IsPress = false;
+                }
+                if (rctrl.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.RIGHT_CTRL)
+                        fkey |= 2;
+                    rctrl.IsPress = false;
+                }
+                if (lshift.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.LEFT_SHIFT)
+                        fkey |= 4;
+                    lshift.IsPress = false;
+                }
+                if (rshift.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.RIGHT_SHIFT)
+                        fkey |= 8;
+                    rshift.IsPress = false;
+                }
+                if (lalt.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.LEFT_ALT)
+                        fkey |= 16;
+                    lalt.IsPress = false;
+                }
+                if (ralt.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.RIGHT_ALT)
+                        fkey |= 32;
+                    ralt.IsPress = false;
+                }
+                if (lwin.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.LEFT_WIN)
+                        fkey |= 64;
+                    lwin.IsPress = false;
+                }
+                if (rwin.IsPress)
+                {
+                    if (keycode != Constants.TypeNumber.RIGHT_WIN)
+                        fkey |= 128;
+                    rwin.IsPress = false;
+                }
             }
 
-            return comboKeyType;
-        }
-
-        private static ushort tripleComboDetect()
-        {
-            if (keyChainCount != 3)
-            {
-                return (ushort)Constants.DbType.INVALID;
-            }
-
-            switch (keyChain[0].keycode)
-            {
-                case Constants.Keyboard.LEFT_CTRL:
-                case Constants.Keyboard.RIGHT_CTRL:
-                case Constants.Keyboard.LEFT_SHIFT:
-                case Constants.Keyboard.RIGHT_SHIFT:
-                case Constants.Keyboard.LEFT_ALT:
-                case Constants.Keyboard.RIGHT_ALT:
-                case Constants.Keyboard.LEFT_WIN:
-                case Constants.Keyboard.RIGHT_WIN:
-                    break;
-                default:
-                    return (ushort)Constants.DbType.INVALID;
-            }
-
-            return Constants.ComboKey.TRIPLE;
-        }
-
-        private static ushort quadraComboDetect()
-        {
-            if (keyChainCount != 4)
-            {
-                return (ushort)Constants.DbType.INVALID;
-            }
-
-            switch (keyChain[0].keycode)
-            {
-                case Constants.Keyboard.LEFT_CTRL:
-                case Constants.Keyboard.RIGHT_CTRL:
-                case Constants.Keyboard.LEFT_SHIFT:
-                case Constants.Keyboard.RIGHT_SHIFT:
-                case Constants.Keyboard.LEFT_ALT:
-                case Constants.Keyboard.RIGHT_ALT:
-                case Constants.Keyboard.LEFT_WIN:
-                case Constants.Keyboard.RIGHT_WIN:
-                    break;
-                default:
-                    return (ushort)Constants.DbType.INVALID;
-            }
-
-            return Constants.ComboKey.QUADRA;
+            StatisticManager.GetInstance.KeyboardEventHappen(keycode, fkey, time);
         }
 
         /// <summary>

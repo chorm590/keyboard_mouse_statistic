@@ -63,19 +63,14 @@ namespace KMS
             BindingOperations.SetBinding(SkTop3, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardComboKeyTop1;
+            binding.Source = statisticManager.SttKeyboardSingleKeyTop4;
             binding.Path = new PropertyPath("Desc");
-            BindingOperations.SetBinding(CkTop1, TextBlock.TextProperty, binding);
+            BindingOperations.SetBinding(SkTop4, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardComboKeyTop2;
+            binding.Source = statisticManager.SttKeyboardSingleKeyTop5;
             binding.Path = new PropertyPath("Desc");
-            BindingOperations.SetBinding(CkTop2, TextBlock.TextProperty, binding);
-
-            binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardComboKeyTop3;
-            binding.Path = new PropertyPath("Desc");
-            BindingOperations.SetBinding(CkTop3, TextBlock.TextProperty, binding);
+            BindingOperations.SetBinding(SkTop5, TextBlock.TextProperty, binding);
 
             binding = new Binding();
             binding.Source = statisticManager.SttMsLeftBtn;

@@ -31,7 +31,7 @@ namespace KMS.src.db
             return true;
         }
 
-        public bool createTable(string name)
+        internal bool createDetailTable(string name)
         {
             if (name == null || name.Length == 0 || sqliteConnection == null || sqliteConnection.State != ConnectionState.Open)
             {
@@ -39,8 +39,9 @@ namespace KMS.src.db
             }
 
             SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name + "(_id INTEGER PRIMARY KEY autoincrement, year SMALLINT NOT NULL, month TINYINT NOT NULL, day TINYINT NOT NULL" +
-                ",hour TINYINT NOT NULL, minute TINYINT NOT NULL, second TINYINT NOT NULL, type SMALLINT NOT NULL, value MEDIUMINT NOT NULL)";
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name + "(year SMALLINT NOT NULL, month TINYINT NOT NULL, day TINYINT NOT NULL" +
+                ",hour TINYINT NOT NULL, minute TINYINT NOT NULL, second TINYINT NOT NULL" +
+                ",type SMALLINT NOT NULL,fkey TINYINT DEFAULT 0,value MEDIUMINT DEFAULT 0)";
             cmd.ExecuteNonQuery();
 
             return true;

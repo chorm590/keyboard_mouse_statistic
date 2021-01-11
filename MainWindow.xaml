@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KMS"
         mc:Ignorable="d"
-        Title="键鼠计数器" Height="400" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="键鼠计数器" Height="420" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <StackPanel>
         <GroupBox
             Header="全局键盘统计"
@@ -15,7 +15,6 @@
             <Grid Margin="0, 5, 0, 0">
                 
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -35,18 +34,16 @@
                 <TextBlock Text="单键Top1：" HorizontalAlignment="Right" Grid.Row="2"/>
                 <TextBlock Text="单键Top2：" HorizontalAlignment="Right" Grid.Row="3"/>
                 <TextBlock Text="单键Top3：" HorizontalAlignment="Right" Grid.Row="4"/>
-                <TextBlock Text="组合键Top1：" HorizontalAlignment="Right" Grid.Row="5"/>
-                <TextBlock Text="组合键Top2：" HorizontalAlignment="Right" Grid.Row="6"/>
-                <TextBlock Text="组合键Top3：" HorizontalAlignment="Right" Grid.Row="7"/>
+                <TextBlock Text="单键Top4：" HorizontalAlignment="Right" Grid.Row="5"/>
+                <TextBlock Text="单键Top5：" HorizontalAlignment="Right" Grid.Row="6"/>
 
                 <TextBlock Name="KbTotal" Text="" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="1"/>
                 <TextBlock Name="ComboTotal" Text="" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="1"/>
                 <TextBlock Name="SkTop1" Text="" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1"/>
                 <TextBlock Name="SkTop2" Text="" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1"/>
                 <TextBlock Name="SkTop3" Text="" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="1"/>
-                <TextBlock Name="CkTop1" Text="" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="1"/>
-                <TextBlock Name="CkTop2" Text="" HorizontalAlignment="Left" Grid.Row="6" Grid.Column="1"/>
-                <TextBlock Name="CkTop3" Text="" HorizontalAlignment="Left" Grid.Row="7" Grid.Column="1"/>
+                <TextBlock Name="SkTop4" Text="" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="1"/>
+                <TextBlock Name="SkTop5" Text="" HorizontalAlignment="Left" Grid.Row="6" Grid.Column="1"/>
 
             </Grid>
         </GroupBox>

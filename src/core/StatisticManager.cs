@@ -31,11 +31,9 @@ namespace KMS.src.core
         private Event sttKbSkTop1;
         private Event sttKbSkTop2;
         private Event sttKbSkTop3;
-        private Event sttKbCkTop1;
-        private Event sttKbCkTop2;
-        private Event sttKbCkTop3;
+        private Event sttKbSkTop4;
+        private Event sttKbSkTop5;
         private List<Event> sttKbSingleKey; //键盘各单键的敲击总数。
-        private List<Event> sttKbComboKey; //键盘组合键敲击总数。
         
 
         private Dictionary<short, Event> sttMsKey; //鼠标单键统计。
@@ -98,35 +96,19 @@ namespace KMS.src.core
             }
         }
 
-        internal Event SttKeyboardComboKeyTop1
+        internal Event SttKeyboardSingleKeyTop4
         {
             get
             {
-                return sttKbCkTop1;
+                return sttKbSkTop4;
             }
         }
 
-        internal Event SttKeyboardComboKeyTop2
+        internal Event SttKeyboardSingleKeyTop5
         {
             get
             {
-                return sttKbCkTop2;
-            }
-        }
-
-        internal Event SttKeyboardComboKeyTop3
-        {
-            get
-            {
-                return sttKbCkTop3;
-            }
-        }
-
-        internal List<Event> SttKeyboardComboKey
-        {
-            get
-            {
-                return sttKbComboKey;
+                return sttKbSkTop5;
             }
         }
 
@@ -172,7 +154,7 @@ namespace KMS.src.core
 
             sttComboKeyTotal = new Event
             {
-                Type = Constants.Statistic.KbCombo
+                Type = Constants.Statistic.KbComboAll
             };
 
             sttKbSkTop1 = new Event
@@ -190,23 +172,19 @@ namespace KMS.src.core
                 Type = Constants.Statistic.KbSkTop3
             };
 
-            sttKbCkTop1 = new Event
+            sttKbSkTop4 = new Event
             {
-                Type = Constants.Statistic.KbCkTop1
+                Type = Constants.Statistic.KbSkTop4
             };
 
-            sttKbCkTop2 = new Event
+            sttKbSkTop5 = new Event
             {
-                Type = Constants.Statistic.KbCkTop2
+                Type = Constants.Statistic.KbSkTop5
             };
 
-            sttKbCkTop3 = new Event
-            {
-                Type = Constants.Statistic.KbCkTop3
-            };
 
             // 2
-            Dictionary<byte, Key> sgKey = Constants.Keyboard.Keys;
+            Dictionary<byte, Key> sgKey = Constants.Keyboard;
             sttKbSingleKey = new List<Event>(sgKey.Count);
             Dictionary<byte, Key>.ValueCollection values = sgKey.Values;
             foreach (Key key in values)
@@ -215,15 +193,6 @@ namespace KMS.src.core
             }
             Logger.v(TAG, "single key count:" + sttKbSingleKey.Count + ", capacity:" + sttKbSingleKey.Capacity);
 
-            // 3
-            Dictionary<ushort, Type> cbKey = Constants.ComboKey.Keys;
-            sttKbComboKey = new List<Event>(cbKey.Count);
-            Dictionary<ushort, Type>.ValueCollection values2 = cbKey.Values;
-            foreach (Type ck in values2)
-            {
-                sttKbComboKey.Add(new Event(ck));
-            }
-            Logger.v(TAG, "combo key count:" + sttKbComboKey.Count + ", capacity:" + sttKbComboKey.Capacity);
 
             Dictionary<short, Type> msKeyDic = Constants.MouseKey.Keys;
             sttMsKey = new Dictionary<short, Event>(msKeyDic.Count);
@@ -239,7 +208,7 @@ namespace KMS.src.core
             sttMsWheelBw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_BACKWARD];
 
             //Initialize timer
-            //tool.Timer.RegisterTimerCallback(timerCallback);
+            tool.Timer.RegisterTimerCallback(timerCallback);
             eventToDbManager = new EventToDbManager();
 
             screenAreaWidth = System.Windows.SystemParameters.PrimaryScreenWidth / 10;
@@ -247,6 +216,7 @@ namespace KMS.src.core
             Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
 
             SQLiteManager sql = SQLiteManager.GetInstance; //必须放在注册StatisticManager的timerCallback后面。
+            
         }
 
         internal void shutdown()
@@ -259,9 +229,9 @@ namespace KMS.src.core
             eventToDbManager.storageRecord();
         }
 
-        internal void KeyboardEventHappen(int typeCode, DateTime time)
+        internal void KeyboardEventHappen(int typeCode, byte fkey, DateTime time)
         {
-            // This call may from sub-thread.
+            // This function should only be call by CountThread with sub-thread.
 
             //TODO 窗体没在前台运行的时候不要实时刷新统计数据，不要实时重新排序。
 
@@ -274,14 +244,13 @@ namespace KMS.src.core
                 kbSingleKeyPressed(typeCode);
                 sttKbTotal.Value++;
                 sttKbTotal.Desc = sttKbTotal.Value + " 次";
-                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
-            }
-            else if ((typeCode >= Constants.ComboKey.LC_LS) && (typeCode <= Constants.ComboKey.QUADRA))
-            {
-                kbComboKeyPressed(typeCode);
-                sttComboKeyTotal.Value++;
-                sttComboKeyTotal.Desc = sttComboKeyTotal.Value + " 次";
-                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
+                if (fkey > 0)
+                {
+                    sttComboKeyTotal.Value++;
+                    SttComboKeyTotal.Desc = SttComboKeyTotal.Value + " 次";
+                }
+                eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                    (short)typeCode, fkey, 0);
             }
             else
             {
@@ -306,15 +275,17 @@ namespace KMS.src.core
                     case Constants.MouseKey.MOUSE_LEFT_BTN:
                         evt.Value++;
                         evt.Desc = evt.Value + " 次";
-                        eventToDbManager.Add(Constants.MouseEvent.MOUSE_LEFT_BTN_AREA,
-                            (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                        eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                            Constants.MouseEvent.MOUSE_LEFT_BTN_AREA,
+                            0,
                             getScreenArea(x, y));
                         break;
                     case Constants.MouseKey.MOUSE_RIGHT_BTN:
                         evt.Value++;
                         evt.Desc = evt.Value + " 次";
-                        eventToDbManager.Add(Constants.MouseEvent.MOUSE_RIGHT_BTN_AREA,
-                            (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                        eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                            Constants.MouseEvent.MOUSE_RIGHT_BTN_AREA,
+                            0,
                             getScreenArea(x, y));
                         break;
                     default:
@@ -323,8 +294,9 @@ namespace KMS.src.core
                         break;
                 }
 
-                eventToDbManager.Add((short)typeCode,
-                    (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                    (short)typeCode,
+                    0,
                     (ushort)mouseData);
             }
         }
@@ -348,45 +320,27 @@ namespace KMS.src.core
             sttKbSingleKey.Sort();
             if (sttKbSingleKey[0].Value > 0)
             {
-                sttKbSkTop1.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + " 次]";
+                sttKbSkTop1.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + " 次]";
             }
 
             if (sttKbSingleKey[1].Value > 0)
             {
-                sttKbSkTop2.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + " 次]";
+                sttKbSkTop2.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + " 次]";
             }
 
             if (sttKbSingleKey[2].Value > 0)
             {
-                sttKbSkTop3.Desc = Constants.Keyboard.Keys[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + " 次]";
-            }
-        }
-
-        private void kbComboKeyPressed(int typeValue)
-        {
-            foreach (Event ckevt in sttKbComboKey)
-            {
-                if (ckevt.Type.Code == typeValue)
-                {
-                    ckevt.Value++;
-                    break;
-                }
+                sttKbSkTop3.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + " 次]";
             }
 
-            sttKbComboKey.Sort();
-            if (sttKbComboKey[0].Value > 0)
+            if (sttKbSingleKey[3].Value > 0)
             {
-                sttKbCkTop1.Desc = sttKbComboKey[0].Type.Desc + " [" + sttKbComboKey[0].Value + " 次]";
+                sttKbSkTop4.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[3].Type.Code)].DisplayName + " [" + sttKbSingleKey[3].Value + " 次]";
             }
 
-            if (sttKbComboKey[1].Value > 0)
+            if (sttKbSingleKey[4].Value > 0)
             {
-                sttKbCkTop2.Desc = sttKbComboKey[1].Type.Desc + " [" + sttKbComboKey[1].Value + " 次]";
-            }
-
-            if (sttKbComboKey[2].Value > 0)
-            {
-                sttKbCkTop3.Desc = sttKbComboKey[2].Type.Desc + " [" + sttKbComboKey[2].Value + " 次]";
+                sttKbSkTop5.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[4].Type.Code)].DisplayName + " [" + sttKbSingleKey[4].Value + " 次]";
             }
         }
 
@@ -406,7 +360,7 @@ namespace KMS.src.core
                 cur = new EventToDb[DEEPTH];
             }
 
-            internal void Add(short type, ushort year, byte month, byte day, byte hour, byte minute, byte second, ushort value)
+            internal void Add(ushort year, byte month, byte day, byte hour, byte minute, byte second, short type, byte fkey, ushort value)
             {
                 if (status == 0)
                     status = 1;
@@ -435,13 +389,14 @@ namespace KMS.src.core
                 if (counter >= DEEPTH)
                     return;
 
-                cur[counter].type = type;
                 cur[counter].year = year;
                 cur[counter].month = month;
                 cur[counter].day = day;
                 cur[counter].hour = hour;
                 cur[counter].minute = minute;
                 cur[counter].second = second;
+                cur[counter].type = type;
+                cur[counter].fkey = fkey;
                 cur[counter].value = value;
 
                 counter++;
@@ -486,6 +441,7 @@ namespace KMS.src.core
                     tmp2[i].hour = cur[i].hour;
                     tmp2[i].minute = cur[i].minute;
                     tmp2[i].second = cur[i].second;
+                    tmp2[i].fkey = cur[i].fkey;
                     tmp2[i].value = cur[i].value;
                 }
                 counter = 0; //reset it.
@@ -500,7 +456,7 @@ namespace KMS.src.core
                     foreach (EventToDb etd in tmp2)
                     {
                         str = "VALUES(" + etd.year + "," + etd.month + "," + etd.day + "," + etd.hour + "," + etd.minute + "," + etd.second;
-                        str += "," + etd.type + "," + etd.value + ")";
+                        str += "," + etd.type + "," + etd.fkey + "," + etd.value + ")";
                         SQLiteManager.GetInstance.InsertDetail(str);
                     }
                     SQLiteManager.GetInstance.CommitTransaction();
@@ -516,13 +472,14 @@ namespace KMS.src.core
 
             private struct EventToDb
             {
-                internal short type;
                 internal ushort year;
                 internal byte month;
                 internal byte day;
                 internal byte hour;
                 internal byte minute;
                 internal byte second;
+                internal short type;
+                internal byte fkey;
                 internal ushort value;
             }
         }

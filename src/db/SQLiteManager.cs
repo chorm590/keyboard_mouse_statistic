@@ -67,7 +67,7 @@ namespace KMS.src.db
             {
                 if (!sqliteHelper.isTableExist(curTable))
                 {
-                    sqliteHelper.createTable(curTable);
+                    sqliteHelper.createDetailTable(curTable);
                 }
             }
             catch (Exception e)
@@ -165,7 +165,7 @@ namespace KMS.src.db
 
         internal void InsertDetail(string str)
         {
-            sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,value) " + str);
+            sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
         }
 
         internal void CommitTransaction()
