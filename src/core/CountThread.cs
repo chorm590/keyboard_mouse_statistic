@@ -15,17 +15,27 @@ namespace KMS.src.core
     {
         private const string TAG = "CountThread";
 
+        internal static bool CanThreadRun;
+
         private static EventQueue.KMEvent[] events;
         private static int eventAmount;
-        private static int idx;
 
-        internal static bool CanThreadRun;
-        private const byte MAX_KEY_CHAIN_COUNT = 4;
+        private const byte MAX_KEY_CHAIN_COUNT = 3;
         private static byte keyChainCount;
+        private static NormalKey[] keyChain = new NormalKey[MAX_KEY_CHAIN_COUNT]; //最多支持三连普通按键。
         private static byte comboKeyCount; //记录最多按下的按键数
+
         private static short msWheelCounter; //同一方向的滚轮滚动聚合成一条记录以节约性能。负值表示向后滚动，正值表示向前滚动。
         private static DateTime msWheelTime; //与 msWheelCounter 配合使用，记录最后一次滚动事件的时间。
-        private static KeyEvent[] keyChain = new KeyEvent[MAX_KEY_CHAIN_COUNT];
+
+        private static FunKey lctrl;
+        private static FunKey rctrl;
+        private static FunKey lshift;
+        private static FunKey rshift;
+        private static FunKey lalt;
+        private static FunKey ralt;
+        private static FunKey lwin;
+        private static FunKey rwin;
 
         internal static void ThreadProc()
         {
@@ -43,17 +53,17 @@ namespace KMS.src.core
         private static void statistic()
         {
             //Should only be call by sub-thread.
-            eventAmount = 0;
+            eventAmount = 0; //Must do.
             EventQueue.migrate(ref events, ref eventAmount);
             Logger.v(TAG, "event amount:" + eventAmount);
 
-            for (idx = 0; idx < eventAmount; idx++)
+            for (int idx = 0; idx < eventAmount; idx++)
             {
-                if (events[idx].type == EventQueue.EVENT_TYPE_KEYBOARD)
+                if (events[idx].type == Constants.HookEvent.KEYBOARD_EVENT)
                 {
                     parseKeyboardEvent(events[idx].eventCode, events[idx].keyCode, events[idx].time);
                 }
-                else if (events[idx].type == EventQueue.EVENT_TYPE_MOUSE)
+                else if (events[idx].type == Constants.HookEvent.MOUSE_EVENT)
                 {
                     parseMouseEvent(events[idx].eventCode, events[idx].keyCode, events[idx].x, events[idx].y, events[idx].time);
                 }
@@ -149,74 +159,98 @@ namespace KMS.src.core
 
         private static void keyDownProcess(short keycode, DateTime time)
         {
-            //清除旧事件
+            //清除普通按键过期事件记录。
             if (keyChainCount > 0)
             {
-                KeyEvent[] tmp = new KeyEvent[MAX_KEY_CHAIN_COUNT];
+                NormalKey[] tmp = new NormalKey[MAX_KEY_CHAIN_COUNT]; //记录需要保留的事件。
                 byte count = 0;
-                sbyte tmp2;
                 for (byte i = 0; i < keyChainCount; i++)
                 {
-                    if (keycode == keyChain[i].keycode)
+                    if (!isTimeout(keyChain[i].time, time))
                     {
                         tmp[count].keycode = keyChain[i].keycode;
-                        tmp[count].IsUp = keyChain[i].IsUp;
-                        tmp[count].Time = keyChain[i].Time;
+                        tmp[count].time = keyChain[i].time;
+
                         count++;
-                        continue;
-                    }
-
-                    if (!keyChain[i].IsUp)
-                    {
-                        if (keyChain[i].Time.Year != time.Year ||
-                            keyChain[i].Time.Month != time.Month ||
-                            keyChain[i].Time.Day != time.Day ||
-                            keyChain[i].Time.Hour != time.Hour)
-                        {
-                            continue;
-                        }
-
-                        tmp2 = (sbyte)(time.Minute - keyChain[i].Time.Minute);
-                        if (tmp2 <= 0)
-                        {
-                            tmp2 = (sbyte)(time.Second - keyChain[i].Time.Second);
-                            if ((tmp2 >= 0 && tmp2 < 6) || (tmp2 < -54 && tmp2 > -60))
-                            {
-                                tmp[count].keycode = keyChain[i].keycode;
-                                tmp[count].IsUp = keyChain[i].IsUp;
-                                tmp[count].Time = keyChain[i].Time;
-                                count++;
-                            }
-                        }
                     }
                 }
 
+                Logger.v(TAG, "event not expired count:" + count);
                 for (byte i = 0; i < count; i++)
                 {
                     keyChain[i].keycode = tmp[i].keycode;
-                    keyChain[i].IsUp = tmp[i].IsUp;
-                    keyChain[i].Time = tmp[i].Time;
+                    keyChain[i].time = tmp[i].time;
                 }
                 keyChainCount = count;
             }
 
+            //清除功能按键过期事件记录。
+            if (lctrl.IsPress && isTimeout(lctrl.time, time))
+            {
+                lctrl.IsPress = false;
+            }
+
+            if (rctrl.IsPress && isTimeout(rctrl.time, time))
+            {
+                rctrl.IsPress = false;
+            }
+
+            if (lshift.IsPress && isTimeout(lshift.time, time))
+            {
+                lshift.IsPress = false;
+            }
+
+            if (rshift.IsPress && isTimeout(rshift.time, time))
+            {
+                rshift.IsPress = false;
+            }
+
+            if (lalt.IsPress && isTimeout(lalt.time, time))
+            {
+                lalt.IsPress = false;
+            }
+
+            if (ralt.IsPress && isTimeout(ralt.time, time))
+            {
+                ralt.IsPress = false;
+            }
+
+            if (lwin.IsPress && isTimeout(lwin.time, time))
+            {
+                lwin.IsPress = false;
+            }
+
+            if (rwin.IsPress && isTimeout(rwin.time, time))
+            {
+                rwin.IsPress = false;
+            }
+
+
             if (keyChainCount >= MAX_KEY_CHAIN_COUNT)
                 return;//忽略事件，不予记录。
 
-            //重复的按键不入链
-            if (keyChainCount > 0)
+            switch (keycode)
             {
-                for (byte i = 0; i < keyChainCount; i++)
-                {
-                    if (keyChain[i].keycode == keycode)
-                        return;
-                }
+                default:
+                    //重复的按键不入链
+                    if (keyChainCount > 0)
+                    {
+                        for (byte i = 0; i < keyChainCount; i++)
+                        {
+                            if (keyChain[i].keycode == keycode)
+                            {
+                                keyChain[i].time = time; //just upgrade event time.
+                                return;
+                            }
+                        }
+                    }
+
+                    keyChain[keyChainCount].keycode = keycode;
+                    keyChain[keyChainCount].time = time;
+                    keyChainCount++;
+                    break;
             }
             
-            keyChain[keyChainCount].keycode = keycode;
-            keyChain[keyChainCount].IsUp = false;
-            keyChain[keyChainCount].Time = time;
-            keyChainCount++;
         }
 
         private static void keyUpProcess(short keycode, DateTime time)
@@ -482,13 +516,27 @@ namespace KMS.src.core
         }
 
         /// <summary>
-        /// 按键链表，主要用于记录组合键。
+        /// 超时时长限制：5秒。
         /// </summary>
-        private struct KeyEvent
+        private static bool isTimeout(DateTime oldTime, DateTime curTime)
+        {
+            double ts = (curTime - oldTime).TotalSeconds;
+            return ts < -5 || ts > 5;
+        }
+
+        /// <summary>
+        /// 用于记录功能键按下事件。
+        /// </summary>
+        private struct FunKey
+        {
+            internal bool IsPress;
+            internal DateTime time;
+        }
+
+        private struct NormalKey
         {
             internal short keycode;
-            internal bool IsUp;
-            internal DateTime Time;
+            internal DateTime time;
         }
     }
 }

@@ -14,24 +14,6 @@ namespace KMS.src.core
         private const int WH_KEYBOARD_LL = 13; //low-level keyboard event symbol.
         private const int WH_MOUSE_LL = 14; //mouse event as above.
 
-        internal struct Keyboard_LL_Hook_Data
-        {
-            public int vkCode;
-            public int scanCode;
-            public int flags;
-            public int time;
-            public IntPtr extraInfo;
-        }
-
-        internal struct Mouse_LL_Hook_Data
-        {
-            internal long yx; //coordination of event with little endian.
-            internal readonly int mouseData;
-            internal readonly uint flags;
-            internal readonly uint time;
-            internal readonly IntPtr dwExtraInfo;
-        }
-
         private static IntPtr pKeyboardHook = IntPtr.Zero; //键盘钩子句柄，通过句柄值来判断是否已注册钩子监听。
         private static IntPtr pMouseHook = IntPtr.Zero; //The hook reference of global mouse event.
         //钩子委托声明
@@ -65,7 +47,7 @@ namespace KMS.src.core
             else
             {
                 khd = (Keyboard_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Keyboard_LL_Hook_Data));
-                EventQueue.enqueue(EventQueue.EVENT_TYPE_KEYBOARD, (short)wParam.ToInt32(), (short)khd.vkCode, 0, 0);
+                EventQueue.enqueue(Constants.HookEvent.KEYBOARD_EVENT, (short)wParam.ToInt32(), (short)khd.vkCode, 0, 0);
             }
 
             return 0;
@@ -83,7 +65,8 @@ namespace KMS.src.core
                 if (wParam.ToInt32() != Constants.MouseEvent.WM_MOUSEMOVE)
                 {
                     mhd = (Mouse_LL_Hook_Data)Marshal.PtrToStructure(lParam, typeof(Mouse_LL_Hook_Data));
-                    EventQueue.enqueue(EventQueue.EVENT_TYPE_MOUSE, (short)wParam.ToInt32(), (short)(mhd.mouseData >> 16), (short)(mhd.yx & 0xffffffff), (short)(mhd.yx >> 32));
+                    EventQueue.enqueue(Constants.HookEvent.MOUSE_EVENT, (short)wParam.ToInt32(), (short)(mhd.mouseData >> 16),
+                        (short)(mhd.yx & 0xffffffff), (short)(mhd.yx >> 32));
                 }
             }
 
@@ -211,6 +194,24 @@ namespace KMS.src.core
             }
 
             return true;
+        }
+
+        internal struct Keyboard_LL_Hook_Data
+        {
+            internal readonly int vkCode;
+            internal readonly int scanCode;
+            internal readonly int flags;
+            internal readonly int time;
+            internal readonly IntPtr extraInfo;
+        }
+
+        internal struct Mouse_LL_Hook_Data
+        {
+            internal long yx;
+            internal readonly int mouseData;
+            internal readonly uint flags;
+            internal readonly uint time;
+            internal readonly IntPtr dwExtraInfo;
         }
     }
 }

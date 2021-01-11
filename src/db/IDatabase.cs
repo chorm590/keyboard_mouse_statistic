@@ -5,6 +5,7 @@ namespace KMS.src.db
     {
         bool openDatabase(string path);
         bool createTable(string name);
+        bool deleteTable(string name);
         void closeDababase();
     }
 }

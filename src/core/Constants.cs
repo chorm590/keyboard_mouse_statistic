@@ -6,6 +6,17 @@ namespace KMS.src.core
     static class Constants
     {
 
+        internal static class TypeNumber
+        {
+            
+        }
+
+        internal static class HookEvent
+        {
+            internal const byte KEYBOARD_EVENT = 1;
+            internal const byte MOUSE_EVENT = 2;
+        }
+
         internal static class KeyEvent
         {
             internal const short WM_KEYDOWN = 0x100;

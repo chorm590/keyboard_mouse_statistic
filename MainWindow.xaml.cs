@@ -27,7 +27,7 @@ namespace KMS
         {
             InitializeComponent();
             Logger.v(TAG, "hello world");
-            TimeManager.Init();
+            src.tool.Timer.StartTimer();
             TimeManager.TimeUsing = DateTime.Now;
 
             statisticManager = StatisticManager.GetInstance;
@@ -125,6 +125,7 @@ namespace KMS
             if (countThread != null)
                 CountThread.CanThreadRun = false;
             Logger.v(TAG, "Hook removed");
+            src.tool.Timer.DestroyTimer();
         }
     }
 }

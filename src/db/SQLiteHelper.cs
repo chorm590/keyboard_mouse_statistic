@@ -91,5 +91,24 @@ namespace KMS.src.db
             detailCmd.CommandText = sql;
             detailCmd.ExecuteNonQuery();
         }
+
+        public bool deleteTable(string name)
+        {
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+            cmd.CommandText = "DROP TABLE IF EXISTS " + name;
+            cmd.ExecuteNonQuery();
+
+            return true;
+        }
+
+        internal bool createDaySummaryTable(string name)
+        {
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name
+                + "(_id INTEGER PRIMARY KEY AUTOINCREMENT,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value MEDIUMINT DEFAULT 0)";
+            cmd.ExecuteNonQuery();
+            
+            return true;
+        }
     }
 }

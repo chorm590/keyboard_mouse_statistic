@@ -78,8 +78,13 @@ namespace KMS.src.db
             }
 
             refreshStatistic();
+            //tool.Timer.RegisterTimerCallback(timerCallback);
         }
 
+        /// <summary>
+        /// 准备好存储数据库文件的路径。
+        /// </summary>
+        /// <param name="fp"></param>
         private void initDbFilePath(string fp)
         {
             Logger.v(TAG, "path:" + fp);
@@ -166,6 +171,54 @@ namespace KMS.src.db
         internal void CommitTransaction()
         {
             sqliteHelper.CommitTransaction();
+        }
+
+        private void timerCallback(object state)
+        {
+            //Should only be call from TimeManager sub-thread.
+
+            //检查是否需要切换表、库。
+            //这个函数与执行数据落地的函数是串行的，并且它将在数据落地之后执行，因此这里可以安全地切换数据库。
+            DateTime now = DateTime.Now;
+            if (now.Year != TimeManager.TimeUsing.Year)
+            {
+
+            }
+            else if (now.Month != TimeManager.TimeUsing.Month)
+            {
+
+            }
+            else if (now.Day != TimeManager.TimeUsing.Day)
+            {
+                sumDay();
+                switchTable();
+            }
+            else
+            {
+                //Do nothing.
+            }
+        }
+
+        /// <summary>
+        /// 统计day*_detail数据表。
+        /// </summary>
+        private void sumDay()
+        {
+            Logger.v(TAG, "sum the day");
+            string summaryToday = "day" + TimeManager.TimeUsing.Day.ToString() + "_summary";
+            if (sqliteHelper.isTableExist(summaryToday))
+            {
+                sqliteHelper.deleteTable(summaryToday); //Assume it will always success.
+            }
+
+            sqliteHelper.createDaySummaryTable(summaryToday); //Assume it will always success.
+
+            //TODO 
+        }
+
+        private void switchTable()
+        {
+            
         }
     }
 }

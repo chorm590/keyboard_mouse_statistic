@@ -12,52 +12,10 @@ namespace KMS.src.tool
     /// </summary>
     static class TimeManager
     {
-        internal delegate void TimerCallback(object obj);
-
-        private static Timer timer;
-        private static Dictionary<string, TimerCallback> timerCb;
-
-        internal static void Init()
-        {
-            if (timer is null)
-            {
-                timer = new Timer(timerCallback, null, 60000, 60000);
-            }
-
-            if (timerCb is null)
-            {
-                timerCb = new Dictionary<string, TimerCallback>();
-            }
-            else
-            {
-                timerCb.Clear();
-            }
-        }
-
         internal static DateTime TimeUsing
         {
             get;
             set;
-        }
-
-        internal static void RegisterTimerCallback(string name, TimerCallback cb)
-        {
-            timerCb.TryAdd(name, cb);
-        }
-
-        private static void timerCallback(object state)
-        {
-            Dictionary<string, TimerCallback>.ValueCollection values = timerCb.Values;
-            foreach (TimerCallback cb in values)
-            {
-                cb(state);
-            }
-        }
-
-        internal static void DestroyTimer()
-        {
-            timer.Dispose();
-            timerCb.Clear();
         }
     }
 }

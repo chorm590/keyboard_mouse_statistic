@@ -164,8 +164,6 @@ namespace KMS.src.core
 
         private StatisticManager()
         {
-            SQLiteManager sql = SQLiteManager.GetInstance;
-
             // 1
             sttKbTotal = new Event
             {
@@ -241,12 +239,14 @@ namespace KMS.src.core
             sttMsWheelBw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_BACKWARD];
 
             //Initialize timer
-            TimeManager.RegisterTimerCallback(TAG, sqliteTimerCallback);
+            //tool.Timer.RegisterTimerCallback(timerCallback);
             eventToDbManager = new EventToDbManager();
 
             screenAreaWidth = System.Windows.SystemParameters.PrimaryScreenWidth / 10;
             screenAreaHeight = System.Windows.SystemParameters.PrimaryScreenHeight / 10;
             Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
+
+            SQLiteManager sql = SQLiteManager.GetInstance; //必须放在注册StatisticManager的timerCallback后面。
         }
 
         internal void shutdown()
@@ -254,7 +254,7 @@ namespace KMS.src.core
             //TODO flush all data to disk.
         }
 
-        private void sqliteTimerCallback(object state)
+        private void timerCallback(object state)
         {
             eventToDbManager.storageRecord();
         }
@@ -390,6 +390,9 @@ namespace KMS.src.core
             }
         }
 
+        /// <summary>
+        /// 将由StatisticManager管理的在内存中的事件落地到数据库中。
+        /// </summary>
         private class EventToDbManager
         {
             private const short DEEPTH = 1000;
