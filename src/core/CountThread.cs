@@ -23,6 +23,8 @@ namespace KMS.src.core
         private const byte MAX_KEY_CHAIN_COUNT = 4;
         private static byte keyChainCount;
         private static byte comboKeyCount; //记录最多按下的按键数
+        private static short msWheelCounter; //同一方向的滚轮滚动聚合成一条记录以节约性能。负值表示向后滚动，正值表示向前滚动。
+        private static DateTime msWheelTime; //与 msWheelCounter 配合使用，记录最后一次滚动事件的时间。
         private static KeyEvent[] keyChain = new KeyEvent[MAX_KEY_CHAIN_COUNT];
 
         internal static void ThreadProc()
@@ -81,6 +83,19 @@ namespace KMS.src.core
 
         private static void parseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
         {
+            if (eventCode != Constants.MouseEvent.WM_MOUSEWHEEL && msWheelCounter != 0)
+            {
+                if (msWheelCounter < 0)
+                {
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
+                }
+                else
+                {
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
+                }
+                msWheelCounter = 0;
+            }
+
             switch (eventCode)
             {
                 case Constants.MouseEvent.WM_LBUTTONDOWN:
@@ -92,11 +107,31 @@ namespace KMS.src.core
                 case Constants.MouseEvent.WM_MOUSEWHEEL:
                     if (mouseData == -120)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, 0, 0, 0, time);
+                        if (msWheelCounter > 0)
+                        {
+                            //上一次仍是前向滚动，本次突然变成后向滚动，需要将前面的前向滚动事件记录下来。
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
+                            msWheelCounter = -1;
+                        }
+                        else
+                        {
+                            msWheelCounter--;
+                            msWheelTime = time;
+                        }
                     }
                     else if (mouseData == 120)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, 0, 0, 0, time);
+                        if (msWheelCounter < 0)
+                        {
+                            //上一次仍是后向滚动，本次突然变成前向滚动，需要将前面的后向滚动事件记录下来。
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
+                            msWheelCounter = 1;
+                        }
+                        else
+                        {
+                            msWheelCounter++;
+                            msWheelTime = time;
+                        }
                     }
                     break;
                 case Constants.MouseEvent.WM_MOUSESIDEDOWN:

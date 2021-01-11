@@ -34,7 +34,7 @@ namespace KMS.src.core
         }
 
         //storage the event.
-        internal const int MAX_EVENT_AMOUNT = 1000;
+        internal const int MAX_EVENT_AMOUNT = 500;
         private static KMEvent[] events = new KMEvent[MAX_EVENT_AMOUNT];
 
         /// <summary>

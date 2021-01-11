@@ -165,6 +165,7 @@ namespace KMS.src.core
         private StatisticManager()
         {
             SQLiteManager sql = SQLiteManager.GetInstance;
+
             // 1
             sttKbTotal = new Event
             {
@@ -295,28 +296,36 @@ namespace KMS.src.core
                 if (evt is null)
                     return;
 
-                evt.Value++;
                 switch (typeCode)
                 {
                     case Constants.MouseKey.MOUSE_WHEEL_BACKWARD:
                     case Constants.MouseKey.MOUSE_WHEEL_FORWARD:
+                        evt.Value += (ushort)mouseData;
                         evt.Desc = evt.Value + " 次";
                         break;
                     case Constants.MouseKey.MOUSE_LEFT_BTN:
+                        evt.Value++;
+                        evt.Desc = evt.Value + " 次";
                         eventToDbManager.Add(Constants.MouseEvent.MOUSE_LEFT_BTN_AREA,
                             (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
                             getScreenArea(x, y));
                         break;
                     case Constants.MouseKey.MOUSE_RIGHT_BTN:
+                        evt.Value++;
+                        evt.Desc = evt.Value + " 次";
                         eventToDbManager.Add(Constants.MouseEvent.MOUSE_RIGHT_BTN_AREA,
                             (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
                             getScreenArea(x, y));
                         break;
                     default:
+                        evt.Value++;
                         evt.Desc = evt.Value + " 次";
                         break;
                 }
-                eventToDbManager.Add((short)typeCode, (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second, 0);
+
+                eventToDbManager.Add((short)typeCode,
+                    (ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+                    (ushort)mouseData);
             }
         }
 
