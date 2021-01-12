@@ -9,9 +9,41 @@ namespace KMS.src.tool
         internal static string GetParentPath(string path)
         {
             if (path == null || path.Length == 0)
-                return null;
+                return path;
 
-            return path.Substring(0, path.LastIndexOf('/'));
+            int lio = path.LastIndexOf('/');
+            if (lio > 0)
+            {
+                return path.Substring(0, lio);
+            }
+            else
+            {
+                lio = path.LastIndexOf('\\');
+                if (lio > 0)
+                    return path.Substring(0, lio);
+                else
+                    return path;
+            }
+        }
+
+        internal static string GetBasename(string path)
+        {
+            if (path == null || path.Length == 0)
+                return path;
+
+            int lio = path.LastIndexOf('/');
+            if (lio < 0)
+            {
+                lio = path.LastIndexOf('\\');
+                if (lio < 0)
+                    return path;
+                else
+                    return path.Substring(lio);
+            }
+            else
+            {
+                return path.Substring(lio);
+            }
         }
     }
 }

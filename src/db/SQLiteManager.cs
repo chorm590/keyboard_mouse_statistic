@@ -1,5 +1,6 @@
 ﻿using KMS.src.tool;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Threading;
@@ -15,14 +16,21 @@ namespace KMS.src.db
 
         private static SQLiteManager instance;
 
-        private string curTable;
         private SQLiteHelper sqliteHelper;
 
-        private string dbFilePath
+        private string curDb
         {
             get
             {
                 return DATABASE_DIR + "/" + TimeManager.TimeUsing.Year + "/" + "kms" + TimeManager.TimeUsing.ToString("yyyyMM") + ".db";
+            }
+        }
+
+        private string curTable
+        {
+            get
+            {
+                return "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
             }
         }
 
@@ -39,46 +47,47 @@ namespace KMS.src.db
 
         private SQLiteManager()
         {
-            string curDbFile = dbFilePath;
-            //make sure the directories.
-            try
-            {
-                initDbFilePath(curDbFile);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Database initialization failed");
-                Application.Current.Shutdown();
-                return;
-            }
+            //string curDbFile = dbFilePath;
+            ////make sure the directories.
+            //try
+            //{
+            //    initDbFilePath(curDbFile);
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show("Database initialization failed");
+            //    Application.Current.Shutdown();
+            //    return;
+            //}
 
-            //open db.
-            sqliteHelper = new SQLiteHelper();
-            if (!sqliteHelper.openDatabase(curDbFile))
-            {
-                MessageBox.Show("Database open failed");
-                Application.Current.Shutdown();
-                return;
-            }
+            ////open db.
+            //sqliteHelper = new SQLiteHelper();
+            //if (!sqliteHelper.openDatabase(curDbFile))
+            //{
+            //    MessageBox.Show("Database open failed");
+            //    Application.Current.Shutdown();
+            //    return;
+            //}
 
-            curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
-            Logger.v(TAG, "current table:" + curTable);
-            try
-            {
-                if (!sqliteHelper.isTableExist(curTable))
-                {
-                    sqliteHelper.createDetailTable(curTable);
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Database exception");
-                Application.Current.Shutdown();
-                return;
-            }
+            //curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
+            //Logger.v(TAG, "current table:" + curTable);
+            //try
+            //{
+            //    if (!sqliteHelper.isTableExist(curTable))
+            //    {
+            //        sqliteHelper.createDetailTable(curTable);
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show("Database exception");
+            //    Application.Current.Shutdown();
+            //    return;
+            //}
 
-            refreshStatistic();
             //tool.Timer.RegisterTimerCallback(timerCallback);
+
+
         }
 
         /// <summary>
@@ -219,6 +228,32 @@ namespace KMS.src.db
         private void switchTable()
         {
             
+        }
+
+        /// <summary>
+        /// 查找所有数据库文件
+        /// </summary>
+        /// <returns>包含各数据库文件路径的列表</returns>
+        internal List<string> IterateDbs()
+        {
+            if (Directory.Exists(DATABASE_DIR))
+            {
+                string[] dirs = Directory.GetDirectories(DATABASE_DIR);
+                string str;
+                foreach (string dir in dirs)
+                {
+                    Logger.v(TAG, "directory:" + dir);
+                    str = Toolset.GetBasename(dir);
+                    Logger.v(TAG, "basename:" + str);
+                    if (str is null || str.Length == 0)
+                        continue;
+
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

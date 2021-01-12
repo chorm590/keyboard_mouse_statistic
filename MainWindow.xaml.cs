@@ -116,11 +116,6 @@ namespace KMS
             BindingOperations.SetBinding(MostOpHourToday, TextBlock.TextProperty, binding);
         }
 
-        private void Open_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logger.v(TAG, "Window closing");

@@ -231,15 +231,14 @@ namespace KMS.src.core
             };
 
             //Initialize timer
-            tool.Timer.RegisterTimerCallback(timerCallback);
+            //tool.Timer.RegisterTimerCallback(timerCallback);
             eventToDbManager = new EventToDbManager();
 
             screenAreaWidth = System.Windows.SystemParameters.PrimaryScreenWidth / 10;
             screenAreaHeight = System.Windows.SystemParameters.PrimaryScreenHeight / 10;
             Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
 
-            SQLiteManager sql = SQLiteManager.GetInstance; //必须放在注册StatisticManager的timerCallback后面。
-            
+            statisticFromDb();
         }
 
         internal void shutdown()
@@ -443,6 +442,14 @@ namespace KMS.src.core
             {
                 SttMostOpHourToday.Desc = maxHour + " 时[" + maxValue + " 次]";
             }
+        }
+
+        /// <summary>
+        /// 从数据库中读取之前保存的数据。
+        /// </summary>
+        private void statisticFromDb()
+        {
+            List<string> dbPath = SQLiteManager.GetInstance.IterateDbs();
         }
 
         /// <summary>
