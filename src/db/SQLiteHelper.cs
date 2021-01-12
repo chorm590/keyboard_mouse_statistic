@@ -15,6 +15,7 @@ namespace KMS.src.db
 
         public bool openDatabase(string path)
         {
+            Logger.v(TAG, "open database:" + path);
             try
             {
                 sqliteConnection = new SQLiteConnection("data source=" + path);
@@ -25,8 +26,6 @@ namespace KMS.src.db
                 Logger.v(TAG, e.StackTrace);
                 return false;
             }
-
-            detailCmd = new SQLiteCommand();
 
             return true;
         }
@@ -58,11 +57,20 @@ namespace KMS.src.db
             cmd.Connection = sqliteConnection;
 
             cmd.CommandText = "SELECT name FROM sqlite_master where type='table' AND name='" + name + "'";
-            SQLiteDataReader reader = cmd.ExecuteReader();
-            bool hasRows = reader.HasRows;
-            reader.Close();
-
-            return hasRows;
+            bool hasRow = false;
+            try
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                hasRow = reader.HasRows;
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                Logger.v(TAG, e.StackTrace);
+                return false;
+            }
+            
+            return hasRow;
         }
 
         public void closeDababase()
@@ -88,6 +96,9 @@ namespace KMS.src.db
 
         internal void InsertDetail(string sql)
         {
+            if(detailCmd is null)
+                detailCmd = new SQLiteCommand();
+
             detailCmd.Connection = sqliteConnection;
             detailCmd.CommandText = sql;
             detailCmd.ExecuteNonQuery();
@@ -110,6 +121,13 @@ namespace KMS.src.db
             cmd.ExecuteNonQuery();
             
             return true;
+        }
+
+        internal SQLiteDataReader QueryTable(string name)
+        {
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+            cmd.CommandText = "SELECT * FROM " + name;
+            return cmd.ExecuteReader();
         }
     }
 }

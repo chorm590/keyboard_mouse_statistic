@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Text;
 using System.Threading;
 using KMS.src.db;
@@ -44,11 +45,6 @@ namespace KMS.src.core
             get;
         }
         
-        internal List<Event> SttKeyboardSingle
-        {
-            get;
-        }
-
         internal Event SttKeyboardSingleKeyTop1
         {
             get;
@@ -449,7 +445,95 @@ namespace KMS.src.core
         /// </summary>
         private void statisticFromDb()
         {
+            //1. 
             List<string> dbPath = SQLiteManager.GetInstance.IterateDbs();
+            if (dbPath == null)
+                return;
+
+            Logger.v(TAG, "There is " + dbPath.Count + " database file");
+            DateTime now = DateTime.Now;
+            Logger.v(TAG, "now,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
+            ushort type;
+            byte fkey;
+            ushort value;
+            short idx;
+            foreach (string db in dbPath)
+            {
+                if(SQLiteManager.GetInstance.UseDatabase(db)) //event record of a month
+                {
+                    for (byte i = 1; i < 32; i++) //day1 ~ day31
+                    {
+                        SQLiteDataReader reader = SQLiteManager.GetInstance.GetEventDetail(i);
+                        if (reader is null)
+                            continue;
+
+                        Logger.v(TAG, "day" + i + ", field count:" + reader.FieldCount);
+
+                        while(reader.Read())
+                        {
+                            type = (ushort)reader.GetInt16(6);
+                            fkey = reader.GetByte(7);
+                            value = (ushort)reader.GetInt16(8);
+
+                            if (type > 0 && type < 256)
+                            {
+                                SttKeyboardTotal.Value++;
+                                if (fkey > 0)
+                                {
+                                    SttComboKeyTotal.Value++;
+                                }
+                                foreach (Event kev in sttKbSingleKey)
+                                {
+                                    if (kev.Type.Code == type)
+                                    {
+                                        kev.Value++;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                switch (type)
+                                {
+                                    case Constants.TypeNumber.MOUSE_LEFT_BTN:
+                                        SttMsLeftBtn.Value++;
+                                        break;
+                                    case Constants.TypeNumber.MOUSE_RIGHT_BTN:
+                                        SttMsRightBtn.Value++;
+                                        break;
+                                    case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
+                                        SttMsWheelForward.Value++;
+                                        break;
+                                    case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
+                                        SttMsWheelBackward.Value++;
+                                        break;
+                                }
+                            }
+                        }
+                        reader.Close();
+                    }
+
+                    SttKeyboardTotal.Desc = SttKeyboardTotal.Value + " 次";
+                    SttComboKeyTotal.Desc = SttComboKeyTotal.Value + " 次";
+                    sttKbSingleKey.Sort();
+                    SttKeyboardSingleKeyTop1.Desc = sttKbSingleKey[0].Type.Desc + " [" + sttKbSingleKey[0].Value + " 次]";
+                    SttKeyboardSingleKeyTop2.Desc = sttKbSingleKey[1].Type.Desc + " [" + sttKbSingleKey[1].Value + " 次]";
+                    SttKeyboardSingleKeyTop3.Desc = sttKbSingleKey[2].Type.Desc + " [" + sttKbSingleKey[2].Value + " 次]";
+                    SttKeyboardSingleKeyTop4.Desc = sttKbSingleKey[3].Type.Desc + " [" + sttKbSingleKey[3].Value + " 次]";
+                    SttKeyboardSingleKeyTop5.Desc = sttKbSingleKey[4].Type.Desc + " [" + sttKbSingleKey[4].Value + " 次]";
+
+                    SttMsLeftBtn.Desc = SttMsLeftBtn.Value + " 次";
+                    SttMsRightBtn.Desc = SttMsRightBtn.Value + " 次";
+                    SttMsWheelForward.Desc = SttMsWheelForward.Value + " 次";
+                    SttMsWheelBackward.Desc = SttMsWheelBackward.Value + " 次";
+
+
+
+                    //TODO close the database
+                }
+            }
+            now = DateTime.Now;
+            Logger.v(TAG, "now2,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
         }
 
         /// <summary>

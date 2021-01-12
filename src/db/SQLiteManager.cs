@@ -1,8 +1,9 @@
 ﻿using KMS.src.tool;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
-using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 
@@ -13,6 +14,8 @@ namespace KMS.src.db
         private const string TAG = "SQLiteManager";
 
         private const string DATABASE_DIR = "db";
+        private const string DETAIL_TABLE_PREFIX = "day";
+        private const string DETAIL_TABLE_SUFFIX = "_detail";
 
         private static SQLiteManager instance;
 
@@ -30,7 +33,7 @@ namespace KMS.src.db
         {
             get
             {
-                return "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
+                return DETAIL_TABLE_PREFIX + TimeManager.TimeUsing.Day.ToString() + DETAIL_TABLE_SUFFIX;
             }
         }
 
@@ -47,47 +50,69 @@ namespace KMS.src.db
 
         private SQLiteManager()
         {
-            //string curDbFile = dbFilePath;
-            ////make sure the directories.
-            //try
-            //{
-            //    initDbFilePath(curDbFile);
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show("Database initialization failed");
-            //    Application.Current.Shutdown();
-            //    return;
-            //}
+            sqliteHelper = new SQLiteHelper();
+            /*
+            string curDbFile = dbFilePath;
+            //make sure the directories.
+            try
+            {
+                initDbFilePath(curDbFile);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Database initialization failed");
+                Application.Current.Shutdown();
+                return;
+            }
 
-            ////open db.
-            //sqliteHelper = new SQLiteHelper();
-            //if (!sqliteHelper.openDatabase(curDbFile))
-            //{
-            //    MessageBox.Show("Database open failed");
-            //    Application.Current.Shutdown();
-            //    return;
-            //}
+            //open db.
+            sqliteHelper = new SQLiteHelper();
+            if (!sqliteHelper.openDatabase(curDbFile))
+            {
+                MessageBox.Show("Database open failed");
+                Application.Current.Shutdown();
+                return;
+            }
 
-            //curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
-            //Logger.v(TAG, "current table:" + curTable);
-            //try
-            //{
-            //    if (!sqliteHelper.isTableExist(curTable))
-            //    {
-            //        sqliteHelper.createDetailTable(curTable);
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show("Database exception");
-            //    Application.Current.Shutdown();
-            //    return;
-            //}
+            curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
+            Logger.v(TAG, "current table:" + curTable);
+            try
+            {
+                if (!sqliteHelper.isTableExist(curTable))
+                {
+                    sqliteHelper.createDetailTable(curTable);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Database exception");
+                Application.Current.Shutdown();
+                return;
+            }
 
-            //tool.Timer.RegisterTimerCallback(timerCallback);
+            tool.Timer.RegisterTimerCallback(timerCallback);
+            */
+        }
 
+        internal bool UseDatabase(string db)
+        {
+            if (db is null || db.Length == 0)
+                return false;
 
+            return sqliteHelper.openDatabase(db);
+        }
+
+        /// <summary>
+        /// 查询指定日的详细数据。
+        /// </summary>
+        internal SQLiteDataReader GetEventDetail(byte day)
+        {
+            if (sqliteHelper.isTableExist(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX))
+            {
+                return sqliteHelper.QueryTable(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -115,56 +140,6 @@ namespace KMS.src.db
         {
             if (sqliteHelper != null)
                 sqliteHelper.closeDababase();
-        }
-
-        /// <summary>
-        /// 从各年度统计数据库、各月度统计数据库中累加数值。
-        /// </summary>
-        private void refreshStatistic()
-        {
-            if (Directory.Exists(DATABASE_DIR))
-            {
-                string[] dirs = Directory.GetDirectories(DATABASE_DIR);
-                int idx;
-                string year;
-                foreach (string dir in dirs)
-                {
-                    idx = dir.LastIndexOf("\\");
-                    if (idx < 0)
-                        continue;
-
-                    idx++;
-                    year = dir.Substring(idx);
-
-                    if (File.Exists(dir + "\\kms" + year + ".db"))
-                    {
-                        //TODO 从年度统计表中取出数据。
-                    }
-                    else
-                    {
-                        //TODO 查询各月度统计表。
-                        refreshFromMonthDb(dir);
-                    }
-                }
-            }
-        }
-
-        private void refreshFromMonthDb(string dir)
-        {
-            if (dir == null || dir.Length == 0)
-                return;
-
-            if (!Directory.Exists(dir))
-                return;
-
-            string[] dbs = Directory.GetFiles(dir);
-            foreach (string db in dbs)
-            {
-                if (db.Contains("kms") && db.Contains(".db"))
-                { 
-                    //TODO 从各月份数据库中取出统计数据，当前日实时计算总数，非当前月查询统计表。
-                }
-            }
         }
 
         internal bool BeginTransaction()
@@ -239,16 +214,60 @@ namespace KMS.src.db
             if (Directory.Exists(DATABASE_DIR))
             {
                 string[] dirs = Directory.GetDirectories(DATABASE_DIR);
+                string[] dirs2;
+                List<string> validDb = new List<string>();
                 string str;
+                Regex regex = new Regex("[1-2][0-9][0-9][0-9]");
                 foreach (string dir in dirs)
                 {
-                    Logger.v(TAG, "directory:" + dir);
                     str = Toolset.GetBasename(dir);
-                    Logger.v(TAG, "basename:" + str);
                     if (str is null || str.Length == 0)
                         continue;
 
+                    //Hummmmmm,2021-01-12 19:08
+                    if (str.Length != 4)
+                        continue;
+
+                    if (regex.IsMatch(str))
+                    {
+                        if (str[0] == '1')
+                        {
+                            if (str[1] != '9')
+                                continue;
+                            else if (str[2] != '7' && str[2] != '8' && str[2] != '9')
+                                continue;
+                        }
+                        else
+                        {
+                            if (str[1] != '0')
+                                continue;
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    //directory valid
+                    dirs2 = Directory.GetFiles(dir);
+                    string str2;
+                    foreach(string file in dirs2)
+                    {
+                        str2 = Toolset.GetBasename(file);
+                        if (str2.StartsWith("kms" + str))
+                        {
+                            if (str2.EndsWith(".db"))
+                            {
+                                validDb.Add(file);
+                            }
+                        }
+                    }
                 }
+
+                if (validDb.Count > 0)
+                    return validDb;
+                else
+                    return null;
             }
             else
             {

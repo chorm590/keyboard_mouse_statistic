@@ -29,7 +29,7 @@ namespace KMS.src.tool
         internal static string GetBasename(string path)
         {
             if (path == null || path.Length == 0)
-                return path;
+                return "";
 
             int lio = path.LastIndexOf('/');
             if (lio < 0)
@@ -37,12 +37,17 @@ namespace KMS.src.tool
                 lio = path.LastIndexOf('\\');
                 if (lio < 0)
                     return path;
+                else if (lio < path.Length - 1)
+                    return path.Substring(lio + 1);
                 else
-                    return path.Substring(lio);
+                    return "";
             }
             else
             {
-                return path.Substring(lio);
+                if (lio < path.Length - 1)
+                    return path.Substring(lio + 1);
+                else
+                    return "";
             }
         }
     }
