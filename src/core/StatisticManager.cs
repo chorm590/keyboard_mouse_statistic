@@ -459,7 +459,7 @@ namespace KMS.src.core
             short idx;
             foreach (string db in dbPath)
             {
-                if(SQLiteManager.GetInstance.UseDatabase(db)) //event record of a month
+                if (SQLiteManager.GetInstance.UseDatabase(db)) //event record of a month
                 {
                     for (byte i = 1; i < 32; i++) //day1 ~ day31
                     {
@@ -469,7 +469,7 @@ namespace KMS.src.core
 
                         Logger.v(TAG, "day" + i + ", field count:" + reader.FieldCount);
 
-                        while(reader.Read())
+                        while (reader.Read())
                         {
                             type = (ushort)reader.GetInt16(6);
                             fkey = reader.GetByte(7);

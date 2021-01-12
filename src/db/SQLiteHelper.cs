@@ -2,6 +2,7 @@
 using System;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 
 namespace KMS.src.db
 {
@@ -15,15 +16,30 @@ namespace KMS.src.db
 
         public bool openDatabase(string path)
         {
-            Logger.v(TAG, "open database:" + path);
             try
             {
                 sqliteConnection = new SQLiteConnection("data source=" + path);
                 sqliteConnection.Open();
+
+                //SQLite在打开文件时不会检测其是否合法，此处通过执行SQL语句来检测库文件合法性。
+                //当库文件不合法时，将其重命名为KMS不识别的格式以避免后续继续打开此文件而浪费计算资源。
+                //chorm, 2021-01-12 22:55
+                try
+                {
+                    SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+                    cmd.CommandText = "SELECT name from sqlite_master";
+                    SQLiteDataReader reader = cmd.ExecuteReader();
+                    reader.Close();
+                }
+                catch (SQLiteException)
+                {
+                    sqliteConnection.Close();
+                    File.Move(path, path + "_invalid");
+                    return false;
+                }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Logger.v(TAG, e.StackTrace);
                 return false;
             }
 
@@ -57,18 +73,9 @@ namespace KMS.src.db
             cmd.Connection = sqliteConnection;
 
             cmd.CommandText = "SELECT name FROM sqlite_master where type='table' AND name='" + name + "'";
-            bool hasRow = false;
-            try
-            {
-                SQLiteDataReader reader = cmd.ExecuteReader();
-                hasRow = reader.HasRows;
-                reader.Close();
-            }
-            catch (Exception e)
-            {
-                Logger.v(TAG, e.StackTrace);
-                return false;
-            }
+            SQLiteDataReader reader = cmd.ExecuteReader();
+            bool hasRow = reader.HasRows;
+            reader.Close();
             
             return hasRow;
         }
