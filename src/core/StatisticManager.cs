@@ -26,164 +26,171 @@ namespace KMS.src.core
             }
         }
 
-        private Event sttKbTotal; //键盘总计数。
-        private Event sttComboKeyTotal; //组合键总计数。
-        private Event sttKbSkTop1;
-        private Event sttKbSkTop2;
-        private Event sttKbSkTop3;
-        private Event sttKbSkTop4;
-        private Event sttKbSkTop5;
-        private List<Event> sttKbSingleKey; //键盘各单键的敲击总数。
-        
+        private readonly double screenAreaWidth;
+        private readonly double screenAreaHeight;
 
-        private Dictionary<short, Event> sttMsKey; //鼠标单键统计。
-        private Event sttMsLBtn;
-        private Event sttMsRBtn;
-        private Event sttMsWheelFw;
-        private Event sttMsWheelBw;
+        private readonly List<Event> sttKbSingleKey; //键盘各单键的敲击总数。
+        private readonly Dictionary<byte, ushort> opInHour; //今日各时段的操作记数。
 
-        private List<Event> sttOthers; //分时段的统计，每日、每月、每年。
-        private EventToDbManager eventToDbManager;
-        private double screenAreaWidth;
-        private double screenAreaHeight;
-
+        private readonly EventToDbManager eventToDbManager;
         
         internal Event SttKeyboardTotal
         {
-            get
-            {
-                return sttKbTotal;
-            }
+            get;
         }
 
         internal Event SttComboKeyTotal
         {
-            get
-            {
-                return sttComboKeyTotal;
-            }
+            get;
         }
         
         internal List<Event> SttKeyboardSingle
         {
-            get
-            {
-                return sttKbSingleKey;
-            }
+            get;
         }
 
         internal Event SttKeyboardSingleKeyTop1
         {
-            get
-            {
-                return sttKbSkTop1;
-            }
+            get;
         }
 
         internal Event SttKeyboardSingleKeyTop2
         {
-            get
-            {
-                return sttKbSkTop2;
-            }
+            get;
         }
 
         internal Event SttKeyboardSingleKeyTop3
         {
-            get
-            {
-                return sttKbSkTop3;
-            }
+            get;
         }
 
         internal Event SttKeyboardSingleKeyTop4
         {
-            get
-            {
-                return sttKbSkTop4;
-            }
+            get;
         }
 
         internal Event SttKeyboardSingleKeyTop5
         {
-            get
-            {
-                return sttKbSkTop5;
-            }
+            get;
         }
 
         internal Event SttMsLeftBtn
         {
-            get
-            {
-                return sttMsLBtn;
-            }
+            get;
         }
 
         internal Event SttMsRightBtn
         {
-            get
-            {
-                return sttMsRBtn;
-            }
+            get;
         }
 
         internal Event SttMsWheelForward
         {
-            get
-            {
-                return sttMsWheelFw;
-            }
+            get;
         }
 
         internal Event SttMsWheelBackward
         {
-            get
-            {
-                return sttMsWheelBw;
-            }
+            get;
+        }
+
+        internal Event SttMsWheelClick
+        {
+            get;
+        }
+
+        internal Event SttMsSideForward
+        {
+            get;
+        }
+
+        internal Event SttMsSideBackward
+        {
+            get;
+        }
+
+        internal Event SttKeyboardTotalToday
+        {
+            get;
+        }
+
+        internal Event SttMouseTotalToday
+        {
+            get;
+        }
+
+        internal Event SttLetterTop1Today //今日敲击最多的字母
+        {
+            get;
+        }
+
+        internal Event SttMostOpHourToday //今日操作键鼠最多的时间段
+        {
+            get;
         }
 
         private StatisticManager()
         {
-            // 1
-            sttKbTotal = new Event
+            //Statistic of all
+            SttKeyboardTotal = new Event
             {
-                Type = Constants.Statistic.KbAll
+                Type = Constants.Statistic.KbTotal
             };
 
-            sttComboKeyTotal = new Event
+            SttComboKeyTotal = new Event
             {
-                Type = Constants.Statistic.KbComboAll
+                Type = Constants.Statistic.KbComboTotal
             };
 
-            sttKbSkTop1 = new Event
+            SttKeyboardSingleKeyTop1 = new Event
             {
                 Type = Constants.Statistic.KbSkTop1
             };
 
-            sttKbSkTop2 = new Event
+            SttKeyboardSingleKeyTop2 = new Event
             {
                 Type = Constants.Statistic.KbSkTop2
             };
 
-            sttKbSkTop3 = new Event
+            SttKeyboardSingleKeyTop3 = new Event
             {
                 Type = Constants.Statistic.KbSkTop3
             };
 
-            sttKbSkTop4 = new Event
+            SttKeyboardSingleKeyTop4 = new Event
             {
                 Type = Constants.Statistic.KbSkTop4
             };
 
-            sttKbSkTop5 = new Event
+            SttKeyboardSingleKeyTop5 = new Event
             {
                 Type = Constants.Statistic.KbSkTop5
             };
 
+            //Statistic of today
+            SttKeyboardTotalToday = new Event()
+            {
+                Type = Constants.Statistic.KbTotalToday
+            };
 
-            // 2
+            SttMouseTotalToday = new Event()
+            {
+                Type = Constants.Statistic.MsTotalToday
+            };
+
+            SttLetterTop1Today = new Event()
+            {
+                Type = Constants.Statistic.KbLetterTop1Today
+            };
+
+            SttMostOpHourToday = new Event()
+            {
+                Type = Constants.Statistic.MostOpHourToday
+            };
+
+            opInHour = new Dictionary<byte, ushort>(24);
+
+            //Statistic of keyboard single key
             Dictionary<byte, Key> sgKey = Constants.Keyboard;
             sttKbSingleKey = new List<Event>(sgKey.Count);
             Dictionary<byte, Key>.ValueCollection values = sgKey.Values;
@@ -193,19 +200,35 @@ namespace KMS.src.core
             }
             Logger.v(TAG, "single key count:" + sttKbSingleKey.Count + ", capacity:" + sttKbSingleKey.Capacity);
 
-
-            Dictionary<short, Type> msKeyDic = Constants.MouseKey.Keys;
-            sttMsKey = new Dictionary<short, Event>(msKeyDic.Count);
-            Dictionary<short, Type>.ValueCollection values3 = msKeyDic.Values;
-            foreach (Type tp in values3)
+            //Statistic of mouse
+            SttMsLeftBtn = new Event
             {
-                sttMsKey.Add((short)tp.Code, new Event(tp));
-            }
-            Logger.v(TAG, "mouse key count:" + sttMsKey.Count);
-            sttMsLBtn = sttMsKey[Constants.MouseKey.MOUSE_LEFT_BTN];
-            sttMsRBtn = sttMsKey[Constants.MouseKey.MOUSE_RIGHT_BTN];
-            sttMsWheelFw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_FORWARD];
-            sttMsWheelBw = sttMsKey[Constants.MouseKey.MOUSE_WHEEL_BACKWARD];
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_LEFT_BTN]
+            };
+            SttMsRightBtn = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_RIGHT_BTN]
+            };
+            SttMsWheelForward = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_FORWARD]
+            };
+            SttMsWheelBackward = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_BACKWARD]
+            };
+            SttMsWheelClick = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_CLICK]
+            };
+            SttMsSideForward = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_SIDE_FORWARD]
+            };
+            SttMsSideBackward = new Event
+            {
+                Type = Constants.MouseKeys[Constants.TypeNumber.MOUSE_SIDE_BACKWARD]
+            };
 
             //Initialize timer
             tool.Timer.RegisterTimerCallback(timerCallback);
@@ -241,14 +264,22 @@ namespace KMS.src.core
             }
             else if (typeCode < 256)
             {
-                kbSingleKeyPressed(typeCode);
-                sttKbTotal.Value++;
-                sttKbTotal.Desc = sttKbTotal.Value + " 次";
+                SttKeyboardTotal.Value++;
+                SttKeyboardTotal.Desc = SttKeyboardTotal.Value + " 次";
+                
                 if (fkey > 0)
                 {
-                    sttComboKeyTotal.Value++;
+                    SttComboKeyTotal.Value++;
                     SttComboKeyTotal.Desc = SttComboKeyTotal.Value + " 次";
                 }
+
+                SttKeyboardTotalToday.Value++;
+                SttKeyboardTotalToday.Desc = SttKeyboardTotalToday.Value + " 次";
+
+                updateOpInHour(time.Hour, 1);
+
+                kbSingleKeyPressed(typeCode);
+
                 eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
                     (short)typeCode, fkey, 0);
             }
@@ -260,45 +291,69 @@ namespace KMS.src.core
 
         internal void MouseEventHappen(int typeCode, int mouseData, short x, short y, DateTime time)
         {
-            if (sttMsKey.TryGetValue((short)typeCode, out Event evt))
+            switch (typeCode)
             {
-                if (evt is null)
-                    return;
+                case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
+                    SttMsWheelBackward.Value += (ushort)mouseData;
+                    SttMsWheelBackward.Desc = SttMsWheelBackward.Value + " 次";
+                    break;
+                case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
+                    SttMsWheelForward.Value += (ushort)mouseData;
+                    SttMsWheelForward.Desc = SttMsWheelForward.Value + " 次";
+                    break;
+                case Constants.TypeNumber.MOUSE_WHEEL_CLICK:
+                    SttMsWheelClick.Value += (ushort)mouseData;
+                    SttMsWheelClick.Desc = SttMsWheelClick.Value + " 次";
+                    break;
+                case Constants.TypeNumber.MOUSE_LEFT_BTN:
+                    SttMsLeftBtn.Value++;
+                    SttMsLeftBtn.Desc = SttMsLeftBtn.Value + " 次";
+                    mouseData = getScreenArea(x, y);
+                    break;
+                case Constants.TypeNumber.MOUSE_RIGHT_BTN:
+                    SttMsRightBtn.Value++;
+                    SttMsRightBtn.Desc = SttMsRightBtn.Value + " 次";
+                    mouseData = getScreenArea(x, y);
+                    break;
+                case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
+                    SttMsSideForward.Value++;
+                    SttMsSideForward.Desc = SttMsSideForward.Value + " 次";
+                    mouseData = getScreenArea(x, y);
+                    break;
+                case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
+                    SttMsSideBackward.Value++;
+                    SttMsSideBackward.Desc = SttMsSideBackward.Value + " 次";
+                    mouseData = getScreenArea(x, y);
+                    break;
+                default:
+                    break;
+            }
 
-                switch (typeCode)
-                {
-                    case Constants.MouseKey.MOUSE_WHEEL_BACKWARD:
-                    case Constants.MouseKey.MOUSE_WHEEL_FORWARD:
-                        evt.Value += (ushort)mouseData;
-                        evt.Desc = evt.Value + " 次";
-                        break;
-                    case Constants.MouseKey.MOUSE_LEFT_BTN:
-                        evt.Value++;
-                        evt.Desc = evt.Value + " 次";
-                        eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
-                            Constants.MouseEvent.MOUSE_LEFT_BTN_AREA,
-                            0,
-                            getScreenArea(x, y));
-                        break;
-                    case Constants.MouseKey.MOUSE_RIGHT_BTN:
-                        evt.Value++;
-                        evt.Desc = evt.Value + " 次";
-                        eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
-                            Constants.MouseEvent.MOUSE_RIGHT_BTN_AREA,
-                            0,
-                            getScreenArea(x, y));
-                        break;
-                    default:
-                        evt.Value++;
-                        evt.Desc = evt.Value + " 次";
-                        break;
-                }
+            switch (typeCode)
+            {
+                case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
+                case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
+                    SttMouseTotalToday.Value += (ushort)mouseData;
+                    updateOpInHour(time.Hour, mouseData);
+                    break;
+                case Constants.TypeNumber.MOUSE_WHEEL_CLICK:
+                case Constants.TypeNumber.MOUSE_LEFT_BTN:
+                case Constants.TypeNumber.MOUSE_RIGHT_BTN:
+                case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
+                case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
+                    SttMouseTotalToday.Value++;
+                    updateOpInHour(time.Hour, 1);
+                    break;
+                default:
+                    break;
+            }
 
-                eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
+            SttMouseTotalToday.Desc = SttMouseTotalToday.Value + " 次";
+
+            eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
                     (short)typeCode,
                     0,
                     (ushort)mouseData);
-            }
         }
 
         private ushort getScreenArea(short x, short y)
@@ -320,27 +375,73 @@ namespace KMS.src.core
             sttKbSingleKey.Sort();
             if (sttKbSingleKey[0].Value > 0)
             {
-                sttKbSkTop1.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + " 次]";
+                SttKeyboardSingleKeyTop1.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName + " [" + sttKbSingleKey[0].Value + " 次]";
             }
 
             if (sttKbSingleKey[1].Value > 0)
             {
-                sttKbSkTop2.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + " 次]";
+                SttKeyboardSingleKeyTop2.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName + " [" + sttKbSingleKey[1].Value + " 次]";
             }
 
             if (sttKbSingleKey[2].Value > 0)
             {
-                sttKbSkTop3.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + " 次]";
+                SttKeyboardSingleKeyTop3.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName + " [" + sttKbSingleKey[2].Value + " 次]";
             }
 
             if (sttKbSingleKey[3].Value > 0)
             {
-                sttKbSkTop4.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[3].Type.Code)].DisplayName + " [" + sttKbSingleKey[3].Value + " 次]";
+                SttKeyboardSingleKeyTop4.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[3].Type.Code)].DisplayName + " [" + sttKbSingleKey[3].Value + " 次]";
             }
 
             if (sttKbSingleKey[4].Value > 0)
             {
-                sttKbSkTop5.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[4].Type.Code)].DisplayName + " [" + sttKbSingleKey[4].Value + " 次]";
+                SttKeyboardSingleKeyTop5.Desc = Constants.Keyboard[(byte)(sttKbSingleKey[4].Type.Code)].DisplayName + " [" + sttKbSingleKey[4].Value + " 次]";
+            }
+
+            //Find the most typed letter
+            foreach (Event kevt in sttKbSingleKey)
+            {
+                if (kevt.Type.Code >= Constants.TypeNumber.A && kevt.Type.Code <= Constants.TypeNumber.Z)
+                {
+                    SttLetterTop1Today.Value = kevt.Value;
+                    SttLetterTop1Today.Desc = kevt.Type.Desc + "[" + kevt.Value + " 次]";
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新今日统计中的各时段操作总数。
+        /// </summary>
+        private void updateOpInHour(int hour, int value)
+        {
+            ushort value2;
+            ushort maxValue = 0;
+            ushort maxHour = 0;
+            if (opInHour.TryGetValue((byte)hour, out value2))
+            {
+                value = value + value2;
+                opInHour.Remove((byte)hour);
+            }
+
+            opInHour.Add((byte)hour, (ushort)value);
+
+            //Find the hour which has most op
+            for (byte i = 0; i < 24; i++) //Must iterate from head to tail?
+            {
+                if (opInHour.TryGetValue(i, out value2))
+                {
+                    if (value2 > maxValue)
+                    {
+                        maxValue = value2;
+                        maxHour = i;
+                    }
+                }
+            }
+
+            if (maxValue > 0)
+            {
+                SttMostOpHourToday.Desc = maxHour + " 时[" + maxValue + " 次]";
             }
         }
 
@@ -349,7 +450,7 @@ namespace KMS.src.core
         /// </summary>
         private class EventToDbManager
         {
-            private const short DEEPTH = 1000;
+            private const short DEEPTH = 1000; //Enough?
 
             private EventToDb[] cur;
             private short counter;

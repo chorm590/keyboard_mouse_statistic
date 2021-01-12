@@ -93,16 +93,16 @@ namespace KMS.src.core
         }
 
         private static void parseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
-        {这个统计有问题
+        {
             if (eventCode != Constants.MouseEvent.WM_MOUSEWHEEL && msWheelCounter != 0)
             {
                 if (msWheelCounter < 0)
                 {
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
                 }
                 else
                 {
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
                 }
                 msWheelCounter = 0;
             }
@@ -110,18 +110,18 @@ namespace KMS.src.core
             switch (eventCode)
             {
                 case Constants.MouseEvent.WM_LBUTTONDOWN:
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_LEFT_BTN, 0, x, y, time);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_LEFT_BTN, 0, x, y, time);
                     break;
                 case Constants.MouseEvent.WM_RBUTTONDOWN:
-                    StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_RIGHT_BTN, 0, x, y, time);
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_RIGHT_BTN, 0, x, y, time);
                     break;
                 case Constants.MouseEvent.WM_MOUSEWHEEL:
-                    if (mouseData == -120)
+                    if (mouseData == -120) //后向滚动
                     {
                         if (msWheelCounter > 0)
                         {
                             //上一次仍是前向滚动，本次突然变成后向滚动，需要将前面的前向滚动事件记录下来。
-                            StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
                             msWheelCounter = -1;
                         }
                         else
@@ -130,12 +130,12 @@ namespace KMS.src.core
                             msWheelTime = time;
                         }
                     }
-                    else if (mouseData == 120)
+                    else if (mouseData == 120) //前向滚动
                     {
                         if (msWheelCounter < 0)
                         {
                             //上一次仍是后向滚动，本次突然变成前向滚动，需要将前面的后向滚动事件记录下来。
-                            StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
                             msWheelCounter = 1;
                         }
                         else
@@ -148,11 +148,11 @@ namespace KMS.src.core
                 case Constants.MouseEvent.WM_MOUSESIDEDOWN:
                     if (mouseData == Constants.MouseDataHighOrder.SIDE_BACKWARD)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_BACKWARD, 0, 0, 0, time);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, 0, 0, 0, time);
                     }
                     else if (mouseData == Constants.MouseDataHighOrder.SIDE_FORWARD)
                     {
-                        StatisticManager.GetInstance.MouseEventHappen(Constants.MouseKey.MOUSE_SIDE_KEY_FORWARD, 0, 0, 0, time);
+                        StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_SIDE_FORWARD, 0, 0, 0, time);
                     }
                     break;
             }

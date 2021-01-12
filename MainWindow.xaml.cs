@@ -37,6 +37,7 @@ namespace KMS
 
         private void bindData()
         {
+            //全局键盘统计
             Binding binding = new Binding();
             binding.Source = statisticManager.SttKeyboardTotal;
             binding.Path = new PropertyPath("Desc");
@@ -72,6 +73,7 @@ namespace KMS
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop5, TextBlock.TextProperty, binding);
 
+            //全局鼠标统计
             binding = new Binding();
             binding.Source = statisticManager.SttMsLeftBtn;
             binding.Path = new PropertyPath("Desc");
@@ -91,6 +93,27 @@ namespace KMS
             binding.Source = statisticManager.SttMsWheelBackward;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsWheelBackward, TextBlock.TextProperty, binding);
+
+            //今日统计
+            binding = new Binding();
+            binding.Source = statisticManager.SttKeyboardTotalToday;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(KbAllToday, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMouseTotalToday;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MsAllToday, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttLetterTop1Today;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MostLetterToday, TextBlock.TextProperty, binding);
+
+            binding = new Binding();
+            binding.Source = statisticManager.SttMostOpHourToday;
+            binding.Path = new PropertyPath("Desc");
+            BindingOperations.SetBinding(MostOpHourToday, TextBlock.TextProperty, binding);
         }
 
         private void Open_Click(object sender, RoutedEventArgs e)

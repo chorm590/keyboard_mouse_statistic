@@ -109,16 +109,17 @@ namespace KMS.src.core
             internal const byte PUNCTUATION_M3 = 0xbf;   // /
             internal const byte PUNCTUATION_11 = 0xc0;   //`
             internal const byte PUNCTUATION_P1 = 0xdb;   //[
-            internal const byte PUNCTUATION_P3 = 0xdc;   // \
+            internal const byte PUNCTUATION_P3 = 0xdc;   // \符号键
             internal const byte PUNCTUATION_P2 = 0xdd;   //]
             internal const byte PUNCTUATION_L2 = 0xde;   //'
 
             internal const ushort KEYBOARD_TOTAL = 0x100;
             internal const ushort KEYBOARD_COMBOL_TOTAL = 0x101;
+            internal const ushort MOUSE_TOTAL = 0x102;
 
             internal const ushort MOUSE_LEFT_BTN = 0x200;
             internal const ushort MOUSE_RIGHT_BTN = 0x201;
-            internal const ushort MOUSE_WHEEL_FORWARD = 0x201;
+            internal const ushort MOUSE_WHEEL_FORWARD = 0x202;
             internal const ushort MOUSE_WHEEL_BACKWARD = 0x203;
             internal const ushort MOUSE_WHEEL_CLICK = 0x204;
             internal const ushort MOUSE_SIDE_FORWARD = 0x205;
@@ -137,6 +138,8 @@ namespace KMS.src.core
             internal const ushort MS_LBTN_AREA_TOP3 = 0x30a;
             internal const ushort MS_LBTN_AREA_TOP4 = 0x30b;
             internal const ushort MS_LBTN_AREA_TOP5 = 0x30c;
+
+            internal const ushort MOST_OPERATION_HOUR = 0x400;
         }
 
         internal static class HookEvent
@@ -271,29 +274,20 @@ namespace KMS.src.core
             internal const int WM_MOUSESIDEDOWN = 0x20b; //鼠标侧键按下事件（猜测）。
             internal const int WM_MOUSESIDEUP = 0x20c; //鼠标侧键抬起事件（猜测）。
             internal const int WM_MOUSEHWHEEL = 0x20e; //水平方向的滚动，一般鼠标没有这个事件。
-            internal const short MOUSE_LEFT_BTN_AREA = 0x214;
-            internal const short MOUSE_RIGHT_BTN_AREA = 0x215;
         }
 
-        internal static class MouseKey
+
+
+        internal static readonly Dictionary<ushort, Type> MouseKeys = new Dictionary<ushort, Type>
         {
-            internal const short MOUSE_LEFT_BTN = 0x201;
-            internal const short MOUSE_RIGHT_BTN = 0x202;
-            internal const short MOUSE_SIDE_KEY_FORWARD = 0x210;
-            internal const short MOUSE_SIDE_KEY_BACKWARD = 0x211;
-            internal const short MOUSE_WHEEL_FORWARD = 0x212;
-            internal const short MOUSE_WHEEL_BACKWARD = 0x213;
-
-            internal static readonly Dictionary<short, Type> Keys = new Dictionary<short, Type>
-            {
-                {MOUSE_LEFT_BTN,                new Type(0x201,"MOUSE_LEFT_BTN") },
-                {MOUSE_RIGHT_BTN,               new Type(0x202,"MOUSE_RIGHT_BTN")},
-                {MOUSE_SIDE_KEY_FORWARD,        new Type(0x210,"MOUSE_SIDE_KEY_FORWARD")},
-                {MOUSE_SIDE_KEY_BACKWARD,       new Type(0x211,"MOUSE_SIDE_KEY_BACKWARD")},
-                {MOUSE_WHEEL_FORWARD,           new Type(0x212,"MOUSE_WHEEL_FORWARD")},
-                {MOUSE_WHEEL_BACKWARD,          new Type(0x213,"MOUSE_WHEEL_BACKWARD")},
-            };
-        }
+            {TypeNumber.MOUSE_LEFT_BTN,                 new Type(TypeNumber.MOUSE_LEFT_BTN,"MOUSE_LEFT_BTN") },
+            {TypeNumber.MOUSE_RIGHT_BTN,                new Type(TypeNumber.MOUSE_RIGHT_BTN,"MOUSE_RIGHT_BTN")},
+            {TypeNumber.MOUSE_SIDE_FORWARD,             new Type(TypeNumber.MOUSE_SIDE_FORWARD,"MOUSE_SIDE_KEY_FORWARD")},
+            {TypeNumber.MOUSE_SIDE_BACKWARD,            new Type(TypeNumber.MOUSE_SIDE_BACKWARD,"MOUSE_SIDE_KEY_BACKWARD")},
+            {TypeNumber.MOUSE_WHEEL_FORWARD,            new Type(TypeNumber.MOUSE_WHEEL_FORWARD,"MOUSE_WHEEL_FORWARD")},
+            {TypeNumber.MOUSE_WHEEL_BACKWARD,           new Type(TypeNumber.MOUSE_WHEEL_BACKWARD,"MOUSE_WHEEL_BACKWARD")},
+            {TypeNumber.MOUSE_WHEEL_CLICK,              new Type(TypeNumber.MOUSE_WHEEL_CLICK,"MOUSE_WHEEL_CLICK")},
+        };
 
         internal static class MouseDataHighOrder
         {
@@ -303,13 +297,17 @@ namespace KMS.src.core
 
         internal static class Statistic
         {
-            internal static Type KbAll = new Type(TypeNumber.KEYBOARD_TOTAL, "键盘按键");
-            internal static Type KbComboAll = new Type(TypeNumber.KEYBOARD_TOTAL, "键盘组合按键");
+            internal static Type KbTotal = new Type(TypeNumber.KEYBOARD_TOTAL, "键盘事件");
+            internal static Type KbComboTotal = new Type(TypeNumber.KEYBOARD_COMBOL_TOTAL, "键盘组合键事件");
             internal static Type KbSkTop1 = new Type(TypeNumber.KB_SK_TOP1, "Single key top1");
             internal static Type KbSkTop2 = new Type(TypeNumber.KB_SK_TOP2, "Single key top2");
             internal static Type KbSkTop3 = new Type(TypeNumber.KB_SK_TOP3, "Single key top3");
             internal static Type KbSkTop4 = new Type(TypeNumber.KB_SK_TOP3, "Single key top4");
             internal static Type KbSkTop5 = new Type(TypeNumber.KB_SK_TOP3, "Single key top5");
+            internal static Type KbTotalToday = new Type(TypeNumber.KEYBOARD_TOTAL, "键盘事件");
+            internal static Type MsTotalToday = new Type(TypeNumber.MOUSE_TOTAL, "鼠标事件");
+            internal static Type KbLetterTop1Today = new Type(TypeNumber.KB_SK_TOP1, "今日键入最多字母");
+            internal static Type MostOpHourToday = new Type(TypeNumber.MOST_OPERATION_HOUR, "今日操作最多的时段");
         }
     }
 }
