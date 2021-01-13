@@ -217,7 +217,7 @@ namespace KMS.src.db
                 string[] dirs2;
                 List<string> validDb = new List<string>();
                 string str;
-                Regex regex = new Regex("[1-2][0-9][0-9][0-9]");
+                Regex regex = new Regex("[1][9][7-9][0-9]|[2][0][0-9][0-9]");
                 foreach (string dir in dirs)
                 {
                     str = Toolset.GetBasename(dir);
@@ -228,22 +228,7 @@ namespace KMS.src.db
                     if (str.Length != 4)
                         continue;
 
-                    if (regex.IsMatch(str))
-                    {
-                        if (str[0] == '1')
-                        {
-                            if (str[1] != '9')
-                                continue;
-                            else if (str[2] != '7' && str[2] != '8' && str[2] != '9')
-                                continue;
-                        }
-                        else
-                        {
-                            if (str[1] != '0')
-                                continue;
-                        }
-                    }
-                    else
+                    if (!regex.IsMatch(str))
                     {
                         continue;
                     }
