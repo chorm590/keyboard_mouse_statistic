@@ -39,58 +39,58 @@ namespace KMS
         {
             //全局键盘统计
             Binding binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardTotal;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KEYBOARD_TOTAL);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(KbTotal, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttComboKeyTotal;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(ComboTotal, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardSingleKeyTop1;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP1);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop1, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardSingleKeyTop2;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP2);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop2, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardSingleKeyTop3;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP3);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop3, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardSingleKeyTop4;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP4);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop4, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttKeyboardSingleKeyTop5;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP5);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop5, TextBlock.TextProperty, binding);
 
             //全局鼠标统计
             binding = new Binding();
-            binding.Source = statisticManager.SttMsLeftBtn;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_LEFT_BTN);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsLeftBtn, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttMsRightBtn;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_RIGHT_BTN);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsRightBtn, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttMsWheelForward;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsWheelForward, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttMsWheelBackward;
+            binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsWheelBackward, TextBlock.TextProperty, binding);
 

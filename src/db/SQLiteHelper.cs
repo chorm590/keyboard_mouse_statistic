@@ -6,13 +6,14 @@ using System.IO;
 
 namespace KMS.src.db
 {
-    class SQLiteHelper : IDatabase
+    class SQLiteHelper
     {
         private const string TAG = "SQLiteHelper";
 
         private SQLiteConnection sqliteConnection;
         private SQLiteTransaction sqliteTransaction;
         private SQLiteCommand detailCmd;
+        private SQLiteCommand cmd;
 
         public bool openDatabase(string path)
         {
@@ -40,6 +41,8 @@ namespace KMS.src.db
                     File.Move(path, path + "_invalid");
                     return false;
                 }
+
+                cmd = new SQLiteCommand(sqliteConnection);
             }
             catch (Exception)
             {
@@ -145,11 +148,10 @@ namespace KMS.src.db
             return cmd.ExecuteReader();
         }
 
-        public void ExecuteSQL(string sql)
+        internal void ExecuteSQL(string sql)
         {
             if (IsDbReady())
             {
-                SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }

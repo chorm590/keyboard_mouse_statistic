@@ -13,6 +13,9 @@ namespace KMS.src.db
     {
         private const string TAG = "SQLiteManager";
 
+        internal const byte GLOBAL_RECORD = 1;
+        internal const byte CUR_RECORD = 2;
+
         private const string DATABASE_DIR = "data";
         private const string SUMMARY_TABLE = "summary";
         private const string MONTH_SUMMARY_PREFIX = "m";
@@ -91,6 +94,7 @@ namespace KMS.src.db
 
         private SQLiteManager()
         {
+            InitDbDirectory();
             totalDatabase = new SQLiteHelper();
             curDatabase = new SQLiteHelper();
         }
@@ -106,15 +110,28 @@ namespace KMS.src.db
             if (!curDatabase.openDatabase(YearDb))
                 return false;
 
-            totalDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + SUMMARY_TABLE + "(type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
-            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + YearTable + "(year SMALLINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
-            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + MonthTable + "(year SMALLINT NOT NULL,month TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
-            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + DayTable + 
-                "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
-            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + HourTable + 
-                "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+            
+            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + YearTable + "(year SMALLINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
+            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + MonthTable +
+            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
+            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + DayTable +
+            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
+            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + HourTable +
+            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
 
             return true;
+        }
+
+        internal void UpdateGlobal(ushort type, uint value)
+        {
+            string sql = "UPDATE " + SUMMARY_TABLE + " SET value=" + value + " where type=" + type;
+            totalDatabase.ExecuteSQL(sql);
+        }
+
+        internal void InsertGlobal(ushort type, uint value)
+        {
+            string sql = "INSERT INTO " + SUMMARY_TABLE + " values(" + type + "," + value + ")";
+            totalDatabase.ExecuteSQL(sql);
         }
 
         internal bool UseDatabase(string db)
@@ -139,24 +156,16 @@ namespace KMS.src.db
             return null;
         }
 
-        /// <summary>
-        /// 准备好存储数据库文件的路径。
-        /// </summary>
-        /// <param name="fp"></param>
-        private void initDbFilePath(string fp)
+        private void InitDbDirectory()
         {
-            Logger.v(TAG, "path:" + fp);
-            if (fp == null || fp.Length == 0)
-                throw new ArgumentNullException("file path cannot be null or empty");
-
-            if (!File.Exists(fp))
+            if (File.Exists(DATABASE_DIR))
             {
-                string parentPath = Toolset.GetParentPath(fp);
-                Logger.v(TAG, "parent path:" + parentPath);
-                if (!Directory.Exists(parentPath))
-                {
-                    Directory.CreateDirectory(parentPath);
-                }
+                File.Move(DATABASE_DIR, DATABASE_DIR + "_rename");
+            }
+
+            if (!Directory.Exists(DATABASE_DIR))
+            {
+                Directory.CreateDirectory(DATABASE_DIR);
             }
         }
 
@@ -166,10 +175,14 @@ namespace KMS.src.db
             //    sqliteHelper.closeDababase();
         }
 
-        internal bool BeginTransaction()
+        internal bool BeginTransaction(byte which)
         {
-            //return sqliteHelper.BeginTransaction();
-            return false;
+            if (which == GLOBAL_RECORD)
+                return totalDatabase.BeginTransaction();
+            else if (which == CUR_RECORD)
+                return curDatabase.BeginTransaction();
+            else
+                return false;
         }
 
         internal void InsertDetail(string str)
@@ -177,9 +190,12 @@ namespace KMS.src.db
             //sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
         }
 
-        internal void CommitTransaction()
+        internal void CommitTransaction(byte which)
         {
-            //sqliteHelper.CommitTransaction();
+            if(which == GLOBAL_RECORD)
+                totalDatabase.CommitTransaction();
+            else if(which == CUR_RECORD)
+                curDatabase.CommitTransaction();
         }
 
         private void timerCallback(object state)
@@ -317,6 +333,16 @@ namespace KMS.src.db
             {
                 return null;
             }
+        }
+
+        internal bool IsGlobalTableExists()
+        {
+            return totalDatabase.isTableExist(SUMMARY_TABLE);
+        }
+
+        internal void CreateGlobalTable()
+        {
+            totalDatabase.ExecuteSQL("CREATE TABLE " + SUMMARY_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
         }
     }
 }

@@ -209,6 +209,12 @@ namespace KMS.src.db
             }
         }
 
+        internal bool IsUpdated
+        {
+            get;
+            set;
+        }
+
         internal void SetTime(DateTime time)
         {
             Year = (short)time.Year;

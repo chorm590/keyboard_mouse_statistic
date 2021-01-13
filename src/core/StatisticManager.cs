@@ -31,18 +31,13 @@ namespace KMS.src.core
         private readonly double screenAreaWidth;
         private readonly double screenAreaHeight;
 
-        private readonly List<Event> sttKbSingleKey; //键盘各单键的敲击总数。
         private readonly Dictionary<byte, ushort> opInHour; //今日各时段的操作记数。
-
-        private readonly EventToDbManager eventToDbManager;
 
         private readonly Statistic statisticGlobal;
         private readonly Statistic statisticYear;
         private readonly Statistic statisticMonth;
         private readonly Statistic statisticDay;
         private readonly Statistic statisticHour;
-
-
 
         internal Event SttKeyboardTotalToday
         {
@@ -66,9 +61,6 @@ namespace KMS.src.core
 
         private StatisticManager()
         {
-            //Statistic of all
-
-
             //Statistic of today
             SttKeyboardTotalToday = new Event()
             {
@@ -92,25 +84,11 @@ namespace KMS.src.core
 
             opInHour = new Dictionary<byte, ushort>(24);
 
-            //Statistic of keyboard single key
-            Dictionary<byte, Key> sgKey = Constants.Keyboard;
-            sttKbSingleKey = new List<Event>(sgKey.Count);
-            Dictionary<byte, Key>.ValueCollection values = sgKey.Values;
-            foreach (Key key in values)
-            {
-                sttKbSingleKey.Add(new Event(key.Type)); //Should not care about the display name
-            }
-            Logger.v(TAG, "single key count:" + sttKbSingleKey.Count + ", capacity:" + sttKbSingleKey.Capacity);
-
-            //Statistic of mouse
-
-
             //Initialize timer
-            //tool.Timer.RegisterTimerCallback(timerCallback);
-            eventToDbManager = new EventToDbManager();
+            tool.Timer.RegisterTimerCallback(TimerCallback);
 
-            screenAreaWidth = System.Windows.SystemParameters.PrimaryScreenWidth / 10;
-            screenAreaHeight = System.Windows.SystemParameters.PrimaryScreenHeight / 10;
+            screenAreaWidth = SystemParameters.PrimaryScreenWidth / 10;
+            screenAreaHeight = SystemParameters.PrimaryScreenHeight / 10;
             Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
 
             statisticGlobal = new Statistic();
@@ -119,9 +97,20 @@ namespace KMS.src.core
             statisticDay = new Statistic();
             statisticHour = new Statistic();
 
-            if (InitDatabase())
+            if (SQLiteManager.GetInstance.Init())
             {
-                QueryStatisticFromDb();
+                if (SQLiteManager.GetInstance.IsGlobalTableExists())
+                {
+                    QueryStatisticFromDb();
+                }
+                else
+                {
+                    if (!InitDatabase())
+                    {
+                        MessageBox.Show("Can't init the database");
+                        Application.Current.Shutdown();
+                    }
+                }
             }
             else
             {
@@ -137,7 +126,113 @@ namespace KMS.src.core
 
         private void TimerCallback(object state)
         {
-            eventToDbManager.storageRecord();
+            DateTime now = DateTime.Now;
+            Logger.v(TAG, "TimerCallback,now1, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
+            //storage the global record.
+            if (SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.GLOBAL_RECORD))
+            {
+                if (statisticGlobal.KeyboardTotal.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.KeyboardTotal.Type, statisticGlobal.KeyboardTotal.Value);
+                    statisticGlobal.KeyboardTotal.IsUpdated = false;
+
+                    if (statisticGlobal.KeyboardComboTotal.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.KeyboardComboTotal.Type, statisticGlobal.KeyboardComboTotal.Value);
+                        statisticGlobal.KeyboardComboTotal.IsUpdated = false;
+                    }
+
+                    if (statisticGlobal.MouseLeftBtn.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseLeftBtn.Type, statisticGlobal.MouseLeftBtn.Value);
+                        statisticGlobal.MouseLeftBtn.IsUpdated = false;
+                    }
+
+                    if(statisticGlobal.MouseRightBtn.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseRightBtn.Type, statisticGlobal.MouseRightBtn.Value);
+                        statisticGlobal.MouseRightBtn.IsUpdated = false;
+                    }
+
+                    if(statisticGlobal.MouseWheelForward.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseWheelForward.Type, statisticGlobal.MouseWheelForward.Value);
+                        statisticGlobal.MouseWheelForward.IsUpdated = false;
+                    }
+
+                    if (statisticGlobal.MouseWheelBackward.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseWheelBackward.Type, statisticGlobal.MouseWheelBackward.Value);
+                        statisticGlobal.MouseWheelBackward.IsUpdated = false;
+                    }
+
+                    if (statisticGlobal.MouseSideKeyForward.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseSideKeyForward.Type, statisticGlobal.MouseSideKeyForward.Value);
+                        statisticGlobal.MouseSideKeyForward.IsUpdated = false;
+                    }
+
+                    if (statisticGlobal.MouseSideKeyBackward.IsUpdated)
+                    {
+                        SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseSideKeyBackward.Type, statisticGlobal.MouseSideKeyBackward.Value);
+                        statisticGlobal.MouseSideKeyBackward.IsUpdated = false;
+                    }
+
+                    List<Record> list = new List<Record>();
+                    if (statisticGlobal.CopyKeys(list))
+                    {
+                        foreach (Record rco in list)
+                        {
+                            if (rco.IsUpdated)
+                            {
+                                SQLiteManager.GetInstance.UpdateGlobal(rco.Type, rco.Value);
+                                rco.IsUpdated = false;
+                            }
+                        }
+                    }
+
+                    SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.GLOBAL_RECORD);
+                }
+
+                if (statisticGlobal.MouseLeftBtn.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseLeftBtn.Type, statisticGlobal.MouseLeftBtn.Value);
+                    statisticGlobal.MouseLeftBtn.IsUpdated = false;
+                }
+
+                if (statisticGlobal.MouseRightBtn.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseRightBtn.Type, statisticGlobal.MouseRightBtn.Value);
+                    statisticGlobal.MouseRightBtn.IsUpdated = false;
+                }
+
+                if (statisticGlobal.MouseWheelForward.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseWheelForward.Type, statisticGlobal.MouseWheelForward.Value);
+                    statisticGlobal.MouseWheelForward.IsUpdated = false;
+                }
+
+                if (statisticGlobal.MouseWheelBackward.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseWheelBackward.Type, statisticGlobal.MouseWheelBackward.Value);
+                    statisticGlobal.MouseWheelBackward.IsUpdated = false;
+                }
+
+                if (statisticGlobal.MouseSideKeyForward.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseSideKeyForward.Type, statisticGlobal.MouseSideKeyForward.Value);
+                    statisticGlobal.MouseSideKeyForward.IsUpdated = false;
+                }
+
+                if (statisticGlobal.MouseSideKeyBackward.IsUpdated)
+                {
+                    SQLiteManager.GetInstance.UpdateGlobal(statisticGlobal.MouseSideKeyBackward.Type, statisticGlobal.MouseSideKeyBackward.Value);
+                    statisticGlobal.MouseSideKeyBackward.IsUpdated = false;
+                }
+            }
+
+            now = DateTime.Now;
+            Logger.v(TAG, "TimerCallback,now2, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
         }
 
         internal void KeyboardEventHappen(int typeCode, byte fkey, DateTime time)
@@ -152,13 +247,23 @@ namespace KMS.src.core
             }
             else if (typeCode < 256)
             {
-                SttKeyboardTotal.Value++;
-                SttKeyboardTotal.Desc = GetDesc1(SttKeyboardTotal.Value);
+                statisticGlobal.KeyboardTotal.Value++;
+                statisticGlobal.KeyboardTotal.Desc = GetDesc1(statisticGlobal.KeyboardTotal.Value);
+                statisticGlobal.KeyboardTotal.IsUpdated = true;
+
+                //statisticYear.KeyboardTotal.Value++;
+                //statisticMonth.KeyboardTotal.Value++;
+                //statisticDay.KeyboardTotal.Value++;
                 
                 if (fkey > 0)
                 {
-                    SttComboKeyTotal.Value++;
-                    SttComboKeyTotal.Desc = GetDesc1(SttComboKeyTotal.Value);
+                    statisticGlobal.KeyboardComboTotal.Value++;
+                    statisticGlobal.KeyboardComboTotal.Desc = GetDesc1(statisticGlobal.KeyboardComboTotal.Value);
+                    statisticGlobal.KeyboardComboTotal.IsUpdated = true;
+
+                    //statisticYear.KeyboardComboTotal.Value++;
+                    //statisticMonth.KeyboardComboTotal.Value++;
+                    //statisticDay.KeyboardComboTotal.Value++;
                 }
 
                 SttKeyboardTotalToday.Value++;
@@ -167,9 +272,6 @@ namespace KMS.src.core
                 UpdateOpInHour(time.Hour, 1);
 
                 KbSingleKeyPressed(typeCode);
-
-                //eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
-                //    (short)typeCode, fkey, 0);
                 
                 //storage total statistic
                 //storage year statistic
@@ -189,36 +291,69 @@ namespace KMS.src.core
             switch (typeCode)
             {
                 case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
-                    SttMsWheelBackward.Value += (ushort)mouseData;
-                    SttMsWheelBackward.Desc = SttMsWheelBackward.Value + " 次";
+                    statisticGlobal.MouseWheelBackward.Value += (ushort)mouseData;
+                    statisticGlobal.MouseWheelBackward.Desc = GetDesc1(statisticGlobal.MouseWheelBackward.Value);
+                    statisticGlobal.MouseWheelBackward.IsUpdated = true;
+
+                    statisticYear.MouseWheelBackward.Value += (ushort)mouseData;
+                    statisticMonth.MouseWheelBackward.Value += (ushort)mouseData;
+                    statisticDay.MouseWheelBackward.Value += (ushort)mouseData;
                     break;
                 case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
-                    SttMsWheelForward.Value += (ushort)mouseData;
-                    SttMsWheelForward.Desc = SttMsWheelForward.Value + " 次";
+                    statisticGlobal.MouseWheelForward.Value += (ushort)mouseData;
+                    statisticGlobal.MouseWheelForward.Desc = GetDesc1(statisticGlobal.MouseWheelForward.Value);
+                    statisticGlobal.MouseWheelForward.IsUpdated = true;
+
+                    statisticYear.MouseWheelBackward.Value += (ushort)mouseData;
+                    statisticMonth.MouseWheelBackward.Value += (ushort)mouseData;
+                    statisticDay.MouseWheelBackward.Value += (ushort)mouseData;
                     break;
                 case Constants.TypeNumber.MOUSE_WHEEL_CLICK:
-                    SttMsWheelClick.Value += (ushort)mouseData;
-                    SttMsWheelClick.Desc = SttMsWheelClick.Value + " 次";
+                    statisticGlobal.MouseWheelClick.Value++;
+                    statisticGlobal.MouseWheelClick.Desc = GetDesc1(statisticGlobal.MouseWheelClick.Value);
+                    statisticGlobal.MouseWheelClick.IsUpdated = true;
+
+                    statisticYear.MouseWheelBackward.Value++;
+                    statisticMonth.MouseWheelBackward.Value++;
+                    statisticDay.MouseWheelBackward.Value++;
                     break;
                 case Constants.TypeNumber.MOUSE_LEFT_BTN:
-                    SttMsLeftBtn.Value++;
-                    SttMsLeftBtn.Desc = SttMsLeftBtn.Value + " 次";
+                    statisticGlobal.MouseLeftBtn.Value++;
+                    statisticGlobal.MouseLeftBtn.Desc = GetDesc1(statisticGlobal.MouseLeftBtn.Value);
+                    statisticGlobal.MouseLeftBtn.IsUpdated = true;
                     mouseData = getScreenArea(x, y);
+
+                    statisticYear.MouseWheelBackward.Value++;
+                    statisticMonth.MouseWheelBackward.Value++;
+                    statisticDay.MouseWheelBackward.Value++;
                     break;
                 case Constants.TypeNumber.MOUSE_RIGHT_BTN:
-                    SttMsRightBtn.Value++;
-                    SttMsRightBtn.Desc = SttMsRightBtn.Value + " 次";
+                    statisticGlobal.MouseRightBtn.Value++;
+                    statisticGlobal.MouseRightBtn.Desc = GetDesc1(statisticGlobal.MouseRightBtn.Value);
+                    statisticGlobal.MouseRightBtn.IsUpdated = true;
                     mouseData = getScreenArea(x, y);
+
+                    statisticYear.MouseWheelBackward.Value++;
+                    statisticMonth.MouseWheelBackward.Value++;
+                    statisticDay.MouseWheelBackward.Value++;
                     break;
                 case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
-                    SttMsSideForward.Value++;
-                    SttMsSideForward.Desc = SttMsSideForward.Value + " 次";
-                    mouseData = getScreenArea(x, y);
+                    statisticGlobal.MouseSideKeyForward.Value++;
+                    statisticGlobal.MouseSideKeyForward.Desc = GetDesc1(statisticGlobal.MouseSideKeyForward.Value);
+                    statisticGlobal.MouseSideKeyForward.IsUpdated = true;
+
+                    statisticYear.MouseWheelBackward.Value++;
+                    statisticMonth.MouseWheelBackward.Value++;
+                    statisticDay.MouseWheelBackward.Value++;
                     break;
                 case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
-                    SttMsSideBackward.Value++;
-                    SttMsSideBackward.Desc = SttMsSideBackward.Value + " 次";
-                    mouseData = getScreenArea(x, y);
+                    statisticGlobal.MouseSideKeyBackward.Value++;
+                    statisticGlobal.MouseSideKeyBackward.Desc = GetDesc1(statisticGlobal.MouseSideKeyBackward.Value);
+                    statisticGlobal.MouseSideKeyBackward.IsUpdated = true;
+
+                    statisticYear.MouseWheelBackward.Value++;
+                    statisticMonth.MouseWheelBackward.Value++;
+                    statisticDay.MouseWheelBackward.Value++;
                     break;
                 default:
                     break;
@@ -243,12 +378,7 @@ namespace KMS.src.core
                     break;
             }
 
-            SttMouseTotalToday.Desc = SttMouseTotalToday.Value + " 次";
-
-            eventToDbManager.Add((ushort)time.Year, (byte)time.Month, (byte)time.Day, (byte)time.Hour, (byte)time.Minute, (byte)time.Second,
-                    (short)typeCode,
-                    0,
-                    (ushort)mouseData);
+            SttMouseTotalToday.Desc = GetDesc1(SttMouseTotalToday.Value);
         }
 
         private ushort getScreenArea(short x, short y)
@@ -258,48 +388,60 @@ namespace KMS.src.core
 
         private void KbSingleKeyPressed(int keycode)
         {
-            foreach (Event kevt in sttKbSingleKey)
+            SingleKeyRecord(statisticGlobal.KeyboardKeys, (byte)keycode);
+            SingleKeyRecord(statisticYear.KeyboardKeys, (byte)keycode);
+            SingleKeyRecord(statisticMonth.KeyboardKeys, (byte)keycode);
+            SingleKeyRecord(statisticDay.KeyboardKeys, (byte)keycode);
+
+            statisticGlobal.SortKeys();
+            if (statisticGlobal.KeyboardKeys[0].Value > 0)
             {
-                if (kevt.Type.Code == keycode)
-                {
-                    kevt.Value++;
-                    break;
-                }
+                statisticGlobal.KeyboardSkTop1.Desc = GetDesc2(Constants.Keyboard[(byte)(statisticGlobal.KeyboardKeys[0].Type)].DisplayName, statisticGlobal.KeyboardKeys[0].Value);
             }
 
-            sttKbSingleKey.Sort();
-            if (sttKbSingleKey[0].Value > 0)
+            if (statisticGlobal.KeyboardKeys[1].Value > 0)
             {
-                SttKeyboardSingleKeyTop1.Desc = GetDesc2(Constants.Keyboard[(byte)(sttKbSingleKey[0].Type.Code)].DisplayName, sttKbSingleKey[0].Value);
+                statisticGlobal.KeyboardSkTop2.Desc = GetDesc2(Constants.Keyboard[(byte)(statisticGlobal.KeyboardKeys[1].Type)].DisplayName, statisticGlobal.KeyboardKeys[1].Value);
             }
 
-            if (sttKbSingleKey[1].Value > 0)
+            if (statisticGlobal.KeyboardKeys[2].Value > 0)
             {
-                SttKeyboardSingleKeyTop2.Desc = GetDesc2(Constants.Keyboard[(byte)(sttKbSingleKey[1].Type.Code)].DisplayName, sttKbSingleKey[1].Value);
+                statisticGlobal.KeyboardSkTop3.Desc = GetDesc2(Constants.Keyboard[(byte)(statisticGlobal.KeyboardKeys[2].Type)].DisplayName, statisticGlobal.KeyboardKeys[2].Value);
             }
 
-            if (sttKbSingleKey[2].Value > 0)
+            if (statisticGlobal.KeyboardKeys[3].Value > 0)
             {
-                SttKeyboardSingleKeyTop3.Desc = GetDesc2(Constants.Keyboard[(byte)(sttKbSingleKey[2].Type.Code)].DisplayName, sttKbSingleKey[2].Value);
+                statisticGlobal.KeyboardSkTop4.Desc = GetDesc2(Constants.Keyboard[(byte)(statisticGlobal.KeyboardKeys[3].Type)].DisplayName, statisticGlobal.KeyboardKeys[3].Value);
             }
 
-            if (sttKbSingleKey[3].Value > 0)
+            if (statisticGlobal.KeyboardKeys[4].Value > 0)
             {
-                SttKeyboardSingleKeyTop4.Desc = GetDesc2(Constants.Keyboard[(byte)(sttKbSingleKey[3].Type.Code)].DisplayName, sttKbSingleKey[3].Value);
-            }
-
-            if (sttKbSingleKey[4].Value > 0)
-            {
-                SttKeyboardSingleKeyTop5.Desc = GetDesc2(Constants.Keyboard[(byte)(sttKbSingleKey[4].Type.Code)].DisplayName, sttKbSingleKey[4].Value);
+                statisticGlobal.KeyboardSkTop5.Desc = GetDesc2(Constants.Keyboard[(byte)(statisticGlobal.KeyboardKeys[4].Type)].DisplayName, statisticGlobal.KeyboardKeys[4].Value);
             }
 
             //Find the most typed letter
-            foreach (Event kevt in sttKbSingleKey)
+            foreach (Record rco in statisticGlobal.KeyboardKeys)
             {
-                if (kevt.Type.Code >= Constants.TypeNumber.A && kevt.Type.Code <= Constants.TypeNumber.Z)
+                if (rco.Type >= Constants.TypeNumber.A && rco.Type <= Constants.TypeNumber.Z)
                 {
-                    SttLetterTop1Today.Value = kevt.Value;
-                    SttLetterTop1Today.Desc = GetDesc2(kevt.Type.Desc, kevt.Value);
+                    SttLetterTop1Today.Value = rco.Value;
+                    SttLetterTop1Today.Desc = GetDesc2(Constants.Keyboard[(byte)(rco.Type)].DisplayName, rco.Value);
+                    break;
+                }
+            }
+        }
+
+        private void SingleKeyRecord(List<Record> list, byte keycode)
+        {
+            if (list == null)
+                return;
+
+            foreach (Record rco in list)
+            {
+                if (rco.Type == keycode)
+                {
+                    rco.Value++;
+                    rco.IsUpdated = true;
                     break;
                 }
             }
@@ -342,7 +484,40 @@ namespace KMS.src.core
 
         private bool InitDatabase()
         {
-            return SQLiteManager.GetInstance.Init();
+            DateTime now = DateTime.Now;
+            Logger.v(TAG, "init table,now1, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
+            SQLiteManager.GetInstance.CreateGlobalTable();
+            //插入所有记录。
+            if (SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.GLOBAL_RECORD))
+            {
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.KeyboardTotal.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.KeyboardComboTotal.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseTotal.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseLeftBtn.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseRightBtn.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseWheelForward.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseWheelBackward.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseWheelClick.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseSideKeyForward.Type, 0);
+                SQLiteManager.GetInstance.InsertGlobal(statisticGlobal.MouseSideKeyBackward.Type, 0);
+                List<Record> list = new List<Record>();
+                if (statisticGlobal.CopyKeys(list))
+                {
+                    foreach (Record rco in list)
+                    {
+                        SQLiteManager.GetInstance.InsertGlobal(rco.Type, 0);
+                    }
+                }
+
+                SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.GLOBAL_RECORD);
+                now = DateTime.Now;
+                Logger.v(TAG, "init table,now2, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -358,23 +533,23 @@ namespace KMS.src.core
             }
 
             DateTime now = DateTime.Now;
-            Logger.v(TAG, "now,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
+            Logger.v(TAG, "bootup,now,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
             ushort type;
             uint value;
             bool noRecord = true;
             while (reader.Read())
             {
                 noRecord = false;
-                type = (ushort)reader.GetInt16(1);
-                value = (ushort)reader.GetInt16(2);
+                type = (ushort)reader.GetInt16(0);
+                value = (ushort)reader.GetInt16(1);
 
                 if (type > 0 && type < 256)
                 {
-                    foreach (Event kev in sttKbSingleKey)
+                    foreach (Record rco in statisticGlobal.KeyboardKeys)
                     {
-                        if (kev.Type.Code == type)
+                        if (rco.Type == type)
                         {
-                            kev.Value++;
+                            rco.Value += value;
                             break;
                         }
                     }
@@ -384,22 +559,28 @@ namespace KMS.src.core
                     switch (type)
                     {
                         case Constants.TypeNumber.KEYBOARD_TOTAL:
-                            SttKeyboardTotal.Value += value;
+                            statisticGlobal.KeyboardTotal.Value += value;
                             break;
                         case Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL:
-                            SttComboKeyTotal.Value += value;
+                            statisticGlobal.KeyboardComboTotal.Value += value;
                             break;
                         case Constants.TypeNumber.MOUSE_LEFT_BTN:
-                            SttMsLeftBtn.Value++;
+                            statisticGlobal.MouseLeftBtn.Value += value;
                             break;
                         case Constants.TypeNumber.MOUSE_RIGHT_BTN:
-                            SttMsRightBtn.Value++;
+                            statisticGlobal.MouseRightBtn.Value += value;
                             break;
                         case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
-                            SttMsWheelForward.Value++;
+                            statisticGlobal.MouseWheelForward.Value += value;
                             break;
                         case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
-                            SttMsWheelBackward.Value++;
+                            statisticGlobal.MouseWheelBackward.Value += value;
+                            break;
+                        case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
+                            statisticGlobal.MouseSideKeyForward.Value += value;
+                            break;
+                        case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
+                            statisticGlobal.MouseSideKeyBackward.Value += value;
                             break;
                     }
                 }
@@ -412,22 +593,22 @@ namespace KMS.src.core
                 return;
             }
 
-            SttKeyboardTotal.Desc = GetDesc1(SttKeyboardTotal.Value);
-            SttComboKeyTotal.Desc = GetDesc1(SttComboKeyTotal.Value);
-            sttKbSingleKey.Sort();
-            SttKeyboardSingleKeyTop1.Desc = GetDesc2(sttKbSingleKey[0].Type.Desc, sttKbSingleKey[0].Value);
-            SttKeyboardSingleKeyTop2.Desc = GetDesc2(sttKbSingleKey[1].Type.Desc, sttKbSingleKey[1].Value);
-            SttKeyboardSingleKeyTop3.Desc = GetDesc2(sttKbSingleKey[2].Type.Desc, sttKbSingleKey[2].Value);
-            SttKeyboardSingleKeyTop4.Desc = GetDesc2(sttKbSingleKey[3].Type.Desc, sttKbSingleKey[3].Value);
-            SttKeyboardSingleKeyTop5.Desc = GetDesc2(sttKbSingleKey[4].Type.Desc, sttKbSingleKey[4].Value);
+            statisticGlobal.KeyboardTotal.Desc = GetDesc1(statisticGlobal.KeyboardTotal.Value);
+            statisticGlobal.KeyboardComboTotal.Desc = GetDesc1(statisticGlobal.KeyboardComboTotal.Value);
+            statisticGlobal.SortKeys();
+            statisticGlobal.KeyboardSkTop1.Desc = GetDesc2(Constants.Keyboard[(byte)statisticGlobal.KeyboardKeys[0].Type].DisplayName, statisticGlobal.KeyboardKeys[0].Value);
+            statisticGlobal.KeyboardSkTop2.Desc = GetDesc2(Constants.Keyboard[(byte)statisticGlobal.KeyboardKeys[1].Type].DisplayName, statisticGlobal.KeyboardKeys[1].Value);
+            statisticGlobal.KeyboardSkTop3.Desc = GetDesc2(Constants.Keyboard[(byte)statisticGlobal.KeyboardKeys[2].Type].DisplayName, statisticGlobal.KeyboardKeys[2].Value);
+            statisticGlobal.KeyboardSkTop4.Desc = GetDesc2(Constants.Keyboard[(byte)statisticGlobal.KeyboardKeys[3].Type].DisplayName, statisticGlobal.KeyboardKeys[3].Value);
+            statisticGlobal.KeyboardSkTop5.Desc = GetDesc2(Constants.Keyboard[(byte)statisticGlobal.KeyboardKeys[4].Type].DisplayName, statisticGlobal.KeyboardKeys[4].Value);
 
-            SttMsLeftBtn.Desc = GetDesc1(SttMsLeftBtn.Value);
-            SttMsRightBtn.Desc = GetDesc1(SttMsRightBtn.Value);
-            SttMsWheelForward.Desc = GetDesc1(SttMsWheelForward.Value);
-            SttMsWheelBackward.Desc = GetDesc1(SttMsWheelBackward.Value);
+            statisticGlobal.MouseLeftBtn.Desc = GetDesc1(statisticGlobal.MouseLeftBtn.Value);
+            statisticGlobal.MouseRightBtn.Desc = GetDesc1(statisticGlobal.MouseRightBtn.Value);
+            statisticGlobal.MouseWheelForward.Desc = GetDesc1(statisticGlobal.MouseWheelForward.Value);
+            statisticGlobal.MouseWheelBackward.Desc = GetDesc1(statisticGlobal.MouseWheelBackward.Value);
 
             now = DateTime.Now;
-            Logger.v(TAG, "now2,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
+            Logger.v(TAG, "bootup,now2,minue:" + now.Minute + ",second:" + now.Second + ",ms:" + now.Millisecond);
         }
 
         private string GetDesc1(long value)
@@ -440,148 +621,47 @@ namespace KMS.src.core
             return value1 + " [" + value2 + " 次]";
         }
 
-        /// <summary>
-        /// 将由StatisticManager管理的在内存中的事件落地到数据库中。
-        /// </summary>
-        private class EventToDbManager
+        internal Record GetRecord(int type)
         {
-            private const short DEEPTH = 1000; //Enough?
-
-            private EventToDb[] cur;
-            private short counter;
-            private byte status;
-
-            internal EventToDbManager()
+            switch (type)
             {
-                cur = new EventToDb[DEEPTH];
+                case Constants.TypeNumber.KEYBOARD_TOTAL:
+                    return statisticGlobal.KeyboardTotal;
+                case Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL:
+                    return statisticGlobal.KeyboardComboTotal;
+                case Constants.TypeNumber.KB_SK_TOP1:
+                    return statisticGlobal.KeyboardSkTop1;
+                case Constants.TypeNumber.KB_SK_TOP2:
+                    return statisticGlobal.KeyboardSkTop2;
+                case Constants.TypeNumber.KB_SK_TOP3:
+                    return statisticGlobal.KeyboardSkTop3;
+                case Constants.TypeNumber.KB_SK_TOP4:
+                    return statisticGlobal.KeyboardSkTop4;
+                case Constants.TypeNumber.KB_SK_TOP5:
+                    return statisticGlobal.KeyboardSkTop5;
+                case Constants.TypeNumber.MOUSE_LEFT_BTN:
+                    return statisticGlobal.MouseLeftBtn;
+                case Constants.TypeNumber.MOUSE_RIGHT_BTN:
+                    return statisticGlobal.MouseRightBtn;
+                case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
+                    return statisticGlobal.MouseWheelForward;
+                case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
+                    return statisticGlobal.MouseWheelBackward;
             }
 
-            internal void Add(ushort year, byte month, byte day, byte hour, byte minute, byte second, short type, byte fkey, ushort value)
-            {
-                if (status == 0)
-                    status = 1;
-                else
-                {
-                    int tmp = 0;
-                    while (tmp++ < 5)
-                    {
-                        Thread.Sleep(10);
-                        if (status == 0)
-                            break;
-                    }
-
-                    if (status == 0)
-                        status = 1;
-                    else
-                        return;
-                }
-
-                if (status != 1)
-                    return;
-
-                if(cur is null)
-                    return;
-
-                if (counter >= DEEPTH)
-                    return;
-
-                cur[counter].year = year;
-                cur[counter].month = month;
-                cur[counter].day = day;
-                cur[counter].hour = hour;
-                cur[counter].minute = minute;
-                cur[counter].second = second;
-                cur[counter].type = type;
-                cur[counter].fkey = fkey;
-                cur[counter].value = value;
-
-                counter++;
-                status = 0;
-            }
-
-            /// <summary>
-            /// 由TimeManager中的定时器子线程触发调用。
-            /// 将前面积累到的事件存储到数据库中。
-            /// </summary>
-            internal void storageRecord()
-            {
-                if (status == 0)
-                    status = 2;
-                else
-                {
-                    int tmp = 0;
-                    while (tmp++ < 5)
-                    {
-                        Thread.Sleep(10);
-                        if (status == 0)
-                            break;
-                    }
-
-                    if (status == 0)
-                        status = 2;
-                    else
-                        return;
-                }
-
-                if (status != 2)
-                    return;
-
-                short counter2 = counter;
-                EventToDb[] tmp2 = new EventToDb[counter2];
-                for (int i = 0; i < counter2; i++)
-                {
-                    tmp2[i].type = cur[i].type;
-                    tmp2[i].year = cur[i].year;
-                    tmp2[i].month = cur[i].month;
-                    tmp2[i].day = cur[i].day;
-                    tmp2[i].hour = cur[i].hour;
-                    tmp2[i].minute = cur[i].minute;
-                    tmp2[i].second = cur[i].second;
-                    tmp2[i].fkey = cur[i].fkey;
-                    tmp2[i].value = cur[i].value;
-                }
-                counter = 0; //reset it.
-                status = 0; //Important
-
-                Logger.v(TAG, "There's " + counter2 + " records need to be storage.");
-                DateTime dt = DateTime.Now;
-                Logger.v(TAG, "[1] hour:" + dt.Hour + ",minute:" + dt.Minute + ",second:" + dt.Second + ",ms:" + dt.Millisecond);
-                if (SQLiteManager.GetInstance.BeginTransaction())
-                {
-                    string str;
-                    foreach (EventToDb etd in tmp2)
-                    {
-                        str = "VALUES(" + etd.year + "," + etd.month + "," + etd.day + "," + etd.hour + "," + etd.minute + "," + etd.second;
-                        str += "," + etd.type + "," + etd.fkey + "," + etd.value + ")";
-                        SQLiteManager.GetInstance.InsertDetail(str);
-                    }
-                    SQLiteManager.GetInstance.CommitTransaction();
-                    dt = DateTime.Now;
-                    Logger.v(TAG, "[2] hour:" + dt.Hour + ",minute:" + dt.Minute + ",second:" + dt.Second + ",ms:" + dt.Millisecond);
-                }
-                else
-                {
-                    //Do nothing
-                    Logger.v(TAG, "Transaction begin failed");
-                }
-            }
-
-            private struct EventToDb
-            {
-                internal ushort year;
-                internal byte month;
-                internal byte day;
-                internal byte hour;
-                internal byte minute;
-                internal byte second;
-                internal short type;
-                internal byte fkey;
-                internal ushort value;
-            }
+            return null;
         }
 
         private class Statistic
         {
+            internal const byte IDLE = 0;
+            internal const byte SORT1 = 1;
+            internal const byte SORT2 = 2;
+            internal const byte COPY1 = 3;
+            internal const byte COPY2 = 4;
+
+            internal byte ListStatus;
+
             internal Record KeyboardTotal { get; }
             internal Record KeyboardComboTotal { get; }
             internal Record KeyboardSkTop1 { get; }
@@ -643,7 +723,6 @@ namespace KMS.src.core
                 {
                     KeyboardKeys.Add(new Record((ushort)key.Code));
                 }
-                Logger.v(TAG, "single key count:" + KeyboardKeys.Count + ", capacity:" + KeyboardKeys.Capacity);
 
                 MouseTotal = new Record
                 {
@@ -684,6 +763,68 @@ namespace KMS.src.core
                 {
                     Type = Constants.TypeNumber.MOUSE_SIDE_BACKWARD
                 };
+            }
+
+            internal void SortKeys()
+            {
+                if (ListStatus == IDLE)
+                    ListStatus = SORT1;
+
+                if (ListStatus == SORT1)
+                    ListStatus = SORT2;
+
+                if (ListStatus == SORT2)
+                {
+                    KeyboardKeys.Sort();
+                }
+
+                ListStatus = IDLE;
+            }
+
+            internal bool CopyKeys(List<Record> dest)
+            {
+                if (dest is null)
+                    return false;
+                byte counter = 0;
+
+                HELLO:
+                if (ListStatus == IDLE)
+                {
+                    ListStatus = COPY1;
+                }
+                else
+                {
+                    if (counter < 3)
+                    {
+                        Thread.Sleep(30);
+                        counter++;
+                        goto HELLO;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                if (ListStatus == COPY1)
+                {
+                    ListStatus = COPY2;
+                }
+                else
+                {
+                    return false;
+                }
+
+                if (ListStatus == COPY2)
+                {
+                    dest.Clear();
+                    dest.AddRange(KeyboardKeys);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }
