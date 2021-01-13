@@ -7,7 +7,7 @@ namespace KMS.src.core
 
         internal static class TypeNumber
         {
-            internal const short INVALID = 0;
+            internal const ushort INVALID = 0;
 
             internal const byte BACKSPACE = 0x8;
             internal const byte TAB = 0x9;

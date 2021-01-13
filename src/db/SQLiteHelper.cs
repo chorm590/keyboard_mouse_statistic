@@ -16,6 +16,9 @@ namespace KMS.src.db
 
         public bool openDatabase(string path)
         {
+            if (path is null || path.Length == 0)
+                return false;
+
             try
             {
                 sqliteConnection = new SQLiteConnection("data source=" + path);
@@ -46,6 +49,14 @@ namespace KMS.src.db
             return true;
         }
 
+        internal bool IsDbReady()
+        {
+            if (sqliteConnection is null)
+                return false;
+
+            return sqliteConnection.State is ConnectionState.Open;
+        }
+
         internal bool createDetailTable(string name)
         {
             if (name == null || name.Length == 0 || sqliteConnection == null || sqliteConnection.State != ConnectionState.Open)
@@ -64,13 +75,10 @@ namespace KMS.src.db
 
         internal bool isTableExist(string name)
         {
-            if (name == null || name.Length == 0 || sqliteConnection == null || sqliteConnection.State != ConnectionState.Open)
-            {
+            if (name is null || name.Length is 0 || sqliteConnection is null || sqliteConnection.State != ConnectionState.Open)
                 return false;
-            }
 
-            SQLiteCommand cmd = new SQLiteCommand();
-            cmd.Connection = sqliteConnection;
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
 
             cmd.CommandText = "SELECT name FROM sqlite_master where type='table' AND name='" + name + "'";
             SQLiteDataReader reader = cmd.ExecuteReader();
@@ -135,6 +143,16 @@ namespace KMS.src.db
             SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
             cmd.CommandText = "SELECT * FROM " + name;
             return cmd.ExecuteReader();
+        }
+
+        public void ExecuteSQL(string sql)
+        {
+            if (IsDbReady())
+            {
+                SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+                cmd.CommandText = sql;
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }

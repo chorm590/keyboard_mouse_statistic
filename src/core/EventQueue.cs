@@ -63,7 +63,7 @@ namespace KMS.src.core
         /// Can only be call by 'StatisticThread',
         /// copy all the event to another place to process.
         /// </summary>
-        internal static void migrate(ref KMEvent[] e, ref int amount)
+        internal static void Migrate(ref KMEvent[] e, ref int amount)
         {
             if (enqueueStep == EQ_STEP_IDLE)
             {

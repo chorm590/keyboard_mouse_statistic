@@ -22,7 +22,7 @@ namespace KMS.src.core
 
         private const byte MAX_KEY_CHAIN_COUNT = 3;
         private static byte keyChainCount;
-        private static byte fkey; //function key,for day*_detail table.
+        private static byte fkey; //function key,indicate combo key typed.
         private static NormalKey[] keyChain = new NormalKey[MAX_KEY_CHAIN_COUNT]; //最多支持三连普通按键。
         private static NormalKey[] keyChainForDownUp = new NormalKey[MAX_KEY_CHAIN_COUNT];
 
@@ -45,28 +45,28 @@ namespace KMS.src.core
             CanThreadRun = true;
             while (CanThreadRun)
             {
-                statistic();
+                Statistic();
                 Thread.Sleep(2000);
             }
             Logger.v(TAG, "ThreadProc() end");
         }
 
-        private static void statistic()
+        private static void Statistic()
         {
             //Should only be call by sub-thread.
             eventAmount = 0; //Must do.
-            EventQueue.migrate(ref events, ref eventAmount);
+            EventQueue.Migrate(ref events, ref eventAmount);
             Logger.v(TAG, "event amount:" + eventAmount + ", keyChainCount:" + keyChainCount);
 
             for (int idx = 0; idx < eventAmount; idx++)
             {
                 if (events[idx].type == Constants.HookEvent.KEYBOARD_EVENT)
                 {
-                    parseKeyboardEvent(events[idx].eventCode, events[idx].keyCode, events[idx].time);
+                    ParseKeyboardEvent(events[idx].eventCode, events[idx].keyCode, events[idx].time);
                 }
                 else if (events[idx].type == Constants.HookEvent.MOUSE_EVENT)
                 {
-                    parseMouseEvent(events[idx].eventCode, events[idx].keyCode, events[idx].x, events[idx].y, events[idx].time);
+                    ParseMouseEvent(events[idx].eventCode, events[idx].keyCode, events[idx].x, events[idx].y, events[idx].time);
                 }
                 else
                 {
@@ -75,24 +75,24 @@ namespace KMS.src.core
             }
         }
 
-        private static void parseKeyboardEvent(short eventCode, short keyCode, DateTime time)
+        private static void ParseKeyboardEvent(short eventCode, short keyCode, DateTime time)
         {
             switch (eventCode)
             {
                 case Constants.KeyEvent.WM_KEYDOWN:
                 case Constants.KeyEvent.WM_SYSKEYDOWN:
-                    keyDownProcess(keyCode, time);
+                    KeyDownProcess(keyCode, time);
                     break;
                 case Constants.KeyEvent.WM_SYSKEYUP:
                 case Constants.KeyEvent.WM_KEYUP:
-                    keyUpProcess(keyCode, time);
+                    KeyUpProcess(keyCode, time);
                     break;
                 default:
                     break;
             }
         }
 
-        private static void parseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
+        private static void ParseMouseEvent(short eventCode, short mouseData, short x, short y, DateTime time)
         {
             if (eventCode != Constants.MouseEvent.WM_MOUSEWHEEL && msWheelCounter != 0)
             {
@@ -158,7 +158,7 @@ namespace KMS.src.core
             }
         }
 
-        private static void keyDownProcess(short keycode, DateTime time)
+        private static void KeyDownProcess(short keycode, DateTime time)
         {
             //清除普通按键过期事件记录。
             if (keyChainCount > 0)
@@ -345,7 +345,7 @@ namespace KMS.src.core
             }
         }
 
-        private static void keyUpProcess(short keycode, DateTime time)
+        private static void KeyUpProcess(short keycode, DateTime time)
         {
             fkey = 0;
             if (keyChainCount > 0)

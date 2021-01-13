@@ -1,16 +1,14 @@
-﻿using System;
+﻿using KMS.src.core;
+using System;
 using System.ComponentModel;
 
 namespace KMS.src.db
 {
-    /// <summary>
-    /// 一个键鼠事件，包含：1、具体的时间信息；2、事件类型。
-    /// </summary>
-    class Event : IComparable, INotifyPropertyChanged
+    class Record : IComparable, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        private PropertyChangedEventArgs pcaValue;
-        private PropertyChangedEventArgs pcaDesc;
+        private readonly PropertyChangedEventArgs pcaValue;
+        private readonly PropertyChangedEventArgs pcaDesc;
 
         private const short DEF_YEAR = 0;
         private const byte DEF_MONTH = 0;
@@ -25,16 +23,16 @@ namespace KMS.src.db
         private byte hour;
         private byte minute;
         private byte second;
+        private ushort millisecond;
         private uint value;
         private string desc;
 
-
-        internal Event() : this(null)
+        internal Record() : this(Constants.TypeNumber.INVALID)
         {
-        
+
         }
 
-        internal Event(core.Type type)
+        internal Record(ushort type)
         {
             Type = type;
             pcaValue = new PropertyChangedEventArgs("Value");
@@ -152,7 +150,19 @@ namespace KMS.src.db
             }
         }
 
-        internal core.Type Type
+        internal ushort MilliSecond
+        {
+            get { return millisecond; }
+            set
+            {
+                if (value > 999)
+                    millisecond = 0;
+                else
+                    millisecond = value;
+            }
+        }
+
+        internal ushort Type
         {
             get;
             set;
@@ -167,10 +177,17 @@ namespace KMS.src.db
 
             set
             {
-                this.value = value;
-                if (PropertyChanged != null)
+                if (value > 2000000000) //上限20亿
                 {
-                    PropertyChanged.Invoke(this, pcaValue);
+                    this.value = 2000000000;
+                }
+                else
+                {
+                    this.value = value;
+                    if (PropertyChanged != null)
+                    {
+                        PropertyChanged.Invoke(this, pcaValue);
+                    }
                 }
             }
         }
@@ -192,7 +209,7 @@ namespace KMS.src.db
             }
         }
 
-        internal void setTime(DateTime time)
+        internal void SetTime(DateTime time)
         {
             Year = (short)time.Year;
             Month = (byte)time.Month;
@@ -202,14 +219,13 @@ namespace KMS.src.db
             Second = (byte)time.Second;
         }
 
-        public int CompareTo(Object obj)
+        public int CompareTo(object obj)
         {
-            if (obj is Event)
+            if (obj is Record rco)
             {
-                Event evt = (Event)obj;
-                if (evt.Value > Value)
+                if (rco.Value > Value)
                     return 1;
-                else if (evt.Value == Value)
+                else if (rco.Value == Value)
                     return 0;
                 else
                     return -1;

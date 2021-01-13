@@ -13,27 +13,68 @@ namespace KMS.src.db
     {
         private const string TAG = "SQLiteManager";
 
-        private const string DATABASE_DIR = "db";
-        private const string DETAIL_TABLE_PREFIX = "day";
-        private const string DETAIL_TABLE_SUFFIX = "_detail";
+        private const string DATABASE_DIR = "data";
+        private const string SUMMARY_TABLE = "summary";
+        private const string MONTH_SUMMARY_PREFIX = "m";
+        private const string DAY_SUMMARY_PREFIX = "d";
+        private const string HOUR_SUMMARY_PREFIX = "h";
 
         private static SQLiteManager instance;
 
-        private SQLiteHelper sqliteHelper;
+        private SQLiteHelper totalDatabase; //存储全局统计数据
+        private SQLiteHelper curDatabase; //存储本年度统计数据
 
-        private string curDb
+        /// <summary>
+        /// 全局统计数据数据库文件。
+        /// </summary>
+        private string TotalDb
         {
             get
             {
-                return DATABASE_DIR + "/" + TimeManager.TimeUsing.Year + "/" + "kms" + TimeManager.TimeUsing.ToString("yyyyMM") + ".db";
+                return DATABASE_DIR + "/kmsall.db";
             }
         }
 
-        private string curTable
+        /// <summary>
+        /// 本年度统计数据库文件。
+        /// </summary>
+        private string YearDb
         {
             get
             {
-                return DETAIL_TABLE_PREFIX + TimeManager.TimeUsing.Day.ToString() + DETAIL_TABLE_SUFFIX;
+                return DATABASE_DIR + "/kms" + TimeManager.TimeUsing.Year + ".db";
+            }
+        }
+
+        private string YearTable
+        {
+            get
+            {
+                return SUMMARY_TABLE;
+            }
+        }
+
+        private string MonthTable
+        {
+            get
+            {
+                return MONTH_SUMMARY_PREFIX + TimeManager.TimeUsing.Month;
+            }
+        }
+
+        private string DayTable
+        {
+            get
+            {
+                return DAY_SUMMARY_PREFIX + TimeManager.TimeUsing.Day;
+            }
+        }
+
+        private string HourTable
+        {
+            get
+            {
+                return HOUR_SUMMARY_PREFIX + TimeManager.TimeUsing.Day; //yes, it is 'Day'!
             }
         }
 
@@ -50,48 +91,30 @@ namespace KMS.src.db
 
         private SQLiteManager()
         {
-            sqliteHelper = new SQLiteHelper();
-            /*
-            string curDbFile = dbFilePath;
-            //make sure the directories.
-            try
-            {
-                initDbFilePath(curDbFile);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Database initialization failed");
-                Application.Current.Shutdown();
-                return;
-            }
+            totalDatabase = new SQLiteHelper();
+            curDatabase = new SQLiteHelper();
+        }
 
-            //open db.
-            sqliteHelper = new SQLiteHelper();
-            if (!sqliteHelper.openDatabase(curDbFile))
-            {
-                MessageBox.Show("Database open failed");
-                Application.Current.Shutdown();
-                return;
-            }
+        internal bool Init()
+        {
+            if (totalDatabase is null || curDatabase is null)
+                return false;
 
-            curTable = "day" + TimeManager.TimeUsing.Day.ToString() + "_detail";
-            Logger.v(TAG, "current table:" + curTable);
-            try
-            {
-                if (!sqliteHelper.isTableExist(curTable))
-                {
-                    sqliteHelper.createDetailTable(curTable);
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Database exception");
-                Application.Current.Shutdown();
-                return;
-            }
+            if (!totalDatabase.openDatabase(TotalDb))
+                return false;
 
-            tool.Timer.RegisterTimerCallback(timerCallback);
-            */
+            if (!curDatabase.openDatabase(YearDb))
+                return false;
+
+            totalDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + SUMMARY_TABLE + "(type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + YearTable + "(year SMALLINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + MonthTable + "(year SMALLINT NOT NULL,month TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + DayTable + 
+                "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+            curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + HourTable + 
+                "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
+
+            return true;
         }
 
         internal bool UseDatabase(string db)
@@ -99,7 +122,8 @@ namespace KMS.src.db
             if (db is null || db.Length == 0)
                 return false;
 
-            return sqliteHelper.openDatabase(db);
+            //return sqliteHelper.openDatabase(db);
+            return false;
         }
 
         /// <summary>
@@ -107,10 +131,10 @@ namespace KMS.src.db
         /// </summary>
         internal SQLiteDataReader GetEventDetail(byte day)
         {
-            if (sqliteHelper.isTableExist(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX))
-            {
-                return sqliteHelper.QueryTable(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX);
-            }
+            //if (sqliteHelper.isTableExist(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX))
+            //{
+            //    return sqliteHelper.QueryTable(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX);
+            //}
 
             return null;
         }
@@ -138,23 +162,24 @@ namespace KMS.src.db
 
         internal void close()
         {
-            if (sqliteHelper != null)
-                sqliteHelper.closeDababase();
+            //if (sqliteHelper != null)
+            //    sqliteHelper.closeDababase();
         }
 
         internal bool BeginTransaction()
         {
-            return sqliteHelper.BeginTransaction();
+            //return sqliteHelper.BeginTransaction();
+            return false;
         }
 
         internal void InsertDetail(string str)
         {
-            sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
+            //sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
         }
 
         internal void CommitTransaction()
         {
-            sqliteHelper.CommitTransaction();
+            //sqliteHelper.CommitTransaction();
         }
 
         private void timerCallback(object state)
@@ -189,13 +214,13 @@ namespace KMS.src.db
         private void sumDay()
         {
             Logger.v(TAG, "sum the day");
-            string summaryToday = "day" + TimeManager.TimeUsing.Day.ToString() + "_summary";
-            if (sqliteHelper.isTableExist(summaryToday))
-            {
-                sqliteHelper.deleteTable(summaryToday); //Assume it will always success.
-            }
+            //string summaryToday = "day" + TimeManager.TimeUsing.Day.ToString() + "_summary";
+            //if (sqliteHelper.isTableExist(summaryToday))
+            //{
+            //    sqliteHelper.deleteTable(summaryToday); //Assume it will always success.
+            //}
 
-            sqliteHelper.createDaySummaryTable(summaryToday); //Assume it will always success.
+            //sqliteHelper.createDaySummaryTable(summaryToday); //Assume it will always success.
 
             //TODO 
         }
@@ -213,6 +238,7 @@ namespace KMS.src.db
         {
             if (Directory.Exists(DATABASE_DIR))
             {
+                string[] files = Directory.GetFiles(DATABASE_DIR);
                 string[] dirs = Directory.GetDirectories(DATABASE_DIR);
                 string[] dirs2;
                 List<string> validDb = new List<string>();
@@ -253,6 +279,39 @@ namespace KMS.src.db
                     return validDb;
                 else
                     return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        internal SQLiteDataReader QueryTotalStatistic()
+        {
+            if (Directory.Exists(DATABASE_DIR))
+            {
+                if (File.Exists(TotalDb))
+                {
+                    if (totalDatabase.IsDbReady())
+                    {
+                        if (totalDatabase.isTableExist(SUMMARY_TABLE))
+                        {
+                            return totalDatabase.QueryTable(SUMMARY_TABLE);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
