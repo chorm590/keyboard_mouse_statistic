@@ -1,4 +1,5 @@
-﻿using KMS.src.tool;
+﻿using KMS.src.core;
+using KMS.src.tool;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -14,23 +15,24 @@ namespace KMS.src.db
         private const string TAG = "SQLiteManager";
 
         internal const byte GLOBAL_RECORD = 1;
-        internal const byte CUR_RECORD = 2;
+        internal const byte YEAR_RECORD = 2;
 
         private const string DATABASE_DIR = "data";
-        private const string SUMMARY_TABLE = "summary";
-        private const string MONTH_SUMMARY_PREFIX = "m";
-        private const string DAY_SUMMARY_PREFIX = "d";
-        private const string HOUR_SUMMARY_PREFIX = "h";
+        private const string GLOBAL_TABLE = "global";
+        private const string YEAR_TABLE = "year";
+        private const string MONTH_TABLE = "month";
+        private const string DAY_TABLE = "day";
+        private const string HOUR_TABLE = "hour";
 
         private static SQLiteManager instance;
 
         private SQLiteHelper totalDatabase; //存储全局统计数据
-        private SQLiteHelper curDatabase; //存储本年度统计数据
+        private SQLiteHelper yearDatabase; //存储本年度统计数据
 
         /// <summary>
         /// 全局统计数据数据库文件。
         /// </summary>
-        private string TotalDb
+        private string GlobalDb
         {
             get
             {
@@ -49,38 +51,6 @@ namespace KMS.src.db
             }
         }
 
-        private string YearTable
-        {
-            get
-            {
-                return SUMMARY_TABLE;
-            }
-        }
-
-        private string MonthTable
-        {
-            get
-            {
-                return MONTH_SUMMARY_PREFIX + TimeManager.TimeUsing.Month;
-            }
-        }
-
-        private string DayTable
-        {
-            get
-            {
-                return DAY_SUMMARY_PREFIX + TimeManager.TimeUsing.Day;
-            }
-        }
-
-        private string HourTable
-        {
-            get
-            {
-                return HOUR_SUMMARY_PREFIX + TimeManager.TimeUsing.Day; //yes, it is 'Day'!
-            }
-        }
-
         internal static SQLiteManager GetInstance
         {
             get
@@ -96,42 +66,193 @@ namespace KMS.src.db
         {
             InitDbDirectory();
             totalDatabase = new SQLiteHelper();
-            curDatabase = new SQLiteHelper();
+            yearDatabase = new SQLiteHelper();
         }
 
+        /// <summary>
+        /// 连接到全局数据库与年度数据库。
+        /// </summary>
+        /// <returns>true 两个数据库均已正常连接。false 未能全部正常创建连接。</returns>
         internal bool Init()
         {
-            if (totalDatabase is null || curDatabase is null)
+            if (totalDatabase is null || yearDatabase is null)
                 return false;
 
-            if (!totalDatabase.openDatabase(TotalDb))
+            if (!totalDatabase.openDatabase(GlobalDb))
                 return false;
 
-            if (!curDatabase.openDatabase(YearDb))
+            if (!yearDatabase.openDatabase(YearDb))
                 return false;
-
-            
-            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + YearTable + "(year SMALLINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
-            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + MonthTable +
-            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
-            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + DayTable +
-            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
-            //curDatabase.ExecuteSQL("CREATE TABLE IF NOT EXISTS " + HourTable +
-            //    "(year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value INTEGER DEFAULT 0)");
 
             return true;
         }
 
-        internal void UpdateGlobal(ushort type, uint value)
+        /// <summary>
+        /// 检查全局库、年度库中各对应表是否存在，若不存在，则创建表并为各统计字段插入初始值。
+        /// 2021-01-14 12:07
+        /// </summary>
+        internal void InitTable()
         {
-            string sql = "UPDATE " + SUMMARY_TABLE + " SET value=" + value + " where type=" + type;
-            totalDatabase.ExecuteSQL(sql);
+            if (!totalDatabase.isTableExist(GLOBAL_TABLE))
+            {
+                Logger.v(TAG, "creating global table");
+                totalDatabase.ExecuteSQL("CREATE TABLE " + GLOBAL_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
+                if (totalDatabase.BeginTransaction())
+                {
+                    InsertGlobal(Constants.TypeNumber.KEYBOARD_TOTAL, 0);
+                    InsertGlobal(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_TOTAL, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_LEFT_BTN, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_RIGHT_BTN, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_CLICK, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_SIDE_FORWARD, 0);
+                    InsertGlobal(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, 0);
+
+                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                    foreach (byte keycode in keys)
+                    {
+                        InsertGlobal(keycode, 0);
+                    }
+
+                    totalDatabase.CommitTransaction();
+                }
+                else
+                {
+                    MessageBox.Show("Init database failed");
+                    throw new Exception();
+                }
+            }
+
+            if (!yearDatabase.isTableExist(YEAR_TABLE))
+            {
+                Logger.v(TAG, "creating year table");
+                yearDatabase.ExecuteSQL("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0,year SMALLINT NOT NULL)");
+                if (yearDatabase.BeginTransaction())
+                {
+                    InsertYear(Constants.TypeNumber.KEYBOARD_TOTAL);
+                    InsertYear(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                    InsertYear(Constants.TypeNumber.MOUSE_TOTAL);
+                    InsertYear(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                    InsertYear(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                    InsertYear(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                    InsertYear(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                    InsertYear(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                    InsertYear(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                    InsertYear(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+
+                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                    foreach (byte keycode in keys)
+                    {
+                        InsertYear(keycode);
+                    }
+
+                    yearDatabase.CommitTransaction();
+                }
+                else
+                {
+                    MessageBox.Show("Init database failed");
+                    throw new Exception();
+                }
+            }
+
+            if (!yearDatabase.isTableExist(MONTH_TABLE))
+            {
+                Logger.v(TAG, "creating month table");
+                yearDatabase.ExecuteSQL("CREATE TABLE " + MONTH_TABLE +
+                    "(type SMALLINT NOT NULL,value INTEGER DEFAULT 0,year SMALLINT NOT NULL,month TINYINT NOT NULL)");
+                if (yearDatabase.BeginTransaction())
+                {
+                    InsertMonth(Constants.TypeNumber.KEYBOARD_TOTAL);
+                    InsertMonth(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                    InsertMonth(Constants.TypeNumber.MOUSE_TOTAL);
+                    InsertMonth(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                    InsertMonth(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                    InsertMonth(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                    InsertMonth(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+
+                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                    foreach (byte keycode in keys)
+                    {
+                        InsertMonth(keycode);
+                    }
+
+                    yearDatabase.CommitTransaction();
+                }
+                else
+                {
+                    MessageBox.Show("Init database failed");
+                    throw new Exception();
+                }
+            }
+
+            if (!yearDatabase.isTableExist(DAY_TABLE))
+            {
+                Logger.v(TAG, "creating day table");
+                yearDatabase.ExecuteSQL("CREATE TABLE " + DAY_TABLE +
+                    "(type SMALLINT NOT NULL,value INTEGER DEFAULT 0,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL)");
+                if (yearDatabase.BeginTransaction())
+                {
+                    InsertDay(Constants.TypeNumber.KEYBOARD_TOTAL);
+                    InsertDay(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                    InsertDay(Constants.TypeNumber.MOUSE_TOTAL);
+                    InsertDay(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                    InsertDay(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                    InsertDay(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                    InsertDay(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                    InsertDay(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                    InsertDay(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                    InsertDay(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+
+                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                    foreach (byte keycode in keys)
+                    {
+                        InsertDay(keycode);
+                    }
+
+                    yearDatabase.CommitTransaction();
+                }
+                else
+                {
+                    MessageBox.Show("Init database failed");
+                    throw new Exception();
+                }
+            }
         }
+
+        //internal void UpdateGlobal(ushort type, uint value)
+        //{
+        //    string sql = "UPDATE " + GLOBAL_TABLE + " SET value=" + value + " where type=" + type;
+        //    totalDatabase.ExecuteSQL(sql);
+        //}
 
         internal void InsertGlobal(ushort type, uint value)
         {
-            string sql = "INSERT INTO " + SUMMARY_TABLE + " values(" + type + "," + value + ")";
+            string sql = "INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + "," + value + ")";
             totalDatabase.ExecuteSQL(sql);
+        }
+
+        private void InsertYear(ushort type)
+        {
+            string sql = "INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")";
+            yearDatabase.ExecuteSQL(sql);
+        }
+
+        private void InsertMonth(ushort type)
+        {
+            string sql = "INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")";
+            yearDatabase.ExecuteSQL(sql);
+        }
+
+        private void InsertDay(ushort type)
+        {
+            string sql = "INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0,"
+                + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")";
+            yearDatabase.ExecuteSQL(sql);
         }
 
         internal bool UseDatabase(string db)
@@ -179,170 +300,166 @@ namespace KMS.src.db
         {
             if (which == GLOBAL_RECORD)
                 return totalDatabase.BeginTransaction();
-            else if (which == CUR_RECORD)
-                return curDatabase.BeginTransaction();
+            else if (which == YEAR_RECORD)
+                return yearDatabase.BeginTransaction();
             else
                 return false;
         }
 
-        internal void InsertDetail(string str)
-        {
-            //sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
-        }
-
         internal void CommitTransaction(byte which)
         {
-            if(which == GLOBAL_RECORD)
+            if (which == GLOBAL_RECORD)
                 totalDatabase.CommitTransaction();
-            else if(which == CUR_RECORD)
-                curDatabase.CommitTransaction();
+            else if (which == YEAR_RECORD)
+                yearDatabase.CommitTransaction();
         }
+
+        //internal void InsertDetail(string str)
+        //{
+        //    //sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
+        //}
 
         private void timerCallback(object state)
         {
-            //Should only be call from TimeManager sub-thread.
+            ////Should only be call from TimeManager sub-thread.
 
-            //检查是否需要切换表、库。
-            //这个函数与执行数据落地的函数是串行的，并且它将在数据落地之后执行，因此这里可以安全地切换数据库。
-            DateTime now = DateTime.Now;
-            if (now.Year != TimeManager.TimeUsing.Year)
-            {
-
-            }
-            else if (now.Month != TimeManager.TimeUsing.Month)
-            {
-
-            }
-            else if (now.Day != TimeManager.TimeUsing.Day)
-            {
-                sumDay();
-                switchTable();
-            }
-            else
-            {
-                //Do nothing.
-            }
-        }
-
-        /// <summary>
-        /// 统计day*_detail数据表。
-        /// </summary>
-        private void sumDay()
-        {
-            Logger.v(TAG, "sum the day");
-            //string summaryToday = "day" + TimeManager.TimeUsing.Day.ToString() + "_summary";
-            //if (sqliteHelper.isTableExist(summaryToday))
+            ////检查是否需要切换表、库。
+            ////这个函数与执行数据落地的函数是串行的，并且它将在数据落地之后执行，因此这里可以安全地切换数据库。
+            //DateTime now = DateTime.Now;
+            //if (now.Year != TimeManager.TimeUsing.Year)
             //{
-            //    sqliteHelper.deleteTable(summaryToday); //Assume it will always success.
+
             //}
+            //else if (now.Month != TimeManager.TimeUsing.Month)
+            //{
 
-            //sqliteHelper.createDaySummaryTable(summaryToday); //Assume it will always success.
-
-            //TODO 
+            //}
+            //else if (now.Day != TimeManager.TimeUsing.Day)
+            //{
+            //    sumDay();
+            //    switchTable();
+            //}
+            //else
+            //{
+            //    //Do nothing.
+            //}
         }
 
-        private void switchTable()
-        {
+        ///// <summary>
+        ///// 统计day*_detail数据表。
+        ///// </summary>
+        //private void sumDay()
+        //{
+        //    Logger.v(TAG, "sum the day");
+        //    //string summaryToday = "day" + TimeManager.TimeUsing.Day.ToString() + "_summary";
+        //    //if (sqliteHelper.isTableExist(summaryToday))
+        //    //{
+        //    //    sqliteHelper.deleteTable(summaryToday); //Assume it will always success.
+        //    //}
+
+        //    //sqliteHelper.createDaySummaryTable(summaryToday); //Assume it will always success.
+
+        //    //TODO 
+        //}
+
+        //private void switchTable()
+        //{
             
+        //}
+
+        ///// <summary>
+        ///// 查找所有数据库文件
+        ///// </summary>
+        ///// <returns>包含各数据库文件路径的列表</returns>
+        //internal List<string> IterateDbs()
+        //{
+        //    if (Directory.Exists(DATABASE_DIR))
+        //    {
+        //        string[] files = Directory.GetFiles(DATABASE_DIR);
+        //        string[] dirs = Directory.GetDirectories(DATABASE_DIR);
+        //        string[] dirs2;
+        //        List<string> validDb = new List<string>();
+        //        string str;
+        //        Regex regex = new Regex("[1][9][7-9][0-9]|[2][0][0-9][0-9]");
+        //        foreach (string dir in dirs)
+        //        {
+        //            str = Toolset.GetBasename(dir);
+        //            if (str is null || str.Length == 0)
+        //                continue;
+
+        //            //Hummmmmm,2021-01-12 19:08
+        //            if (str.Length != 4)
+        //                continue;
+
+        //            if (!regex.IsMatch(str))
+        //            {
+        //                continue;
+        //            }
+
+        //            //directory valid
+        //            dirs2 = Directory.GetFiles(dir);
+        //            string str2;
+        //            foreach(string file in dirs2)
+        //            {
+        //                str2 = Toolset.GetBasename(file);
+        //                if (str2.StartsWith("kms" + str))
+        //                {
+        //                    if (str2.EndsWith(".db"))
+        //                    {
+        //                        validDb.Add(file);
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        if (validDb.Count > 0)
+        //            return validDb;
+        //        else
+        //            return null;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        internal SQLiteDataReader QueryGlobalStatistic()
+        {
+            return QueryStatistic(totalDatabase, GLOBAL_TABLE);
         }
 
-        /// <summary>
-        /// 查找所有数据库文件
-        /// </summary>
-        /// <returns>包含各数据库文件路径的列表</returns>
-        internal List<string> IterateDbs()
+        internal SQLiteDataReader QueryYearStatistic()
         {
-            if (Directory.Exists(DATABASE_DIR))
+            return QueryStatistic(yearDatabase, YEAR_TABLE);
+        }
+
+        internal SQLiteDataReader QueryMonthStatistic()
+        {
+            return QueryStatistic(yearDatabase, YEAR_TABLE);
+        }
+
+        internal SQLiteDataReader QueryDayStatistic()
+        {
+            return QueryStatistic(yearDatabase, YEAR_TABLE);
+        }
+
+        private SQLiteDataReader QueryStatistic(SQLiteHelper sqlite, string table)
+        {
+            if (sqlite.IsDbReady())
             {
-                string[] files = Directory.GetFiles(DATABASE_DIR);
-                string[] dirs = Directory.GetDirectories(DATABASE_DIR);
-                string[] dirs2;
-                List<string> validDb = new List<string>();
-                string str;
-                Regex regex = new Regex("[1][9][7-9][0-9]|[2][0][0-9][0-9]");
-                foreach (string dir in dirs)
+                if (sqlite.isTableExist(table))
                 {
-                    str = Toolset.GetBasename(dir);
-                    if (str is null || str.Length == 0)
-                        continue;
-
-                    //Hummmmmm,2021-01-12 19:08
-                    if (str.Length != 4)
-                        continue;
-
-                    if (!regex.IsMatch(str))
-                    {
-                        continue;
-                    }
-
-                    //directory valid
-                    dirs2 = Directory.GetFiles(dir);
-                    string str2;
-                    foreach(string file in dirs2)
-                    {
-                        str2 = Toolset.GetBasename(file);
-                        if (str2.StartsWith("kms" + str))
-                        {
-                            if (str2.EndsWith(".db"))
-                            {
-                                validDb.Add(file);
-                            }
-                        }
-                    }
+                    return sqlite.QueryTable(table);
                 }
-
-                if (validDb.Count > 0)
-                    return validDb;
                 else
+                {
                     return null;
+                }
             }
             else
             {
                 return null;
             }
-        }
-
-        internal SQLiteDataReader QueryTotalStatistic()
-        {
-            if (Directory.Exists(DATABASE_DIR))
-            {
-                if (File.Exists(TotalDb))
-                {
-                    if (totalDatabase.IsDbReady())
-                    {
-                        if (totalDatabase.isTableExist(SUMMARY_TABLE))
-                        {
-                            return totalDatabase.QueryTable(SUMMARY_TABLE);
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        internal bool IsGlobalTableExists()
-        {
-            return totalDatabase.isTableExist(SUMMARY_TABLE);
-        }
-
-        internal void CreateGlobalTable()
-        {
-            totalDatabase.ExecuteSQL("CREATE TABLE " + SUMMARY_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER DEFAULT 0)");
         }
     }
 }
