@@ -62,7 +62,6 @@ namespace KMS.src.db
             {
                 if (value < 1 || value > 12)
                 {
-                    year = DEF_YEAR;
                     month = DEF_MONTH;
                 }
                 else
@@ -79,8 +78,6 @@ namespace KMS.src.db
             {
                 if (value < 1 || value > 31)
                 {
-                    year = DEF_YEAR;
-                    month = DEF_MONTH;
                     day = DEF_DAY;
                 }
                 else
@@ -97,9 +94,6 @@ namespace KMS.src.db
             {
                 if (value > 23)
                 {
-                    year = DEF_YEAR;
-                    month = DEF_MONTH;
-                    day = DEF_DAY;
                     hour = DEF_HOUR;
                 }
                 else
@@ -116,10 +110,6 @@ namespace KMS.src.db
             {
                 if (value > 59)
                 {
-                    year = DEF_YEAR;
-                    month = DEF_MONTH;
-                    day = DEF_DAY;
-                    hour = DEF_HOUR;
                     minute = DEF_MINUTE;
                 }
                 else
@@ -136,11 +126,6 @@ namespace KMS.src.db
             {
                 if (value > 59)
                 {
-                    year = DEF_YEAR;
-                    month = DEF_MONTH;
-                    day = DEF_DAY;
-                    hour = DEF_HOUR;
-                    minute = DEF_MINUTE;
                     second = DEF_SECOND;
                 }
                 else
@@ -189,6 +174,8 @@ namespace KMS.src.db
                         PropertyChanged.Invoke(this, pcaValue);
                     }
                 }
+
+                IsUpdated = true;
             }
         }
 

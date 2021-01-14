@@ -64,7 +64,16 @@ namespace KMS.src.db
 
         private SQLiteManager()
         {
-            InitDbDirectory();
+            //make sure the data path ok
+            if (File.Exists(DATABASE_DIR))
+            {
+                File.Move(DATABASE_DIR, DATABASE_DIR + "_rename");
+            }
+            if (!Directory.Exists(DATABASE_DIR))
+            {
+                Directory.CreateDirectory(DATABASE_DIR);
+            }
+
             totalDatabase = new SQLiteHelper();
             yearDatabase = new SQLiteHelper();
         }
@@ -224,35 +233,24 @@ namespace KMS.src.db
             }
         }
 
-        //internal void UpdateGlobal(ushort type, uint value)
-        //{
-        //    string sql = "UPDATE " + GLOBAL_TABLE + " SET value=" + value + " where type=" + type;
-        //    totalDatabase.ExecuteSQL(sql);
-        //}
-
         internal void InsertGlobal(ushort type, uint value)
         {
-            string sql = "INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + "," + value + ")";
-            totalDatabase.ExecuteSQL(sql);
+            totalDatabase.ExecuteSQL("INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + "," + value + ")");
         }
 
         private void InsertYear(ushort type)
         {
-            string sql = "INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")";
-            yearDatabase.ExecuteSQL(sql);
+            yearDatabase.ExecuteSQL("INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")");
         }
 
         private void InsertMonth(ushort type)
         {
-            string sql = "INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")";
-            yearDatabase.ExecuteSQL(sql);
+            yearDatabase.ExecuteSQL("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
         }
 
         private void InsertDay(ushort type)
         {
-            string sql = "INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0,"
-                + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")";
-            yearDatabase.ExecuteSQL(sql);
+            yearDatabase.ExecuteSQL("INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")");
         }
 
         internal bool UseDatabase(string db)
@@ -275,19 +273,6 @@ namespace KMS.src.db
             //}
 
             return null;
-        }
-
-        private void InitDbDirectory()
-        {
-            if (File.Exists(DATABASE_DIR))
-            {
-                File.Move(DATABASE_DIR, DATABASE_DIR + "_rename");
-            }
-
-            if (!Directory.Exists(DATABASE_DIR))
-            {
-                Directory.CreateDirectory(DATABASE_DIR);
-            }
         }
 
         internal void close()
@@ -314,10 +299,29 @@ namespace KMS.src.db
                 yearDatabase.CommitTransaction();
         }
 
-        //internal void InsertDetail(string str)
-        //{
-        //    //sqliteHelper.InsertDetail("INSERT INTO " + curTable + "(year,month,day,hour,minute,second,type,fkey,value) " + str);
-        //}
+        internal void UpdateGlobal(ushort type, uint value)
+        {
+            Logger.v(TAG, "update global,type:" + type + ",value:" + value);
+            totalDatabase.ExecuteSQL("UPDATE " + GLOBAL_TABLE + " SET value=" + value + " WHERE type=" + type);
+        }
+
+        internal void UpdateYear(ushort type, uint value, ushort year)
+        {
+            Logger.v(TAG, "update year,type:" + type + ",value:" + value + ",year:" + year);
+            yearDatabase.ExecuteSQL("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type);
+        }
+
+        internal void UpdateMonth(ushort type, uint value, ushort year, byte month)
+        {
+            Logger.v(TAG, "update month,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month);
+            yearDatabase.ExecuteSQL("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month);
+        }
+
+        internal void UpdateDay(ushort type, uint value, ushort year, byte month, byte day)
+        {
+            Logger.v(TAG, "update day,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month + ",day:" + day);
+            yearDatabase.ExecuteSQL("UPDATE " + DAY_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month + " AND day=" + day);
+        }
 
         private void timerCallback(object state)
         {
@@ -435,12 +439,12 @@ namespace KMS.src.db
 
         internal SQLiteDataReader QueryMonthStatistic()
         {
-            return QueryStatistic(yearDatabase, YEAR_TABLE);
+            return QueryStatistic(yearDatabase, MONTH_TABLE);
         }
 
         internal SQLiteDataReader QueryDayStatistic()
         {
-            return QueryStatistic(yearDatabase, YEAR_TABLE);
+            return QueryStatistic(yearDatabase, DAY_TABLE);
         }
 
         private SQLiteDataReader QueryStatistic(SQLiteHelper sqlite, string table)
