@@ -106,11 +106,6 @@ namespace KMS
             BindingOperations.SetBinding(MsAllToday, TextBlock.TextProperty, binding);
 
             binding = new Binding();
-            binding.Source = statisticManager.SttLetterTop1Today;
-            binding.Path = new PropertyPath("Desc");
-            BindingOperations.SetBinding(MostLetterToday, TextBlock.TextProperty, binding);
-
-            binding = new Binding();
             binding.Source = statisticManager.SttMostOpHourToday;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MostOpHourToday, TextBlock.TextProperty, binding);

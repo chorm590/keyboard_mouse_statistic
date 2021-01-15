@@ -60,23 +60,7 @@ namespace KMS.src.db
             return sqliteConnection.State is ConnectionState.Open;
         }
 
-        internal bool createDetailTable(string name)
-        {
-            if (name == null || name.Length == 0 || sqliteConnection == null || sqliteConnection.State != ConnectionState.Open)
-            {
-                return false;
-            }
-
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name + "(year SMALLINT NOT NULL, month TINYINT NOT NULL, day TINYINT NOT NULL" +
-                ",hour TINYINT NOT NULL, minute TINYINT NOT NULL, second TINYINT NOT NULL" +
-                ",type SMALLINT NOT NULL,fkey TINYINT DEFAULT 0,value MEDIUMINT DEFAULT 0)";
-            cmd.ExecuteNonQuery();
-
-            return true;
-        }
-
-        internal bool isTableExist(string name)
+        internal bool IsTableExist(string name)
         {
             if (name is null || name.Length is 0 || sqliteConnection is null || sqliteConnection.State != ConnectionState.Open)
                 return false;
@@ -122,29 +106,10 @@ namespace KMS.src.db
             detailCmd.ExecuteNonQuery();
         }
 
-        public bool deleteTable(string name)
+        internal SQLiteDataReader Query(string sql)
         {
             SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "DROP TABLE IF EXISTS " + name;
-            cmd.ExecuteNonQuery();
-
-            return true;
-        }
-
-        internal bool createDaySummaryTable(string name)
-        {
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "CREATE TABLE IF NOT EXISTS " + name
-                + "(_id INTEGER PRIMARY KEY AUTOINCREMENT,hour TINYINT NOT NULL,type SMALLINT NOT NULL,value MEDIUMINT DEFAULT 0)";
-            cmd.ExecuteNonQuery();
-            
-            return true;
-        }
-
-        internal SQLiteDataReader QueryTable(string name)
-        {
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = "SELECT * FROM " + name;
+            cmd.CommandText = sql;
             return cmd.ExecuteReader();
         }
 
@@ -155,6 +120,16 @@ namespace KMS.src.db
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }
+        }
+
+        internal SQLiteDataReader QueryWithSQL(string sql)
+        {
+            if (sql is null || sql.Length == 0)
+                return null;
+
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+            cmd.CommandText = sql;
+            return cmd.ExecuteReader();
         }
     }
 }

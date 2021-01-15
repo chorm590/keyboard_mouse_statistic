@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KMS"
         mc:Ignorable="d"
-        Title="键鼠计数器" Height="420" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="键鼠计数器" Height="410" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <StackPanel>
         <GroupBox
             Header="全局键盘统计"
@@ -83,11 +83,10 @@
         <GroupBox
             Header="今日统计"
             Margin="5,2,5,10"
-            Height="100">
+            Height="80">
 
 			<Grid Margin="0, 5, 0, 0">
 				<Grid.RowDefinitions>
-					<RowDefinition/>
 					<RowDefinition/>
 					<RowDefinition/>
 					<RowDefinition/>
@@ -100,12 +99,10 @@
 
 				<TextBlock Text="键盘按键总计：" HorizontalAlignment="Right" Grid.Row="0"/>
 				<TextBlock Text="鼠标事件总计：" HorizontalAlignment="Right" Grid.Row="1"/>
-				<TextBlock Text="敲击最多字母：" HorizontalAlignment="Right" Grid.Row="2"/>
 				<TextBlock Text="操作最多时段：" HorizontalAlignment="Right" Grid.Row="3"/>
 
 				<TextBlock Name="KbAllToday" Text="" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="1"/>
 				<TextBlock Name="MsAllToday" Text="" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="1"/>
-				<TextBlock Name="MostLetterToday" Text="" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1"/>
 				<TextBlock Name="MostOpHourToday" Text="" HorizontalAlignment="Left" Grid.Row="3" Grid.Column="1"/>
 
 			</Grid>
