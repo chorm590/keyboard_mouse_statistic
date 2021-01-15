@@ -70,8 +70,6 @@ namespace KMS.src.core
                 Type = Constants.TypeNumber.INVALID
             };
 
-            //opInHour = new Dictionary<byte, ushort>(24);
-
             //Initialize timer
             tool.Timer.RegisterTimerCallback(TimerCallback);
 
@@ -405,12 +403,12 @@ namespace KMS.src.core
                     Logger.v(TAG, "hour " + i + " kb value in db:" + hstmp[i].KbTotal);
                     if (hstmp[i].Hour == 25)
                     {
-                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.KEYBOARD_TOTAL, hourStatistic[i].Hour, hourStatistic[i].KbTotal);
+                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.KEYBOARD_TOTAL, i/* 'i' is 'hour' */, hourStatistic[i].KbTotal);
                         hourStatistic[i].IsKBUpdated = false;
                     }
                     else if (hstmp[i].KbTotal != hourStatistic[i].KbTotal)
                     {
-                        SQLiteManager.GetInstance.UpdateHour(Constants.TypeNumber.KEYBOARD_TOTAL, hourStatistic[i].Hour, hourStatistic[i].KbTotal);
+                        SQLiteManager.GetInstance.UpdateHour(Constants.TypeNumber.KEYBOARD_TOTAL, i, hourStatistic[i].KbTotal);
                         hourStatistic[i].IsKBUpdated = false;
                     }
                 }
@@ -420,12 +418,12 @@ namespace KMS.src.core
                     Logger.v(TAG, "hour " + i + " ms value in db:" + hstmp[i].MsTotal);
                     if (hstmp[i].Hour == 25)
                     {
-                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.MOUSE_TOTAL, hourStatistic[i].Hour, hourStatistic[i].MsTotal);
+                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.MOUSE_TOTAL, i, hourStatistic[i].MsTotal);
                         hourStatistic[i].IsMSUpdated = false;
                     }
                     else if (hstmp[i].MsTotal != hourStatistic[i].MsTotal)
                     {
-                        SQLiteManager.GetInstance.UpdateHour(Constants.TypeNumber.MOUSE_TOTAL, hourStatistic[i].Hour, hourStatistic[i].MsTotal);
+                        SQLiteManager.GetInstance.UpdateHour(Constants.TypeNumber.MOUSE_TOTAL, i, hourStatistic[i].MsTotal);
                         hourStatistic[i].IsMSUpdated = false;
                     }
                 }
@@ -639,7 +637,6 @@ namespace KMS.src.core
             short year = 0;
             byte month = 0;
             byte day = 0;
-            byte hour = 0;
             ushort type;
             uint value;
             bool noRecord = true;

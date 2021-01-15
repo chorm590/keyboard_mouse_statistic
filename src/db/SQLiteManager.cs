@@ -236,7 +236,7 @@ namespace KMS.src.db
             {
                 Logger.v(TAG, "creating hour table");
                 yearDatabase.ExecuteSQL("CREATE TABLE " + HOUR_TABLE +
-                    "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL");
+                    "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL)");
                 //Enough!
             }
         }
@@ -265,7 +265,7 @@ namespace KMS.src.db
         {
             Logger.v(TAG, "InsertHour,type:" + type + ",hour:" + hour + ",value:" + value);
             yearDatabase.ExecuteSQL("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + "," +
-                TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + "," + hour);
+                TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + "," + hour + ")");
         }
 
         internal bool UseDatabase(string db)
@@ -316,25 +316,25 @@ namespace KMS.src.db
 
         internal void UpdateGlobal(ushort type, uint value)
         {
-            Logger.v(TAG, "update global,type:" + type + ",value:" + value);
+            //Logger.v(TAG, "update global,type:" + type + ",value:" + value);
             totalDatabase.ExecuteSQL("UPDATE " + GLOBAL_TABLE + " SET value=" + value + " WHERE type=" + type);
         }
 
         internal void UpdateYear(ushort type, uint value, ushort year)
         {
-            Logger.v(TAG, "update year,type:" + type + ",value:" + value + ",year:" + year);
+            //Logger.v(TAG, "update year,type:" + type + ",value:" + value + ",year:" + year);
             yearDatabase.ExecuteSQL("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type);
         }
 
         internal void UpdateMonth(ushort type, uint value, ushort year, byte month)
         {
-            Logger.v(TAG, "update month,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month);
+            //Logger.v(TAG, "update month,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month);
             yearDatabase.ExecuteSQL("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month);
         }
 
         internal void UpdateDay(ushort type, uint value, ushort year, byte month, byte day)
         {
-            Logger.v(TAG, "update day,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month + ",day:" + day);
+            //Logger.v(TAG, "update day,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month + ",day:" + day);
             yearDatabase.ExecuteSQL("UPDATE " + DAY_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month + " AND day=" + day);
         }
 
@@ -461,7 +461,7 @@ namespace KMS.src.db
 
         internal SQLiteDataReader QueryMonthStatistic()
         {
-            return QueryWithSQL(yearDatabase, MONTH_TABLE, "SELECT*FROM" + MONTH_TABLE +
+            return QueryWithSQL(yearDatabase, MONTH_TABLE, "SELECT*FROM " + MONTH_TABLE +
                 " WHERE year=" + TimeManager.TimeUsing.Year + " AND month=" + TimeManager.TimeUsing.Month);
         }
 
