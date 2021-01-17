@@ -448,17 +448,14 @@ namespace KMS.src.core
                     //SwitchYearTable();
                     break;
                 case 2: //month switch
-                    ////1. 更新小时统计表
-                    //ClearHourStatistic();
-                    //QueryHourStatisticFromDB();
+                    //1. 更新小时统计表
+                    SwitchHourStatistic();
 
-                    ////2. 更新日统计
-                    //ClearStatistic(statisticDay);
-                    //QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticDay);
+                    //2. 更新日统计
+                    SwitchDayStatistic();
 
-                    ////3. 更新月统计
-                    //ClearStatistic(statisticMonth);
-                    //QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticMonth);
+                    //3. 更新月统计
+                    SwitchMonthStatistic();
                     break;
                 case 3: //day switch
                     //1. 更新小时统计表
@@ -496,7 +493,7 @@ namespace KMS.src.core
         private void SwitchDayStatistic()
         {
             ClearStatistic(statisticDay);
-            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryDayStatistic();
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryDayWhileSwitchDate();
             if (reader != null)
             {
                 //将查上来的数据记录到statisticDay中。
@@ -504,6 +501,16 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticDay);
                 }
+            }
+        }
+
+        private void SwitchMonthStatistic()
+        {
+            ClearStatistic(statisticMonth);
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryMonthWhileSwitchedDate();
+            if (reader != null)
+            {
+                //todo
             }
         }
 

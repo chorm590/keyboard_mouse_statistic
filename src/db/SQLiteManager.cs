@@ -194,7 +194,7 @@ namespace KMS.src.db
         /// <summary>
         /// 日期更换时由StatisticManager调用。
         /// </summary>
-        internal SQLiteDataReader TryQueryDayStatistic()
+        internal SQLiteDataReader TryQueryDayWhileSwitchDate()
         {
             // 检查指定日期记录是否存在。
             SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryDayTableSQL);
