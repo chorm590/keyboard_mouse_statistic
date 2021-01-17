@@ -21,7 +21,7 @@ namespace KMS.src.core
         {
             get
             {
-                if (instance == null)
+                if (instance is null)
                     instance = new StatisticManager();
 
                 return instance;
@@ -33,21 +33,6 @@ namespace KMS.src.core
         private readonly Statistic statisticMonth;
         private readonly Statistic statisticDay;
         private readonly HourStatistic[] hourStatistic;
-
-        internal Record SttKeyboardTotalToday
-        {
-            get;
-        }
-
-        internal Record SttMouseTotalToday
-        {
-            get;
-        }
-
-        internal Record SttMostOpHourToday //今日操作键鼠最多的时间段
-        {
-            get;
-        }
 
         private StatisticManager()
         {
@@ -66,8 +51,16 @@ namespace KMS.src.core
             };
 
             //Initialize timer
-            tool.Timer.RegisterTimerCallback(TimingStorage); //Must in front of SQLiteManager initialize
-            //tool.Timer.RegisterTimerCallback(DateWatcher);
+            /*
+                Bug提示：Timer检查时间有一定的间隔，且这一间隔不能缩的很短。再加上程序使用的时间系统是TimeManager中的记录的模糊时间值。
+                因此程序的时间系统同步真实时间存在延迟。这一延迟可能会导致键鼠事件记录出错。
+                例如：在小时统计数据中，当操作系统日期刚切换到程序日期切换之前这一时期内产生的原本属于新一天的记录会被误认为是前一天0点的数据。
+                这一Bug看起来是一个无解的/解决成本很高的问题，目前采用规避的办法应付解决。
+                规避方案：在每次存储前对比操作系统时间与程序时间。发现操作系统已是新一天时，将小时数据强行存到前一点23点。
+                chorm, 2021-01-18 10:51
+             */
+            tool.Timer.RegisterTimerCallback(TimingStorage); //Must be ahead of 'DateWatcher'
+            tool.Timer.RegisterTimerCallback(DateWatcher);
 
             statisticGlobal = new Statistic();
             statisticYear = new Statistic();
@@ -77,18 +70,18 @@ namespace KMS.src.core
 
             if (SQLiteManager.GetInstance.Init())
             {
-                QueryStatisticFromDb(SQLiteManager.GLOBAL_RECORD, statisticGlobal);
+                QueryStatisticFromDB(SQLiteManager.GLOBAL_RECORD, statisticGlobal);
                 if (statisticGlobal.KeyboardTotal.Value is 0)
                 {
                     new Thread(() => {
                         DateTime niw = DateTime.Now;
                         Logger.v(TAG, "Init table begin, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
 
-                        SQLiteManager.GetInstance.InitTable();
+                        SQLiteManager.GetInstance.InitTables();
                         //year,month,day三张表的时间要初始化。
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticYear);
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticMonth);
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticDay);
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticYear);
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticMonth);
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticDay);
                         //Hour table needn't initialization.
 
                         niw = DateTime.Now;
@@ -102,10 +95,10 @@ namespace KMS.src.core
                         DateTime niw = DateTime.Now;
                         Logger.v(TAG, "Year statistic query begin, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
 
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticYear);
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticMonth);
-                        QueryStatisticFromDb(SQLiteManager.YEAR_RECORD, statisticDay);
-                        QueryHourStatisticFromDb();
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticYear);
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticMonth);
+                        QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticDay);
+                        QueryHourStatisticFromDB();
 
                         niw = DateTime.Now;
                         Logger.v(TAG, "Year statistic query end, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
@@ -389,9 +382,10 @@ namespace KMS.src.core
                 if (hourStatistic[i].IsKBUpdated) //It won't be a lot
                 {
                     Logger.v(TAG, "hour " + i + " kb value in db:" + hstmp[i].KbTotal);
+                    
                     if ((hstmp[i].RecordStatus & 1) == 0)
                     {
-                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.KEYBOARD_TOTAL, i/* 'i' is 'hour' */, hourStatistic[i].KbTotal);
+                        SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.KEYBOARD_TOTAL, i, hourStatistic[i].KbTotal);
                         hourStatistic[i].IsKBUpdated = false;
                     }
                     else if (hstmp[i].KbTotal != hourStatistic[i].KbTotal)
@@ -430,6 +424,7 @@ namespace KMS.src.core
             DateTime now = DateTime.Now;
 
             int status = CheckDate(now, TimeManager.TimeUsing);
+            Logger.v(TAG, "check date ret:" + status);
 
             switch (status)
             {
@@ -442,34 +437,48 @@ namespace KMS.src.core
             }
 
             /*
-                Important:接受因更换的瞬间而造成的数据丢失。2021-01-17 22:49
+                Important:接受因更换的瞬间而造成的数据丢失问题。2021-01-17 22:49
              */
             switch (status)
             {
                 case 1: //year switch
-                    SQLiteManager.GetInstance.SwitchYearDB();
-                    SwitchYearTable();
+                    ////1. 更换数据库文件
+                    //SQLiteManager.GetInstance.SwitchYearDB();
+
+                    ////2. 重置小时统计表
+                    //ClearHourStatistic();
+                    //QueryHourStatisticFromDB();
+
+                    ////3. 更新日统计表
+                    ////SwitchDayTable();
+
+                    ////4. 更新月统计表
+                    //ClearStatistic(statisticMonth);
+                    //QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticMonth);
+
+                    ////5. 更新年统计表
+                    //SwitchYearTable();
                     break;
                 case 2: //month switch
+                    ////1. 更新小时统计表
+                    //ClearHourStatistic();
+                    //QueryHourStatisticFromDB();
+
+                    ////2. 更新日统计
+                    //ClearStatistic(statisticDay);
+                    //QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticDay);
+
+                    ////3. 更新月统计
+                    //ClearStatistic(statisticMonth);
+                    //QueryStatisticFromDB(SQLiteManager.YEAR_RECORD, statisticMonth);
                     break;
                 case 3: //day switch
-                    break;
-                case 4: //hour switch
-                    //1. 更新今日统计
-                    // Needn't do anything
-                    //2. 更新小时统计表
-                    for (byte i = 0; i < 24; i++)
-                    {
-                        hourStatistic[i].RecordStatus = 0;
-                        hourStatistic[i].IsKBUpdated = false;
-                        hourStatistic[i].IsMSUpdated = false;
-                        hourStatistic[i].KbTotal = 0;
-                        hourStatistic[i].MsTotal = 0;
-                    }
-                    QueryHourStatisticFromDb();
+                    //1. 更新小时统计表
+                    ClearHourStatistic();
+                    QueryHourStatisticFromDB();
 
-                    //3.更新日表
-                    TODO
+                    //2.更新日统计
+                    SwitchDayStatistic();
                     break;
             }
         }
@@ -489,6 +498,31 @@ namespace KMS.src.core
         }
 
         /// <summary>
+        /// 日期更换，重新准备日统计记录。
+        /// </summary>
+        private void SwitchDayStatistic()
+        {
+            ClearStatistic(statisticDay);
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryDayStatistic();
+            if (reader != null)
+            {
+                //将查上来的数据记录到statisticDay中。
+                while (reader.Read())
+                {
+                    ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), reader.GetInt16(2), reader.GetByte(3), reader.GetByte(4), 0, statisticDay);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 日期更换
+        /// </summary>
+        private void SwitchMonthTable()
+        {
+            
+        }
+
+        /// <summary>
         /// 检查当前年表是否存在。若不存在，则新建并插入初始值。若存在，则读取数据并应用到 statisticYear 中。2021-01-17 21:47
         /// </summary>
         private void SwitchYearTable()
@@ -499,6 +533,59 @@ namespace KMS.src.core
                 //从SQLiteDataReader中提取数据出来。
 
             }
+        }
+
+        private void ClearHourStatistic()
+        {
+            for (byte i = 0; i < 24; i++)
+            {
+                hourStatistic[i].RecordStatus = 0;
+                hourStatistic[i].IsKBUpdated = false;
+                hourStatistic[i].IsMSUpdated = false;
+                hourStatistic[i].KbTotal = 0;
+                hourStatistic[i].MsTotal = 0;
+            }
+            Logger.v(TAG, "hour statistic cleared");
+        }
+
+        private void ClearStatistic(Statistic stt)
+        {
+            stt.KeyboardTotal.Value = 0;
+            stt.KeyboardTotal.IsUpdated = false;
+
+            stt.KeyboardComboTotal.Value = 0;
+            stt.KeyboardComboTotal.IsUpdated = false;
+
+            stt.MouseTotal.Value = 0;
+            stt.MouseTotal.IsUpdated = false;
+
+            stt.MouseLeftBtn.Value = 0;
+            stt.MouseLeftBtn.IsUpdated = false;
+
+            stt.MouseRightBtn.Value = 0;
+            stt.MouseRightBtn.IsUpdated = false;
+
+            stt.MouseWheelForward.Value = 0;
+            stt.MouseWheelForward.IsUpdated = false;
+
+            stt.MouseWheelBackward.Value = 0;
+            stt.MouseWheelBackward.IsUpdated = false;
+
+            stt.MouseWheelClick.Value = 0;
+            stt.MouseWheelClick.IsUpdated = false;
+
+            stt.MouseSideKeyForward.Value = 0;
+            stt.MouseSideKeyForward.IsUpdated = false;
+
+            stt.MouseSideKeyBackward.Value = 0;
+            stt.MouseSideKeyBackward.IsUpdated = false;
+
+            foreach (Record rco in stt.KeyboardKeys)
+            {
+                rco.Value = 0;
+                rco.IsUpdated = false;
+            }
+            Logger.v(TAG, "clear statistic finish");
         }
 
         internal void KeyboardEventHappen(int typeCode, byte fkey, DateTime time)
@@ -518,8 +605,17 @@ namespace KMS.src.core
                 statisticYear.KeyboardTotal.Value++;
                 statisticMonth.KeyboardTotal.Value++;
                 statisticDay.KeyboardTotal.Value++;
-                hourStatistic[time.Hour].KbTotal++;
-                hourStatistic[time.Hour].IsKBUpdated = true;
+                //跨日处理
+                if ((time.Hour == 0) && (time.Day != TimeManager.TimeUsing.Day))
+                {
+                    hourStatistic[23].KbTotal++;
+                    hourStatistic[23].IsKBUpdated = true;
+                }
+                else
+                {
+                    hourStatistic[time.Hour].KbTotal++;
+                    hourStatistic[time.Hour].IsKBUpdated = true;
+                }
 
                 if (fkey > 0)
                 {
@@ -605,8 +701,17 @@ namespace KMS.src.core
                     statisticYear.MouseTotal.Value += (ushort)mouseData;
                     statisticMonth.MouseTotal.Value += (ushort)mouseData;
                     statisticDay.MouseTotal.Value += (ushort)mouseData;
-                    hourStatistic[time.Hour].MsTotal += (ushort)mouseData;
-                    hourStatistic[time.Hour].IsMSUpdated = true;
+                    //跨日处理。
+                    if ((time.Hour == 0) && (time.Day != TimeManager.TimeUsing.Day))
+                    {
+                        hourStatistic[23].MsTotal += (ushort)mouseData;
+                        hourStatistic[23].IsMSUpdated = true;
+                    }
+                    else
+                    {
+                        hourStatistic[time.Hour].MsTotal += (ushort)mouseData;
+                        hourStatistic[time.Hour].IsMSUpdated = true;
+                    }
                     break;
                 case Constants.TypeNumber.MOUSE_WHEEL_CLICK:
                 case Constants.TypeNumber.MOUSE_LEFT_BTN:
@@ -617,8 +722,17 @@ namespace KMS.src.core
                     statisticYear.MouseTotal.Value++;
                     statisticMonth.MouseTotal.Value++;
                     statisticDay.MouseTotal.Value++;
-                    hourStatistic[time.Hour].MsTotal++;
-                    hourStatistic[time.Hour].IsMSUpdated = true;
+                    //跨日处理。
+                    if ((time.Hour == 0) && (time.Day != TimeManager.TimeUsing.Day))
+                    {
+                        hourStatistic[23].MsTotal++;
+                        hourStatistic[23].IsMSUpdated = true;
+                    }
+                    else
+                    {
+                        hourStatistic[time.Hour].MsTotal++;
+                        hourStatistic[time.Hour].IsMSUpdated = true;
+                    }
                     break;
                 default:
                     break;
@@ -679,7 +793,7 @@ namespace KMS.src.core
         /// <summary>
         /// 从数据库中读取统计数据。
         /// </summary>
-        private void QueryStatisticFromDb(byte which, Statistic statistic)
+        private void QueryStatisticFromDB(byte which, Statistic statistic)
         {
             SQLiteDataReader reader = null;
             if (which == SQLiteManager.GLOBAL_RECORD)
@@ -849,7 +963,7 @@ namespace KMS.src.core
         /// <summary>
         /// 程序启动时从数据库中读取今天的小时统计数据。
         /// </summary>
-        private void QueryHourStatisticFromDb()
+        private void QueryHourStatisticFromDB()
         {
             SQLiteDataReader reader = SQLiteManager.GetInstance.QueryHourStatistic();
             if (reader != null)
@@ -964,6 +1078,106 @@ namespace KMS.src.core
             {
                 SttMostOpHourToday.Value = mostTimes;
                 SttMostOpHourToday.Desc = GetDesc2(mostHour.ToString(), mostTimes);
+            }
+        }
+
+        /// <summary>
+        /// 将从数据库中读上来的事件记录存储到内存中的statistic对象中。2021-01-18 10:12
+        /// </summary>
+        private void ApplyKeyboardRecordFromDB(short type, int value, short year, byte month, byte day, byte hour, Statistic statistic)
+        {
+            if (type > 0 && type < 256)
+            {
+                foreach (Record rco in statistic.KeyboardKeys)
+                {
+                    if (rco.Type == type)
+                    {
+                        rco.Value += (uint)value;
+                        rco.IsUpdated = false;
+                        rco.Year = year;
+                        rco.Month = month;
+                        rco.Day = day;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                switch ((ushort)type)
+                {
+                    case Constants.TypeNumber.KEYBOARD_TOTAL:
+                        statistic.KeyboardTotal.Value += (uint)value;
+                        statistic.KeyboardTotal.IsUpdated = false;
+                        statistic.KeyboardTotal.Year = year;
+                        statistic.KeyboardTotal.Month = month;
+                        statistic.KeyboardTotal.Day = day;
+                        statistic.KeyboardTotal.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL:
+                        statistic.KeyboardComboTotal.Value += (uint)value;
+                        statistic.KeyboardComboTotal.IsUpdated = false;
+                        statistic.KeyboardComboTotal.Year = year;
+                        statistic.KeyboardComboTotal.Month = month;
+                        statistic.KeyboardComboTotal.Day = day;
+                        statistic.KeyboardComboTotal.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_TOTAL:
+                        statistic.MouseTotal.Value += (uint)value;
+                        statistic.MouseTotal.IsUpdated = false;
+                        statistic.MouseTotal.Year = year;
+                        statistic.MouseTotal.Month = month;
+                        statistic.MouseTotal.Day = day;
+                        statistic.MouseTotal.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_LEFT_BTN:
+                        statistic.MouseLeftBtn.Value += (uint)value;
+                        statistic.MouseLeftBtn.IsUpdated = false;
+                        statistic.MouseLeftBtn.Year = year;
+                        statistic.MouseLeftBtn.Month = month;
+                        statistic.MouseLeftBtn.Day = day;
+                        statistic.MouseLeftBtn.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_RIGHT_BTN:
+                        statistic.MouseRightBtn.Value += (uint)value;
+                        statistic.MouseRightBtn.IsUpdated = false;
+                        statistic.MouseRightBtn.Year = year;
+                        statistic.MouseRightBtn.Month = month;
+                        statistic.MouseRightBtn.Day = day;
+                        statistic.MouseRightBtn.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_WHEEL_FORWARD:
+                        statistic.MouseWheelForward.Value += (uint)value;
+                        statistic.MouseWheelForward.IsUpdated = false;
+                        statistic.MouseWheelForward.Year = year;
+                        statistic.MouseWheelForward.Month = month;
+                        statistic.MouseWheelForward.Day = day;
+                        statistic.MouseWheelForward.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
+                        statistic.MouseWheelBackward.Value += (uint)value;
+                        statistic.MouseWheelBackward.IsUpdated = false;
+                        statistic.MouseWheelBackward.Year = year;
+                        statistic.MouseWheelBackward.Month = month;
+                        statistic.MouseWheelBackward.Day = day;
+                        statistic.MouseWheelBackward.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
+                        statistic.MouseSideKeyForward.Value += (uint)value;
+                        statistic.MouseSideKeyForward.IsUpdated = false;
+                        statistic.MouseSideKeyForward.Year = year;
+                        statistic.MouseSideKeyForward.Month = month;
+                        statistic.MouseSideKeyForward.Day = day;
+                        statistic.MouseSideKeyForward.Hour = hour;
+                        break;
+                    case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
+                        statistic.MouseSideKeyBackward.Value += (uint)value;
+                        statistic.MouseSideKeyBackward.IsUpdated = false;
+                        statistic.MouseSideKeyBackward.Year = year;
+                        statistic.MouseSideKeyBackward.Month = month;
+                        statistic.MouseSideKeyBackward.Day = day;
+                        statistic.MouseSideKeyBackward.Hour = hour;
+                        break;
+                }
             }
         }
 
@@ -1205,6 +1419,21 @@ namespace KMS.src.core
             internal uint MsTotal;
             internal bool IsKBUpdated;
             internal bool IsMSUpdated;
+        }
+
+        internal Record SttKeyboardTotalToday
+        {
+            get;
+        }
+
+        internal Record SttMouseTotalToday
+        {
+            get;
+        }
+
+        internal Record SttMostOpHourToday //今日操作键鼠最多的时间段
+        {
+            get;
         }
     }
 }

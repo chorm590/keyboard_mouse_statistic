@@ -1,5 +1,4 @@
-﻿using KMS.src.tool;
-using System;
+﻿using System;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -8,14 +7,12 @@ namespace KMS.src.db
 {
     class SQLiteHelper
     {
-        private const string TAG = "SQLiteHelper";
-
         private SQLiteConnection sqliteConnection;
         private SQLiteTransaction sqliteTransaction;
-        private SQLiteCommand detailCmd;
-        private SQLiteCommand cmd;
+        private SQLiteCommand nonQueryCmd;
+        private SQLiteCommand queryCmd;
 
-        public bool openDatabase(string path)
+        public bool OpenDatabase(string path)
         {
             if (path is null || path.Length == 0)
                 return false;
@@ -42,7 +39,8 @@ namespace KMS.src.db
                     return false;
                 }
 
-                cmd = new SQLiteCommand(sqliteConnection);
+                queryCmd = new SQLiteCommand(sqliteConnection);
+                nonQueryCmd = new SQLiteCommand(sqliteConnection);
             }
             catch (Exception)
             {
@@ -66,7 +64,6 @@ namespace KMS.src.db
                 return false;
 
             SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-
             cmd.CommandText = "SELECT name FROM sqlite_master where type='table' AND name='" + name + "'";
             SQLiteDataReader reader = cmd.ExecuteReader();
             bool hasRow = reader.HasRows;
@@ -75,12 +72,13 @@ namespace KMS.src.db
             return hasRow;
         }
 
-        public void closeDababase()
+        public void CloseDababase()
         {
             if (IsDbReady())
             {
                 sqliteConnection.Close();
             }
+            sqliteConnection = null;
         }
 
         internal bool BeginTransaction()
@@ -95,43 +93,20 @@ namespace KMS.src.db
                 return false;
 
             sqliteTransaction.Commit();
+            sqliteTransaction = null;
             return true;
         }
 
-        internal void InsertDetail(string sql)
+        internal void ExecuteNonQuery(string sql)
         {
-            if(detailCmd is null)
-                detailCmd = new SQLiteCommand();
-
-            detailCmd.Connection = sqliteConnection;
-            detailCmd.CommandText = sql;
-            detailCmd.ExecuteNonQuery();
+            nonQueryCmd.CommandText = sql;
+            nonQueryCmd.ExecuteNonQuery();
         }
 
-        internal SQLiteDataReader Query(string sql)
+        internal SQLiteDataReader ExecuteQuery(string sql)
         {
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = sql;
-            return cmd.ExecuteReader();
-        }
-
-        internal void ExecuteSQL(string sql)
-        {
-            if (IsDbReady())
-            {
-                cmd.CommandText = sql;
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        internal SQLiteDataReader QueryWithSQL(string sql)
-        {
-            if (sql is null || sql.Length == 0)
-                return null;
-
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = sql;
-            return cmd.ExecuteReader();
+            queryCmd.CommandText = sql;
+            return queryCmd.ExecuteReader();
         }
     }
 }
