@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KMS.src.tool;
+using System;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -10,7 +11,6 @@ namespace KMS.src.db
         private SQLiteConnection sqliteConnection;
         private SQLiteTransaction sqliteTransaction;
         private SQLiteCommand nonQueryCmd;
-        private SQLiteCommand queryCmd;
 
         public bool OpenDatabase(string path)
         {
@@ -39,7 +39,6 @@ namespace KMS.src.db
                     return false;
                 }
 
-                queryCmd = new SQLiteCommand(sqliteConnection);
                 nonQueryCmd = new SQLiteCommand(sqliteConnection);
             }
             catch (Exception)
@@ -105,8 +104,9 @@ namespace KMS.src.db
 
         internal SQLiteDataReader ExecuteQuery(string sql)
         {
-            queryCmd.CommandText = sql;
-            return queryCmd.ExecuteReader();
+            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
+            cmd.CommandText = sql;
+            return cmd.ExecuteReader();
         }
     }
 }

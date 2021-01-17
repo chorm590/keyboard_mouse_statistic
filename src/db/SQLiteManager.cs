@@ -84,72 +84,21 @@ namespace KMS.src.db
             {
                 Logger.v(TAG, "creating global table");
                 totalDatabase.ExecuteNonQuery("CREATE TABLE " + GLOBAL_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER)");
-                if (totalDatabase.BeginTransaction())
-                {
-                    InsertGlobal(Constants.TypeNumber.KEYBOARD_TOTAL, 0);
-                    InsertGlobal(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_TOTAL, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_LEFT_BTN, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_RIGHT_BTN, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_WHEEL_CLICK, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_SIDE_FORWARD, 0);
-                    InsertGlobal(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, 0);
-
-                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
-                    foreach (byte keycode in keys)
-                    {
-                        InsertGlobal(keycode, 0);
-                    }
-
-                    totalDatabase.CommitTransaction();
-                }
-                else
-                {
-                    MessageBox.Show("Init database failed");
-                    throw new Exception();
-                }
+                InitGlobalTable();
             }
 
             if (!yearDatabase.IsTableExist(YEAR_TABLE))
             {
                 Logger.v(TAG, "creating year table");
-                yearDatabase.ExecuteNonQuery("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER,year SMALLINT NOT NULL)");
-                InsertYearTable();
+                CreateYearTable();
+                InitYearTable();
             }
 
             if (!yearDatabase.IsTableExist(MONTH_TABLE))
             {
                 Logger.v(TAG, "creating month table");
-                yearDatabase.ExecuteNonQuery("CREATE TABLE " + MONTH_TABLE +
-                    "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL)");
-                if (yearDatabase.BeginTransaction())
-                {
-                    InsertMonth(Constants.TypeNumber.KEYBOARD_TOTAL);
-                    InsertMonth(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
-                    InsertMonth(Constants.TypeNumber.MOUSE_TOTAL);
-                    InsertMonth(Constants.TypeNumber.MOUSE_LEFT_BTN);
-                    InsertMonth(Constants.TypeNumber.MOUSE_RIGHT_BTN);
-                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
-                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
-                    InsertMonth(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
-                    InsertMonth(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
-                    InsertMonth(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
-
-                    Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
-                    foreach (byte keycode in keys)
-                    {
-                        InsertMonth(keycode);
-                    }
-
-                    yearDatabase.CommitTransaction();
-                }
-                else
-                {
-                    MessageBox.Show("Init database failed");
-                    throw new Exception();
-                }
+                CreateMonthTable();
+                InitMonthTable();
             }
 
             if (!yearDatabase.IsTableExist(DAY_TABLE))
@@ -168,29 +117,6 @@ namespace KMS.src.db
             }
         }
 
-        internal SQLiteDataReader InitYearTable()
-        {
-            if (!yearDatabase.IsTableExist(YEAR_TABLE))
-            {
-                Logger.v(TAG, "creating year table");
-                yearDatabase.ExecuteNonQuery("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER,year SMALLINT NOT NULL)");
-                InsertYearTable();
-                return null;
-            }
-            else
-            {
-                Logger.v(TAG, "year table existed,querying");
-                return yearDatabase.ExecuteQuery("SELECT*FROM " + YEAR_TABLE);
-            }
-        }
-
-        internal SQLiteDataReader InitMonthTable()
-        {
-            return null;
-        }
-
-        
-
         /// <summary>
         /// 日期更换时由StatisticManager调用。
         /// </summary>
@@ -200,14 +126,14 @@ namespace KMS.src.db
             SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryDayTableSQL);
             if (reader is null)
             {
-                Logger.v(TAG, "query null");
+                Logger.v(TAG, "query day table null");
                 return null;
             }
             else
             {
                 if (!reader.HasRows)
                 {
-                    Logger.v(TAG, "No record found, initing");
+                    Logger.v(TAG, "No day record found, initing");
                     InitDayTable();
                     return null;
                 }
@@ -216,25 +142,112 @@ namespace KMS.src.db
             return reader;
         }
 
-        private void InsertYearTable()
+        internal SQLiteDataReader TryQueryMonthWhileSwitchDate()
         {
-            if (yearDatabase.BeginTransaction())
+            SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryMonthTableSQL);
+            if (reader is null)
             {
-                InitYearItem(Constants.TypeNumber.KEYBOARD_TOTAL);
-                InitYearItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
-                InitYearItem(Constants.TypeNumber.MOUSE_TOTAL);
-                InitYearItem(Constants.TypeNumber.MOUSE_LEFT_BTN);
-                InitYearItem(Constants.TypeNumber.MOUSE_RIGHT_BTN);
-                InitYearItem(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
-                InitYearItem(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
-                InitYearItem(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
-                InitYearItem(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
-                InitYearItem(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+                Logger.v(TAG, "query month table null");
+                return null;
+            }
+            else
+            {
+                if (!reader.HasRows)
+                {
+                    Logger.v(TAG, "No month record found, initing");
+                    InitMonthTable();
+                    return null;
+                }
+            }
+
+            return reader;
+        }
+
+        internal SQLiteDataReader TryQueryYearWhileSwitchDate()
+        {
+            SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryYearTableSQL);
+            if (reader is null)
+            {
+                Logger.v(TAG, "query year table null");
+                return null;
+            }
+            else
+            {
+                if (!reader.HasRows)
+                {
+                    Logger.v(TAG, "No year record found, initing");
+                    InitYearTable();
+                    return null;
+                }
+            }
+
+            return reader;
+        }
+
+        private void CreateYearTable()
+        {
+            yearDatabase.ExecuteNonQuery("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER,year SMALLINT NOT NULL)");
+        }
+
+        private void CreateMonthTable()
+        {
+            yearDatabase.ExecuteNonQuery("CREATE TABLE " + MONTH_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL)");
+        }
+
+        private void CreateDayTable()
+        {
+            yearDatabase.ExecuteNonQuery("CREATE TABLE " + DAY_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL)");
+        }
+
+        internal void InitGlobalTable()
+        {
+            if (totalDatabase.BeginTransaction())
+            {
+                InsertGlobalItem(Constants.TypeNumber.KEYBOARD_TOTAL);
+                InsertGlobalItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_TOTAL);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                InsertGlobalItem(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
 
                 Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
                 foreach (byte keycode in keys)
                 {
-                    InitYearItem(keycode);
+                    InsertGlobalItem(keycode);
+                }
+
+                totalDatabase.CommitTransaction();
+            }
+            else
+            {
+                MessageBox.Show("Init database failed");
+                throw new Exception();
+            }
+        }
+
+        internal void InitYearTable()
+        {
+            if (yearDatabase.BeginTransaction())
+            {
+                InsertYearItem(Constants.TypeNumber.KEYBOARD_TOTAL);
+                InsertYearItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                InsertYearItem(Constants.TypeNumber.MOUSE_TOTAL);
+                InsertYearItem(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                InsertYearItem(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                InsertYearItem(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                InsertYearItem(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                InsertYearItem(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                InsertYearItem(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                InsertYearItem(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+
+                Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                foreach (byte keycode in keys)
+                {
+                    InsertYearItem(keycode);
                 }
 
                 yearDatabase.CommitTransaction();
@@ -246,9 +259,34 @@ namespace KMS.src.db
             }
         }
 
-        private void CreateDayTable()
+        internal void InitMonthTable()
         {
-            yearDatabase.ExecuteNonQuery("CREATE TABLE " + DAY_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL)");
+            if (yearDatabase.BeginTransaction())
+            {
+                InsertMonthItem(Constants.TypeNumber.KEYBOARD_TOTAL);
+                InsertMonthItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_TOTAL);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_LEFT_BTN);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_RIGHT_BTN);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_WHEEL_CLICK);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_SIDE_FORWARD);
+                InsertMonthItem(Constants.TypeNumber.MOUSE_SIDE_BACKWARD);
+
+                Dictionary<byte, Key>.KeyCollection keys = Constants.Keyboard.Keys;
+                foreach (byte keycode in keys)
+                {
+                    InsertMonthItem(keycode);
+                }
+
+                yearDatabase.CommitTransaction();
+            }
+            else
+            {
+                MessageBox.Show("Init database failed");
+                throw new Exception();
+            }
         }
 
         private void InitDayTable()
@@ -281,56 +319,33 @@ namespace KMS.src.db
             }
         }
 
-        private void InitYearItem(ushort type)
+        internal void InsertGlobalItem(ushort type)
+        {
+            totalDatabase.ExecuteNonQuery("INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + ",0)");
+        }
+
+        private void InsertYearItem(ushort type)
         {
             yearDatabase.ExecuteNonQuery("INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")");
         }
 
-        /// <summary>
-        /// 将指定日期下的 type 字段值插入表中。
-        /// </summary>
+        private void InsertMonthItem(ushort type)
+        {
+            yearDatabase.ExecuteNonQuery("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
+        }
+
         private void InsertDayItem(ushort type)
         {
             yearDatabase.ExecuteNonQuery("INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")");
         }
 
-        internal void InsertGlobal(ushort type, uint value)
+        internal void InsertHourItem(ushort type, uint value, byte hour)
         {
-            totalDatabase.ExecuteNonQuery("INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + "," + value + ")");
-        }
-
-        private void InsertMonth(ushort type)
-        {
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
-        }
-
-        internal void InsertHour(ushort type, uint value, byte hour)
-        {
-            Logger.v(TAG, "InsertHour,type:" + type + ",hour:" + hour + ",value:" + value);
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + "," +
-                TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + "," + hour + ")");
-        }
-
-        internal bool UseDatabase(string db)
-        {
-            if (db is null || db.Length == 0)
-                return false;
-
-            //return sqliteHelper.openDatabase(db);
-            return false;
-        }
-
-        /// <summary>
-        /// 查询指定日的详细数据。
-        /// </summary>
-        internal SQLiteDataReader GetEventDetail(byte day)
-        {
-            //if (sqliteHelper.isTableExist(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX))
-            //{
-            //    return sqliteHelper.QueryTable(DETAIL_TABLE_PREFIX + day + DETAIL_TABLE_SUFFIX);
-            //}
-
-            return null;
+            yearDatabase.ExecuteNonQuery("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + ","
+                + TimeManager.TimeUsing.Year + ","
+                + TimeManager.TimeUsing.Month + ","
+                + TimeManager.TimeUsing.Day + ","
+                + hour + ")");
         }
 
         internal void close()
@@ -359,20 +374,20 @@ namespace KMS.src.db
 
         internal void UpdateGlobal(ushort type, uint value)
         {
-            //Logger.v(TAG, "update global,type:" + type + ",value:" + value);
             totalDatabase.ExecuteNonQuery("UPDATE " + GLOBAL_TABLE + " SET value=" + value + " WHERE type=" + type);
         }
 
-        internal void UpdateYear(ushort type, uint value, ushort year)
+        internal void UpdateYear(ushort type, uint value)
         {
-            //Logger.v(TAG, "update year,type:" + type + ",value:" + value + ",year:" + year);
-            yearDatabase.ExecuteNonQuery("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type);
+            yearDatabase.ExecuteNonQuery("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type
+                + " AND year=" + TimeManager.TimeUsing.Year);
         }
 
-        internal void UpdateMonth(ushort type, uint value, ushort year, byte month)
+        internal void UpdateMonth(ushort type, uint value)
         {
-            //Logger.v(TAG, "update month,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month);
-            yearDatabase.ExecuteNonQuery("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month);
+            yearDatabase.ExecuteNonQuery("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type
+                + " AND year=" + TimeManager.TimeUsing.Year
+                + " AND month=" + TimeManager.TimeUsing.Month);
         }
 
         internal void UpdateDay(ushort type, uint value)
@@ -458,7 +473,7 @@ namespace KMS.src.db
 
         internal SQLiteDataReader QueryYearStatistic()
         {
-            return Query(totalDatabase, YEAR_TABLE, QueryYearTableSQL);
+            return Query(yearDatabase, YEAR_TABLE, QueryYearTableSQL);
         }
 
         internal SQLiteDataReader QueryMonthStatistic()
