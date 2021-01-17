@@ -15,7 +15,7 @@ namespace KMS.src.tool
         {
             if (timer is null)
             {
-                timer = new System.Threading.Timer(timerCallback, null, 60000, 60000);
+                timer = new System.Threading.Timer(TickToc, null, 50000, 60000);
             }
 
             if (timerCallbackList is null)
@@ -33,7 +33,7 @@ namespace KMS.src.tool
             timerCallbackList.Add(cb);
         }
 
-        private static void timerCallback(object state)
+        private static void TickToc(object state)
         {
             foreach (TimerCallback cb in timerCallbackList)
             {

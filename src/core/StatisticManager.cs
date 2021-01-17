@@ -28,9 +28,6 @@ namespace KMS.src.core
             }
         }
 
-        private readonly double screenAreaWidth;
-        private readonly double screenAreaHeight;
-
         private readonly Statistic statisticGlobal;
         private readonly Statistic statisticYear;
         private readonly Statistic statisticMonth;
@@ -59,23 +56,18 @@ namespace KMS.src.core
             {
                 Type = Constants.TypeNumber.KEYBOARD_TOTAL
             };
-
             SttMouseTotalToday = new Record()
             {
                 Type = Constants.TypeNumber.MOUSE_TOTAL
             };
-
             SttMostOpHourToday = new Record()
             {
                 Type = Constants.TypeNumber.INVALID
             };
 
             //Initialize timer
-            tool.Timer.RegisterTimerCallback(TimerCallback);
-
-            screenAreaWidth = SystemParameters.PrimaryScreenWidth / 10;
-            screenAreaHeight = SystemParameters.PrimaryScreenHeight / 10;
-            Logger.v(TAG, "screen width:" + screenAreaWidth + ",height:" + screenAreaHeight);
+            tool.Timer.RegisterTimerCallback(TimingStorage); //Must in front of SQLiteManager initialize
+            //tool.Timer.RegisterTimerCallback(DateWatcher);
 
             statisticGlobal = new Statistic();
             statisticYear = new Statistic();
@@ -135,7 +127,7 @@ namespace KMS.src.core
         /// <summary>
         /// 定时执行函数，约每60秒执行一次。主要在此将新数据存储到数据库中。
         /// </summary>
-        private void TimerCallback(object state)
+        private void TimingStorage(object state)
         {
             DateTime now = DateTime.Now;
             Logger.v(TAG, "storage data, now1, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
@@ -365,10 +357,6 @@ namespace KMS.src.core
                     if (hourStatistic[i].IsKBUpdated || hourStatistic[i].IsMSUpdated)
                     {
                         hstmp = new HourStatistic[24];
-                        for (byte j = 0; j < 24; j++)
-                        {
-                            hstmp[j].Hour = 25; //means no record in this hour.
-                        }
 
                         SQLiteDataReader reader = SQLiteManager.GetInstance.QueryHourStatistic();
                         if (reader != null)
@@ -385,12 +373,12 @@ namespace KMS.src.core
                                 if (type == Constants.TypeNumber.KEYBOARD_TOTAL)
                                 {
                                     hstmp[hour].KbTotal = (uint)val;
-                                    hstmp[hour].Hour = hour;
+                                    hstmp[hour].RecordStatus |= 1;
                                 }
                                 else if (type == Constants.TypeNumber.MOUSE_TOTAL)
                                 {
                                     hstmp[hour].MsTotal = (uint)val;
-                                    hstmp[hour].Hour = hour;
+                                    hstmp[hour].RecordStatus |= 2;
                                 }
                             }
                             reader.Close();
@@ -401,7 +389,7 @@ namespace KMS.src.core
                 if (hourStatistic[i].IsKBUpdated) //It won't be a lot
                 {
                     Logger.v(TAG, "hour " + i + " kb value in db:" + hstmp[i].KbTotal);
-                    if (hstmp[i].Hour == 25)
+                    if ((hstmp[i].RecordStatus & 1) == 0)
                     {
                         SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.KEYBOARD_TOTAL, i/* 'i' is 'hour' */, hourStatistic[i].KbTotal);
                         hourStatistic[i].IsKBUpdated = false;
@@ -416,7 +404,7 @@ namespace KMS.src.core
                 if (hourStatistic[i].IsMSUpdated)
                 {
                     Logger.v(TAG, "hour " + i + " ms value in db:" + hstmp[i].MsTotal);
-                    if (hstmp[i].Hour == 25)
+                    if ((hstmp[i].RecordStatus & 2) == 0)
                     {
                         SQLiteManager.GetInstance.InsertHour(Constants.TypeNumber.MOUSE_TOTAL, i, hourStatistic[i].MsTotal);
                         hourStatistic[i].IsMSUpdated = false;
@@ -431,6 +419,86 @@ namespace KMS.src.core
 
             now = DateTime.Now;
             Logger.v(TAG, "storage data,now2, " + now.Minute + ":" + now.Second + "." + now.Millisecond);
+        }
+
+
+        /// <summary>
+        /// 检查是否已经换日，若是，更新TimeManager中的时间，然后更换数据库或数据库并初始化。
+        /// </summary>
+        private void DateWatcher(object state)
+        {
+            DateTime now = DateTime.Now;
+
+            int status = CheckDate(now, TimeManager.TimeUsing);
+
+            switch (status)
+            {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    TimeManager.TimeUsing = now; //Important
+                    break;
+            }
+
+            /*
+                Important:接受因更换的瞬间而造成的数据丢失。2021-01-17 22:49
+             */
+            switch (status)
+            {
+                case 1: //year switch
+                    SQLiteManager.GetInstance.SwitchYearDB();
+                    SwitchYearTable();
+                    break;
+                case 2: //month switch
+                    break;
+                case 3: //day switch
+                    break;
+                case 4: //hour switch
+                    //1. 更新今日统计
+                    // Needn't do anything
+                    //2. 更新小时统计表
+                    for (byte i = 0; i < 24; i++)
+                    {
+                        hourStatistic[i].RecordStatus = 0;
+                        hourStatistic[i].IsKBUpdated = false;
+                        hourStatistic[i].IsMSUpdated = false;
+                        hourStatistic[i].KbTotal = 0;
+                        hourStatistic[i].MsTotal = 0;
+                    }
+                    QueryHourStatisticFromDb();
+
+                    //3.更新日表
+                    TODO
+                    break;
+            }
+        }
+
+        private int CheckDate(DateTime now, DateTime timeUsing)
+        {
+            if (now.Year != timeUsing.Year)
+                return 1;
+            else if (now.Month != timeUsing.Month)
+                return 2;
+            else if (now.Day != timeUsing.Day)
+                return 3;
+            else if (now.Hour != timeUsing.Hour)
+                return 4;
+            else
+                return 0;
+        }
+
+        /// <summary>
+        /// 检查当前年表是否存在。若不存在，则新建并插入初始值。若存在，则读取数据并应用到 statisticYear 中。2021-01-17 21:47
+        /// </summary>
+        private void SwitchYearTable()
+        {
+            SQLiteDataReader reader = SQLiteManager.GetInstance.InitYearTable();
+            if (reader != null)
+            {
+                //从SQLiteDataReader中提取数据出来。
+
+            }
         }
 
         internal void KeyboardEventHappen(int typeCode, byte fkey, DateTime time)
@@ -798,10 +866,12 @@ namespace KMS.src.core
                     if (type == Constants.TypeNumber.KEYBOARD_TOTAL)
                     {
                         hourStatistic[hour].KbTotal = (uint)value;
+                        hourStatistic[hour].RecordStatus |= 1;
                     }
                     else if (type == Constants.TypeNumber.MOUSE_TOTAL)
                     {
                         hourStatistic[hour].MsTotal = (uint)value;
+                        hourStatistic[hour].RecordStatus |= 2;
                     }
                 }
                 reader.Close();
@@ -1125,7 +1195,12 @@ namespace KMS.src.core
 
         private struct HourStatistic
         {
-            internal byte Hour;
+            /// <summary>
+            /// 第0位表示当前小时值键盘记录是否已插入过记录。第1位表示鼠标记录。
+            /// 用于指导在定时存储时小时记录是该插入还是更新。
+            /// </summary>
+            internal byte RecordStatus;
+            internal byte Hour; //It seem it is always 'unused'
             internal uint KbTotal;
             internal uint MsTotal;
             internal bool IsKBUpdated;

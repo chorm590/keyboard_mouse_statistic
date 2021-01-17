@@ -77,8 +77,10 @@ namespace KMS.src.db
 
         public void closeDababase()
         {
-            if (sqliteConnection != null)
+            if (IsDbReady())
+            {
                 sqliteConnection.Close();
+            }
         }
 
         internal bool BeginTransaction()
