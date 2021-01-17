@@ -304,7 +304,7 @@ namespace KMS.src.db
             yearDatabase.ExecuteNonQuery("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
         }
 
-        internal void InsertHour(ushort type, byte hour, uint value)
+        internal void InsertHour(ushort type, uint value, byte hour)
         {
             Logger.v(TAG, "InsertHour,type:" + type + ",hour:" + hour + ",value:" + value);
             yearDatabase.ExecuteNonQuery("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + "," +
@@ -375,13 +375,16 @@ namespace KMS.src.db
             yearDatabase.ExecuteNonQuery("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month);
         }
 
-        internal void UpdateDay(ushort type, uint value, ushort year, byte month, byte day)
+        internal void UpdateDay(ushort type, uint value)
         {
-            //Logger.v(TAG, "update day,type:" + type + ",value:" + value + ",year:" + year + ",month:" + month + ",day:" + day);
-            yearDatabase.ExecuteNonQuery("UPDATE " + DAY_TABLE + " SET value=" + value + " WHERE type=" + type + " AND month=" + month + " AND day=" + day);
+            yearDatabase.ExecuteNonQuery("UPDATE " + DAY_TABLE + " SET value=" + value
+                + " WHERE type=" + type
+                + " AND year=" + TimeManager.TimeUsing.Year
+                + " AND month=" + TimeManager.TimeUsing.Month
+                + " AND day=" + TimeManager.TimeUsing.Day);
         }
 
-        internal void UpdateHour(ushort type, byte hour, uint value)
+        internal void UpdateHour(ushort type, uint value, byte hour)
         {
             Logger.v(TAG, "UpdateHour,type:" + type + ",hour:" + hour + ",value:" + value);
             yearDatabase.ExecuteNonQuery("UPDATE " + HOUR_TABLE + " SET value=" + value
