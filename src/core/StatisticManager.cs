@@ -783,6 +783,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticGlobal);
                 }
+                reader.Close();
             }
         }
 
@@ -795,6 +796,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticYear);
                 }
+                reader.Close();
             }
         }
 
@@ -807,6 +809,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticMonth);
                 }
+                reader.Close();
             }
         }
 
@@ -819,6 +822,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticDay);
                 }
+                reader.Close();
             }
         }
 
@@ -896,9 +900,20 @@ namespace KMS.src.core
                     return statisticGlobal.MouseWheelForward;
                 case Constants.TypeNumber.MOUSE_WHEEL_BACKWARD:
                     return statisticGlobal.MouseWheelBackward;
+                case Constants.TypeNumber.MOUSE_WHEEL_CLICK:
+                    return statisticGlobal.MouseWheelClick;
+                case Constants.TypeNumber.MOUSE_SIDE_FORWARD:
+                    return statisticGlobal.MouseSideKeyForward;
+                case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
+                    return statisticGlobal.MouseSideKeyBackward;
             }
 
             return null;
+        }
+
+        internal List<Record> GetSingleKeyRecords()
+        {
+            return statisticGlobal.KeyboardKeys;
         }
 
         /// <summary>

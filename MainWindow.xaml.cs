@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Data;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace KMS
 {
@@ -21,7 +22,8 @@ namespace KMS
         private const string TAG = "KMS";
 
         private Thread countThread;
-        private StatisticManager statisticManager;
+        private readonly StatisticManager statisticManager;
+        private GlobalStatisticDetail globalStatisticDetail;
 
         public MainWindow()
         {
@@ -31,7 +33,7 @@ namespace KMS
             TimeManager.TimeUsing = DateTime.Now;
 
             statisticManager = StatisticManager.GetInstance;
-            startWatching();
+            StartWatching();
             bindData();
         }
 
@@ -114,10 +116,27 @@ namespace KMS
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logger.v(TAG, "Window closing");
-            stopAll();
+            StopAll();
         }
 
-        private void startWatching()
+        private void GlobalDetail(object sender, MouseButtonEventArgs e)
+        {
+            Logger.v(TAG, "Global detail clicked");
+            if (globalStatisticDetail != null)
+            {
+                globalStatisticDetail.Close();
+            }
+
+            globalStatisticDetail = new GlobalStatisticDetail();
+            globalStatisticDetail.SetStatistic(
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_SIDE_FORWARD),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_SIDE_BACKWARD),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_CLICK),
+                statisticManager.GetSingleKeyRecords()); //Must call before 'show'
+            globalStatisticDetail.ShowDialog();
+        }
+
+        private void StartWatching()
         {
             countThread = new Thread(CountThread.ThreadProc);
             countThread.Start();
@@ -127,7 +146,7 @@ namespace KMS
             Logger.v(TAG, "KM-event listening");
         }
 
-        private void stopAll()
+        private void StopAll()
         {
             KMEventHook.RemoveHook();
             if (countThread != null)
