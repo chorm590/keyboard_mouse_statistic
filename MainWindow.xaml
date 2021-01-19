@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KMS"
+		xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="键鼠计数器" Height="410" Width="300" Closing="Window_Closing" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
 	<StackPanel>
@@ -111,4 +112,12 @@
 
 		</GroupBox>
 	</StackPanel>
+
+	<Window.Resources>
+		<ResourceDictionary>
+			<sys:String x:Key="exit">
+				退出
+			</sys:String>
+		</ResourceDictionary>
+	</Window.Resources>
 </Window>

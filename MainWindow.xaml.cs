@@ -10,6 +10,7 @@ using System.IO;
 using System.Windows.Data;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Forms;
 
 namespace KMS
 {
@@ -24,6 +25,7 @@ namespace KMS
         private Thread countThread;
         private readonly StatisticManager statisticManager;
         private GlobalStatisticDetail globalStatisticDetail;
+        private NotifyIcon notifyIcon;
 
         public MainWindow()
         {
@@ -35,88 +37,126 @@ namespace KMS
             statisticManager = StatisticManager.GetInstance;
             StartWatching();
             bindData();
+            NotifyIconInit();
         }
 
         private void bindData()
         {
             //全局键盘统计
-            Binding binding = new Binding();
+            System.Windows.Data.Binding binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KEYBOARD_TOTAL);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(KbTotal, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(ComboTotal, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP1);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop1, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP2);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop2, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP3);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop3, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP4);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop4, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.KB_SK_TOP5);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(SkTop5, TextBlock.TextProperty, binding);
 
             //全局鼠标统计
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_LEFT_BTN);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsLeftBtn, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_RIGHT_BTN);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsRightBtn, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_FORWARD);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsWheelForward, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD);
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsWheelBackward, TextBlock.TextProperty, binding);
 
             //今日统计
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.SttKeyboardTotalToday;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(KbAllToday, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.SttMouseTotalToday;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MsAllToday, TextBlock.TextProperty, binding);
 
-            binding = new Binding();
+            binding = new System.Windows.Data.Binding();
             binding.Source = statisticManager.SttMostOpHourToday;
             binding.Path = new PropertyPath("Desc");
             BindingOperations.SetBinding(MostOpHourToday, TextBlock.TextProperty, binding);
         }
 
+        private void NotifyIconInit()
+        {
+            notifyIcon = new NotifyIcon();
+            notifyIcon.Text = "键鼠统计器";
+            notifyIcon.Click += NotifyIcon_Click;
+
+            ContextMenuStrip menus = new ContextMenuStrip();
+            menus.Items.Add(Resources["exit"].ToString());
+            menus.ItemClicked += Menus_ItemClick;
+            notifyIcon.ContextMenuStrip = menus;
+
+            notifyIcon.Icon = new System.Drawing.Icon("icon_small.ico");
+            notifyIcon.Visible = true;
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Logger.v(TAG, "Window closing");
-            StopAll();
+            if (Visibility == Visibility.Visible)
+                Hide();
+            e.Cancel = true;
+        }
+
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            Logger.v(TAG, "NotifyIcon_Click");
+            if (Visibility == Visibility.Hidden)
+            {
+                Logger.v(TAG, "Showing the main window");
+                Show();
+            }
+        }
+
+        private void Menus_ItemClick(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (Resources["exit"].ToString().Equals(e.ClickedItem.ToString()))
+            {
+                Logger.v(TAG, "Exiting kms");
+                StopAll();
+                System.Windows.Application.Current.Shutdown();
+            }
         }
 
         private void GlobalDetail(object sender, MouseButtonEventArgs e)
