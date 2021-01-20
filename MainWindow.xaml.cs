@@ -135,8 +135,10 @@ namespace KMS
         {
             Logger.v(TAG, "Window closing");
             if (Visibility == Visibility.Visible)
+            {
                 Hide();
-            e.Cancel = true;
+                e.Cancel = true;
+            }
         }
 
         private void NotifyIcon_Click(object sender, EventArgs e)

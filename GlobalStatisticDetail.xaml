@@ -7,6 +7,13 @@
         mc:Ignorable="d"
         Title="全局统计详情" Height="500" Width="400" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-		<ListView x:Name="LVGlobalKeys" Margin="3, 5, 3, 10" />
+		<ListView x:Name="LVGlobalKeys" Margin="3, 5, 3, 10" >
+			<ListView.View>
+				<GridView>
+					<GridViewColumn Header="按键码" Width="150" />
+					<GridViewColumn Header="敲击次数" Width="200" />
+				</GridView>
+			</ListView.View>
+		</ListView>
 	</Grid>
 </Window>
