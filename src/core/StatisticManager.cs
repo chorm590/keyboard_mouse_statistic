@@ -126,7 +126,7 @@ namespace KMS.src.core
 
         internal void Shutdown()
         {
-            //TODO flush all data to disk.
+            TimingStorage(null);
         }
 
         /// <summary>

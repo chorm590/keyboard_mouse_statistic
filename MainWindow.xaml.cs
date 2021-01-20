@@ -200,6 +200,7 @@ namespace KMS
                 CountThread.CanThreadRun = false;
             Logger.v(TAG, "Hook removed");
             src.tool.Timer.DestroyTimer();
+            statisticManager.Shutdown();
         }
     }
 }
