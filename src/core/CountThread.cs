@@ -85,6 +85,18 @@ namespace KMS.src.core
                     break;
                 case Constants.KeyEvent.WM_SYSKEYUP:
                 case Constants.KeyEvent.WM_KEYUP:
+                    if (msWheelCounter != 0)
+                    {
+                        if (msWheelCounter < 0)
+                        {
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, msWheelCounter * -1, 0, 0, msWheelTime);
+                        }
+                        else
+                        {
+                            StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, msWheelCounter, 0, 0, msWheelTime);
+                        }
+                        msWheelCounter = 0;
+                    }
                     KeyUpProcess(keyCode, time);
                     break;
                 default:
@@ -154,6 +166,9 @@ namespace KMS.src.core
                     {
                         StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_SIDE_FORWARD, 0, 0, 0, time);
                     }
+                    break;
+                case Constants.MouseEvent.WM_WHEEL_CLK_DOWN:
+                    StatisticManager.GetInstance.MouseEventHappen(Constants.TypeNumber.MOUSE_WHEEL_CLICK, 0, 0, 0, time);
                     break;
             }
         }

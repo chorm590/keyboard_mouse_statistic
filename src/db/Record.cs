@@ -179,6 +179,12 @@ namespace KMS.src.db
             }
         }
 
+        public string Name
+        {
+            get;
+            set;
+        }
+
         public string Desc
         {
             get

@@ -3,10 +3,6 @@ using System.Threading;
 using System.Windows;
 using KMS.src.core;
 using KMS.src.tool;
-using KMS.src.db;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using System.Windows.Data;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -120,7 +116,7 @@ namespace KMS
         {
             notifyIcon = new NotifyIcon();
             notifyIcon.Text = "键鼠统计器";
-            notifyIcon.Click += NotifyIcon_Click;
+            notifyIcon.MouseClick += NotifyIcon_Click;
 
             ContextMenuStrip menus = new ContextMenuStrip();
             menus.Items.Add(Resources["exit"].ToString());
@@ -133,7 +129,6 @@ namespace KMS
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Logger.v(TAG, "Window closing");
             if (Visibility == Visibility.Visible)
             {
                 Hide();
@@ -141,13 +136,18 @@ namespace KMS
             }
         }
 
-        private void NotifyIcon_Click(object sender, EventArgs e)
+        private void NotifyIcon_Click(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            Logger.v(TAG, "NotifyIcon_Click");
-            if (Visibility == Visibility.Hidden)
+            if (e.Button == MouseButtons.Right)
             {
-                Logger.v(TAG, "Showing the main window");
-                Show();
+                notifyIcon.ContextMenuStrip.Show();
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                if (Visibility == Visibility.Hidden)
+                {
+                    Show();
+                }
             }
         }
 
@@ -163,7 +163,6 @@ namespace KMS
 
         private void GlobalDetail(object sender, MouseButtonEventArgs e)
         {
-            Logger.v(TAG, "Global detail clicked");
             if (globalStatisticDetail != null)
             {
                 globalStatisticDetail.Close();
@@ -171,9 +170,15 @@ namespace KMS
 
             globalStatisticDetail = new GlobalStatisticDetail();
             globalStatisticDetail.SetStatistic(
+                statisticManager.GetRecord(Constants.TypeNumber.KEYBOARD_TOTAL),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_TOTAL),
                 statisticManager.GetRecord(Constants.TypeNumber.MOUSE_SIDE_FORWARD),
                 statisticManager.GetRecord(Constants.TypeNumber.MOUSE_SIDE_BACKWARD),
                 statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_CLICK),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_FORWARD),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_LEFT_BTN),
+                statisticManager.GetRecord(Constants.TypeNumber.MOUSE_RIGHT_BTN),
                 statisticManager.GetSingleKeyRecords()); //Must call before 'show'
             globalStatisticDetail.ShowDialog();
         }

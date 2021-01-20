@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace KMS.src.core
 {
@@ -270,6 +271,8 @@ namespace KMS.src.core
             internal const int WM_LBUTTONUP = 0x202;
             internal const int WM_RBUTTONDOWN = 0x204;
             internal const int WM_RBUTTONUP = 0x205;
+            internal const int WM_WHEEL_CLK_DOWN = 0x207;
+            internal const int WM_WHEEL_CLK_UP = 0x208;
             internal const int WM_MOUSEWHEEL = 0x20a;
             internal const int WM_MOUSESIDEDOWN = 0x20b; //鼠标侧键按下事件（猜测）。
             internal const int WM_MOUSESIDEUP = 0x20c; //鼠标侧键抬起事件（猜测）。
@@ -280,19 +283,19 @@ namespace KMS.src.core
 
         internal static readonly Dictionary<ushort, Type> MouseKeys = new Dictionary<ushort, Type>
         {
-            {TypeNumber.MOUSE_LEFT_BTN,                 new Type(TypeNumber.MOUSE_LEFT_BTN,"MOUSE_LEFT_BTN") },
-            {TypeNumber.MOUSE_RIGHT_BTN,                new Type(TypeNumber.MOUSE_RIGHT_BTN,"MOUSE_RIGHT_BTN")},
-            {TypeNumber.MOUSE_SIDE_FORWARD,             new Type(TypeNumber.MOUSE_SIDE_FORWARD,"MOUSE_SIDE_KEY_FORWARD")},
-            {TypeNumber.MOUSE_SIDE_BACKWARD,            new Type(TypeNumber.MOUSE_SIDE_BACKWARD,"MOUSE_SIDE_KEY_BACKWARD")},
-            {TypeNumber.MOUSE_WHEEL_FORWARD,            new Type(TypeNumber.MOUSE_WHEEL_FORWARD,"MOUSE_WHEEL_FORWARD")},
-            {TypeNumber.MOUSE_WHEEL_BACKWARD,           new Type(TypeNumber.MOUSE_WHEEL_BACKWARD,"MOUSE_WHEEL_BACKWARD")},
-            {TypeNumber.MOUSE_WHEEL_CLICK,              new Type(TypeNumber.MOUSE_WHEEL_CLICK,"MOUSE_WHEEL_CLICK")},
+            {TypeNumber.MOUSE_LEFT_BTN,                 new Type(TypeNumber.MOUSE_LEFT_BTN,         "鼠标左键") },
+            {TypeNumber.MOUSE_RIGHT_BTN,                new Type(TypeNumber.MOUSE_RIGHT_BTN,        "鼠标右键")},
+            {TypeNumber.MOUSE_SIDE_FORWARD,             new Type(TypeNumber.MOUSE_SIDE_FORWARD,     "鼠标后侧键")},
+            {TypeNumber.MOUSE_SIDE_BACKWARD,            new Type(TypeNumber.MOUSE_SIDE_BACKWARD,    "鼠标前侧键")},
+            {TypeNumber.MOUSE_WHEEL_FORWARD,            new Type(TypeNumber.MOUSE_WHEEL_FORWARD,    "鼠标滑轮后滑")},
+            {TypeNumber.MOUSE_WHEEL_BACKWARD,           new Type(TypeNumber.MOUSE_WHEEL_BACKWARD,   "鼠标滑轮前滑")},
+            {TypeNumber.MOUSE_WHEEL_CLICK,              new Type(TypeNumber.MOUSE_WHEEL_CLICK,      "鼠标滑轮点击")},
         };
 
         internal static class MouseDataHighOrder
         {
             internal const int SIDE_FORWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
-            internal const int SIDE_BACKWARD = 0x10; //鼠标侧键后退标志。high-order in DWORD
+            internal const int SIDE_BACKWARD = 0x2; //鼠标侧键后退标志。high-order in DWORD
         }
 
         internal static class Statistic

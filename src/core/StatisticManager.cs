@@ -906,6 +906,8 @@ namespace KMS.src.core
                     return statisticGlobal.MouseSideKeyForward;
                 case Constants.TypeNumber.MOUSE_SIDE_BACKWARD:
                     return statisticGlobal.MouseSideKeyBackward;
+                case Constants.TypeNumber.MOUSE_TOTAL:
+                    return statisticGlobal.MouseTotal;
             }
 
             return null;
@@ -1091,7 +1093,10 @@ namespace KMS.src.core
                 Dictionary<byte, Key>.ValueCollection values = sgKey.Values;
                 foreach (Key key in values)
                 {
-                    KeyboardKeys.Add(new Record((ushort)key.Code));
+                    KeyboardKeys.Add(new Record((ushort)key.Code)
+                    {
+                        Name = key.Name //方便在全局按键详情窗口的展示。2021-01-20 19:41
+                    });
                 }
 
                 MouseTotal = new Record
@@ -1102,36 +1107,43 @@ namespace KMS.src.core
                 MouseLeftBtn = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_LEFT_BTN,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_LEFT_BTN].Desc
                 };
 
                 MouseRightBtn = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_RIGHT_BTN,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_RIGHT_BTN].Desc
                 };
 
                 MouseWheelForward = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_WHEEL_FORWARD,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_FORWARD].Desc
                 };
 
                 MouseWheelBackward = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_WHEEL_BACKWARD,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_BACKWARD].Desc
                 };
 
                 MouseWheelClick = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_WHEEL_CLICK,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_WHEEL_CLICK].Desc
                 };
 
                 MouseSideKeyForward = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_SIDE_FORWARD,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_SIDE_FORWARD].Desc
                 };
 
                 MouseSideKeyBackward = new Record
                 {
                     Type = Constants.TypeNumber.MOUSE_SIDE_BACKWARD,
+                    Name = Constants.MouseKeys[Constants.TypeNumber.MOUSE_SIDE_BACKWARD].Desc
                 };
             }
 
