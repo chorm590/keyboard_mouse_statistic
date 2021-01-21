@@ -1,28 +1,7 @@
-# keyboard_mouse_statistic
+Base on .net-core-3.1, a keyboard and mouse event statistic tool.
 
-#### 介绍
-一款统计windows桌面操作系统中键盘与鼠标事件的软件。
+It has basically record function now.
 
-除了最基本的按键与鼠标事件总量统计外还提供了年月日时段统计、鼠标热力统计及组合键统计等。
+statistic is...deving...I'm tired of dev this,so it may won't comes...
 
-软件是使用WPF技术，基于.NET FRAMEWORK 4.7.2 开发而来的。
-
-
-
-
-
-
-#### 安装教程
-
-
-
-
-
-
-
-#### 使用说明
-
-
-
-
-
+The two app screenshot is in docs-dir.
