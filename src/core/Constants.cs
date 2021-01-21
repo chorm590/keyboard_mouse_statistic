@@ -285,10 +285,10 @@ namespace KMS.src.core
         {
             {TypeNumber.MOUSE_LEFT_BTN,                 new Type(TypeNumber.MOUSE_LEFT_BTN,         "鼠标左键") },
             {TypeNumber.MOUSE_RIGHT_BTN,                new Type(TypeNumber.MOUSE_RIGHT_BTN,        "鼠标右键")},
-            {TypeNumber.MOUSE_SIDE_FORWARD,             new Type(TypeNumber.MOUSE_SIDE_FORWARD,     "鼠标后侧键")},
-            {TypeNumber.MOUSE_SIDE_BACKWARD,            new Type(TypeNumber.MOUSE_SIDE_BACKWARD,    "鼠标前侧键")},
-            {TypeNumber.MOUSE_WHEEL_FORWARD,            new Type(TypeNumber.MOUSE_WHEEL_FORWARD,    "鼠标滑轮后滑")},
-            {TypeNumber.MOUSE_WHEEL_BACKWARD,           new Type(TypeNumber.MOUSE_WHEEL_BACKWARD,   "鼠标滑轮前滑")},
+            {TypeNumber.MOUSE_SIDE_FORWARD,             new Type(TypeNumber.MOUSE_SIDE_FORWARD,     "鼠标前侧键")},
+            {TypeNumber.MOUSE_SIDE_BACKWARD,            new Type(TypeNumber.MOUSE_SIDE_BACKWARD,    "鼠标后侧键")},
+            {TypeNumber.MOUSE_WHEEL_FORWARD,            new Type(TypeNumber.MOUSE_WHEEL_FORWARD,    "鼠标滑轮前滑")},
+            {TypeNumber.MOUSE_WHEEL_BACKWARD,           new Type(TypeNumber.MOUSE_WHEEL_BACKWARD,   "鼠标滑轮后滑")},
             {TypeNumber.MOUSE_WHEEL_CLICK,              new Type(TypeNumber.MOUSE_WHEEL_CLICK,      "鼠标滑轮点击")},
         };
 
