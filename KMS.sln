@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "新建文件夹\Setup1\Setup1.vdproj", "{26217B87-D141-4239-997C-496DDA66E071}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "setup_project\Setup1\Setup1.vdproj", "{57D16E3B-59E3-4D8D-9563-AE6F10A73974}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,12 +34,12 @@ Global
 		{569E6051-C11B-4786-9D43-6F2CCD902B52}.Release|x64.Build.0 = Release|x64
 		{569E6051-C11B-4786-9D43-6F2CCD902B52}.Release|x86.ActiveCfg = Release|x86
 		{569E6051-C11B-4786-9D43-6F2CCD902B52}.Release|x86.Build.0 = Release|x86
-		{26217B87-D141-4239-997C-496DDA66E071}.Debug|Any CPU.ActiveCfg = Debug
-		{26217B87-D141-4239-997C-496DDA66E071}.Debug|x64.ActiveCfg = Debug
-		{26217B87-D141-4239-997C-496DDA66E071}.Debug|x86.ActiveCfg = Debug
-		{26217B87-D141-4239-997C-496DDA66E071}.Release|Any CPU.ActiveCfg = Release
-		{26217B87-D141-4239-997C-496DDA66E071}.Release|x64.ActiveCfg = Release
-		{26217B87-D141-4239-997C-496DDA66E071}.Release|x86.ActiveCfg = Release
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Debug|Any CPU.ActiveCfg = Debug
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Debug|x64.ActiveCfg = Debug
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Debug|x86.ActiveCfg = Debug
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Release|Any CPU.ActiveCfg = Release
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Release|x64.ActiveCfg = Release
+		{57D16E3B-59E3-4D8D-9563-AE6F10A73974}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
