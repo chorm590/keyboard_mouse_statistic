@@ -71,7 +71,7 @@ namespace KMS.src.core
             if (SQLiteManager.GetInstance.Init())
             {
                 QueryGlobalStatisticFromDB();
-                if (statisticGlobal.KeyboardTotal.Value is 0)
+                if ((statisticGlobal.KeyboardTotal.Value is 0) && (statisticGlobal.MouseTotal.Value is 0))
                 {
                     new Thread(() => {
                         DateTime niw = DateTime.Now;
@@ -85,10 +85,10 @@ namespace KMS.src.core
                 }
                 else
                 {
-                    //read statistic from year database
+                    //read statistic from detail database
                     new Thread(()=> {
                         DateTime niw = DateTime.Now;
-                        Logger.v(TAG, "Year statistic query begin, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
+                        Logger.v(TAG, "Detail statistic query begin, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
 
                         QueryYearStatisticFromDB();
                         QueryMonthStatisticFromDB();
@@ -112,7 +112,7 @@ namespace KMS.src.core
                         statisticGlobal.MouseWheelBackward.Desc = GetDesc1(statisticGlobal.MouseWheelBackward.Value);
 
                         niw = DateTime.Now;
-                        Logger.v(TAG, "Year statistic query end, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
+                        Logger.v(TAG, "Detail statistic query end, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
                     }).Start();
 
                 }
