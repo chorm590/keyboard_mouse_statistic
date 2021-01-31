@@ -26,8 +26,8 @@ namespace KMS.src.db
 
         private static SQLiteManager instance;
 
-        private readonly SQLiteHelper totalDatabase; //存储全局统计数据
-        private SQLiteHelper yearDatabase; //存储本年度统计数据
+        private readonly SQLiteHelper globalDatabase; //存储全局统计数据
+        private SQLiteHelper detailDatabase; //存储本年度统计数据
 
         internal static SQLiteManager GetInstance
         {
@@ -52,8 +52,8 @@ namespace KMS.src.db
                 Directory.CreateDirectory(DATABASE_DIR);
             }
 
-            totalDatabase = new SQLiteHelper();
-            yearDatabase = new SQLiteHelper();
+            globalDatabase = new SQLiteHelper();
+            detailDatabase = new SQLiteHelper();
         }
 
         /// <summary>
@@ -62,13 +62,13 @@ namespace KMS.src.db
         /// <returns>true 两个数据库均已正常连接。false 未能全部正常创建连接。</returns>
         internal bool Init()
         {
-            if (totalDatabase is null || yearDatabase is null)
+            if (globalDatabase is null || detailDatabase is null)
                 return false;
 
-            if (!totalDatabase.OpenDatabase(GlobalDb))
+            if (!globalDatabase.OpenDatabase(GlobalDb))
                 return false;
 
-            if (!yearDatabase.OpenDatabase(YearDb))
+            if (!detailDatabase.OpenDatabase(YearDb))
                 return false;
 
             return true;
@@ -80,38 +80,38 @@ namespace KMS.src.db
         /// </summary>
         internal void InitTables()
         {
-            if (!totalDatabase.IsTableExist(GLOBAL_TABLE))
+            if (!globalDatabase.IsTableExist(GLOBAL_TABLE))
             {
                 Logger.v(TAG, "creating global table");
-                totalDatabase.ExecuteNonQuery("CREATE TABLE " + GLOBAL_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER)");
+                globalDatabase.ExecuteNonQuery("CREATE TABLE " + GLOBAL_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER)");
                 InitGlobalTable();
             }
 
-            if (!yearDatabase.IsTableExist(YEAR_TABLE))
+            if (!detailDatabase.IsTableExist(YEAR_TABLE))
             {
                 Logger.v(TAG, "creating year table");
                 CreateYearTable();
                 InitYearTable();
             }
 
-            if (!yearDatabase.IsTableExist(MONTH_TABLE))
+            if (!detailDatabase.IsTableExist(MONTH_TABLE))
             {
                 Logger.v(TAG, "creating month table");
                 CreateMonthTable();
                 InitMonthTable();
             }
 
-            if (!yearDatabase.IsTableExist(DAY_TABLE))
+            if (!detailDatabase.IsTableExist(DAY_TABLE))
             {
                 Logger.v(TAG, "creating day table");
                 CreateDayTable();
                 InitDayTable();
             }
 
-            if (!yearDatabase.IsTableExist(HOUR_TABLE))
+            if (!detailDatabase.IsTableExist(HOUR_TABLE))
             {
                 Logger.v(TAG, "creating hour table");
-                yearDatabase.ExecuteNonQuery("CREATE TABLE " + HOUR_TABLE +
+                detailDatabase.ExecuteNonQuery("CREATE TABLE " + HOUR_TABLE +
                     "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL,hour TINYINT NOT NULL)");
                 //Enough!
             }
@@ -123,7 +123,7 @@ namespace KMS.src.db
         internal SQLiteDataReader TryQueryDayWhileSwitchDate()
         {
             // 检查指定日期记录是否存在。
-            SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryDayTableSQL);
+            SQLiteDataReader reader = detailDatabase.ExecuteQuery(QueryDayTableSQL);
             if (reader is null)
             {
                 Logger.v(TAG, "query day table null");
@@ -133,6 +133,7 @@ namespace KMS.src.db
             {
                 if (!reader.HasRows)
                 {
+                    reader.Close();
                     Logger.v(TAG, "No day record found, initing");
                     InitDayTable();
                     return null;
@@ -144,7 +145,7 @@ namespace KMS.src.db
 
         internal SQLiteDataReader TryQueryMonthWhileSwitchDate()
         {
-            SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryMonthTableSQL);
+            SQLiteDataReader reader = detailDatabase.ExecuteQuery(QueryMonthTableSQL);
             if (reader is null)
             {
                 Logger.v(TAG, "query month table null");
@@ -154,6 +155,7 @@ namespace KMS.src.db
             {
                 if (!reader.HasRows)
                 {
+                    reader.Close();
                     Logger.v(TAG, "No month record found, initing");
                     InitMonthTable();
                     return null;
@@ -165,7 +167,7 @@ namespace KMS.src.db
 
         internal SQLiteDataReader TryQueryYearWhileSwitchDate()
         {
-            SQLiteDataReader reader = yearDatabase.ExecuteQuery(QueryYearTableSQL);
+            SQLiteDataReader reader = detailDatabase.ExecuteQuery(QueryYearTableSQL);
             if (reader is null)
             {
                 Logger.v(TAG, "query year table null");
@@ -175,6 +177,7 @@ namespace KMS.src.db
             {
                 if (!reader.HasRows)
                 {
+                    reader.Close();
                     Logger.v(TAG, "No year record found, initing");
                     InitYearTable();
                     return null;
@@ -186,22 +189,22 @@ namespace KMS.src.db
 
         private void CreateYearTable()
         {
-            yearDatabase.ExecuteNonQuery("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER,year SMALLINT NOT NULL)");
+            detailDatabase.ExecuteNonQuery("CREATE TABLE " + YEAR_TABLE + "(type SMALLINT PRIMARY KEY NOT NULL,value INTEGER,year SMALLINT NOT NULL)");
         }
 
         private void CreateMonthTable()
         {
-            yearDatabase.ExecuteNonQuery("CREATE TABLE " + MONTH_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL)");
+            detailDatabase.ExecuteNonQuery("CREATE TABLE " + MONTH_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL)");
         }
 
         private void CreateDayTable()
         {
-            yearDatabase.ExecuteNonQuery("CREATE TABLE " + DAY_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL)");
+            detailDatabase.ExecuteNonQuery("CREATE TABLE " + DAY_TABLE + "(type SMALLINT NOT NULL,value INTEGER,year SMALLINT NOT NULL,month TINYINT NOT NULL,day TINYINT NOT NULL)");
         }
 
         internal void InitGlobalTable()
         {
-            if (totalDatabase.BeginTransaction())
+            if (globalDatabase.BeginTransaction())
             {
                 InsertGlobalItem(Constants.TypeNumber.KEYBOARD_TOTAL);
                 InsertGlobalItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
@@ -220,7 +223,7 @@ namespace KMS.src.db
                     InsertGlobalItem(keycode);
                 }
 
-                totalDatabase.CommitTransaction();
+                globalDatabase.CommitTransaction();
             }
             else
             {
@@ -231,7 +234,7 @@ namespace KMS.src.db
 
         internal void InitYearTable()
         {
-            if (yearDatabase.BeginTransaction())
+            if (detailDatabase.BeginTransaction())
             {
                 InsertYearItem(Constants.TypeNumber.KEYBOARD_TOTAL);
                 InsertYearItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
@@ -250,7 +253,7 @@ namespace KMS.src.db
                     InsertYearItem(keycode);
                 }
 
-                yearDatabase.CommitTransaction();
+                detailDatabase.CommitTransaction();
             }
             else
             {
@@ -261,7 +264,7 @@ namespace KMS.src.db
 
         internal void InitMonthTable()
         {
-            if (yearDatabase.BeginTransaction())
+            if (detailDatabase.BeginTransaction())
             {
                 InsertMonthItem(Constants.TypeNumber.KEYBOARD_TOTAL);
                 InsertMonthItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
@@ -280,7 +283,7 @@ namespace KMS.src.db
                     InsertMonthItem(keycode);
                 }
 
-                yearDatabase.CommitTransaction();
+                detailDatabase.CommitTransaction();
             }
             else
             {
@@ -291,7 +294,7 @@ namespace KMS.src.db
 
         private void InitDayTable()
         {
-            if (yearDatabase.BeginTransaction())
+            if (detailDatabase.BeginTransaction())
             {
                 InsertDayItem(Constants.TypeNumber.KEYBOARD_TOTAL);
                 InsertDayItem(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL);
@@ -310,7 +313,7 @@ namespace KMS.src.db
                     InsertDayItem(keycode);
                 }
 
-                yearDatabase.CommitTransaction();
+                detailDatabase.CommitTransaction();
             }
             else
             {
@@ -321,27 +324,27 @@ namespace KMS.src.db
 
         internal void InsertGlobalItem(ushort type)
         {
-            totalDatabase.ExecuteNonQuery("INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + ",0)");
+            globalDatabase.ExecuteNonQuery("INSERT INTO " + GLOBAL_TABLE + " VALUES(" + type + ",0)");
         }
 
         private void InsertYearItem(ushort type)
         {
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")");
+            detailDatabase.ExecuteNonQuery("INSERT INTO " + YEAR_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + ")");
         }
 
         private void InsertMonthItem(ushort type)
         {
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
+            detailDatabase.ExecuteNonQuery("INSERT INTO " + MONTH_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + ")");
         }
 
         private void InsertDayItem(ushort type)
         {
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")");
+            detailDatabase.ExecuteNonQuery("INSERT INTO " + DAY_TABLE + " VALUES(" + type + ",0," + TimeManager.TimeUsing.Year + "," + TimeManager.TimeUsing.Month + "," + TimeManager.TimeUsing.Day + ")");
         }
 
         internal void InsertHourItem(ushort type, uint value, byte hour)
         {
-            yearDatabase.ExecuteNonQuery("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + ","
+            detailDatabase.ExecuteNonQuery("INSERT INTO " + HOUR_TABLE + " VALUES(" + type + "," + value + ","
                 + TimeManager.TimeUsing.Year + ","
                 + TimeManager.TimeUsing.Month + ","
                 + TimeManager.TimeUsing.Day + ","
@@ -357,9 +360,9 @@ namespace KMS.src.db
         internal bool BeginTransaction(byte which)
         {
             if (which == GLOBAL_RECORD)
-                return totalDatabase.BeginTransaction();
+                return globalDatabase.BeginTransaction();
             else if (which == YEAR_RECORD)
-                return yearDatabase.BeginTransaction();
+                return detailDatabase.BeginTransaction();
             else
                 return false;
         }
@@ -367,32 +370,32 @@ namespace KMS.src.db
         internal void CommitTransaction(byte which)
         {
             if (which == GLOBAL_RECORD)
-                totalDatabase.CommitTransaction();
+                globalDatabase.CommitTransaction();
             else if (which == YEAR_RECORD)
-                yearDatabase.CommitTransaction();
+                detailDatabase.CommitTransaction();
         }
 
         internal void UpdateGlobal(ushort type, uint value)
         {
-            totalDatabase.ExecuteNonQuery("UPDATE " + GLOBAL_TABLE + " SET value=" + value + " WHERE type=" + type);
+            globalDatabase.ExecuteNonQuery("UPDATE " + GLOBAL_TABLE + " SET value=" + value + " WHERE type=" + type);
         }
 
         internal void UpdateYear(ushort type, uint value)
         {
-            yearDatabase.ExecuteNonQuery("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type
+            detailDatabase.ExecuteNonQuery("UPDATE " + YEAR_TABLE + " SET value=" + value + " WHERE type=" + type
                 + " AND year=" + TimeManager.TimeUsing.Year);
         }
 
         internal void UpdateMonth(ushort type, uint value)
         {
-            yearDatabase.ExecuteNonQuery("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type
+            detailDatabase.ExecuteNonQuery("UPDATE " + MONTH_TABLE + " SET value=" + value + " WHERE type=" + type
                 + " AND year=" + TimeManager.TimeUsing.Year
                 + " AND month=" + TimeManager.TimeUsing.Month);
         }
 
         internal void UpdateDay(ushort type, uint value)
         {
-            yearDatabase.ExecuteNonQuery("UPDATE " + DAY_TABLE + " SET value=" + value
+            detailDatabase.ExecuteNonQuery("UPDATE " + DAY_TABLE + " SET value=" + value
                 + " WHERE type=" + type
                 + " AND year=" + TimeManager.TimeUsing.Year
                 + " AND month=" + TimeManager.TimeUsing.Month
@@ -402,7 +405,7 @@ namespace KMS.src.db
         internal void UpdateHour(ushort type, uint value, byte hour)
         {
             Logger.v(TAG, "UpdateHour,type:" + type + ",hour:" + hour + ",value:" + value);
-            yearDatabase.ExecuteNonQuery("UPDATE " + HOUR_TABLE + " SET value=" + value
+            detailDatabase.ExecuteNonQuery("UPDATE " + HOUR_TABLE + " SET value=" + value
                 + " WHERE year=" + TimeManager.TimeUsing.Year
                 + " AND month=" + TimeManager.TimeUsing.Month
                 + " AND day=" + TimeManager.TimeUsing.Day
@@ -468,27 +471,27 @@ namespace KMS.src.db
 
         internal SQLiteDataReader QueryGlobalStatistic()
         {
-            return Query(totalDatabase, GLOBAL_TABLE, QueryGlobalTableSQL);
+            return Query(globalDatabase, GLOBAL_TABLE, QueryGlobalTableSQL);
         }
 
         internal SQLiteDataReader QueryYearStatistic()
         {
-            return Query(yearDatabase, YEAR_TABLE, QueryYearTableSQL);
+            return Query(detailDatabase, YEAR_TABLE, QueryYearTableSQL);
         }
 
         internal SQLiteDataReader QueryMonthStatistic()
         {
-            return Query(yearDatabase, MONTH_TABLE, QueryMonthTableSQL);
+            return Query(detailDatabase, MONTH_TABLE, QueryMonthTableSQL);
         }
 
         internal SQLiteDataReader QueryDayStatistic()
         {
-            return Query(yearDatabase, DAY_TABLE, QueryDayTableSQL);
+            return Query(detailDatabase, DAY_TABLE, QueryDayTableSQL);
         }
 
         internal SQLiteDataReader QueryHourStatistic()
         {
-            return Query(yearDatabase, HOUR_TABLE, QueryHourTableSQL);
+            return Query(detailDatabase, HOUR_TABLE, QueryHourTableSQL);
         }
 
         private SQLiteDataReader Query(SQLiteHelper sqlite, string table, string sql)
@@ -512,8 +515,8 @@ namespace KMS.src.db
 
         internal void SwitchYearDB()
         {
-            yearDatabase.CloseDababase();
-            yearDatabase.OpenDatabase(YearDb);
+            detailDatabase.CloseDababase();
+            detailDatabase.OpenDatabase(YearDb);
         }
 
         /// <summary>

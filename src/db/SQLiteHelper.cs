@@ -11,6 +11,7 @@ namespace KMS.src.db
         private SQLiteConnection sqliteConnection;
         private SQLiteTransaction sqliteTransaction;
         private SQLiteCommand nonQueryCmd;
+        private SQLiteCommand queryCmd;
 
         public bool OpenDatabase(string path)
         {
@@ -40,6 +41,7 @@ namespace KMS.src.db
                 }
 
                 nonQueryCmd = new SQLiteCommand(sqliteConnection);
+                queryCmd = new SQLiteCommand(sqliteConnection);
             }
             catch (Exception)
             {
@@ -104,9 +106,8 @@ namespace KMS.src.db
 
         internal SQLiteDataReader ExecuteQuery(string sql)
         {
-            SQLiteCommand cmd = new SQLiteCommand(sqliteConnection);
-            cmd.CommandText = sql;
-            return cmd.ExecuteReader();
+            queryCmd.CommandText = sql;
+            return queryCmd.ExecuteReader();
         }
     }
 }

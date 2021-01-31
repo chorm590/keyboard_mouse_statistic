@@ -138,7 +138,7 @@ namespace KMS.src.core
             Logger.v(TAG, "TimingStorage, now1 " + now.Minute + ":" + now.Second + "." + now.Millisecond);
             //storage the global record.
             bool globalTransaction = false;
-            bool yearTransaction = false;
+            bool detailTransaction = false;
 
             // [1/2]keyboard event
             if (statisticGlobal.KeyboardTotal.IsUpdated)
@@ -146,15 +146,15 @@ namespace KMS.src.core
                 if (SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.GLOBAL_RECORD))
                 {
                     globalTransaction = true;
-                    yearTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
+                    detailTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
 
                     SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.KEYBOARD_TOTAL, statisticGlobal.KeyboardTotal.Value);
                     statisticGlobal.KeyboardTotal.IsUpdated = false;
 
-                    if (yearTransaction)
+                    if (detailTransaction)
                     {
                         SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.KEYBOARD_TOTAL, statisticYear.KeyboardTotal.Value);
-                        SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.KEYBOARD_TOTAL, statisticYear.KeyboardTotal.Value);
+                        SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.KEYBOARD_TOTAL, statisticMonth.KeyboardTotal.Value);
                         SQLiteManager.GetInstance.UpdateDay(Constants.TypeNumber.KEYBOARD_TOTAL, statisticDay.KeyboardTotal.Value);
                     }
                     
@@ -162,10 +162,10 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, statisticGlobal.KeyboardComboTotal.Value);
                         statisticGlobal.KeyboardComboTotal.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, statisticYear.KeyboardComboTotal.Value);
-                            SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, statisticYear.KeyboardComboTotal.Value);
+                            SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, statisticMonth.KeyboardComboTotal.Value);
                             SQLiteManager.GetInstance.UpdateDay(Constants.TypeNumber.KEYBOARD_COMBOL_TOTAL, statisticDay.KeyboardComboTotal.Value);
                         }
                     }
@@ -184,7 +184,7 @@ namespace KMS.src.core
                         }
                     }
 
-                    if (yearTransaction)
+                    if (detailTransaction)
                     {
                         if (statisticYear.CopyKeys(list))
                         {
@@ -235,8 +235,8 @@ namespace KMS.src.core
 
                 if(globalTransaction)
                 {
-                    if (!yearTransaction)
-                        yearTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
+                    if (!detailTransaction)
+                        detailTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
 
                     //存储鼠标事件。
                     SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_TOTAL, statisticGlobal.MouseTotal.Value);
@@ -249,7 +249,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_LEFT_BTN, statisticGlobal.MouseLeftBtn.Value);
                         statisticGlobal.MouseLeftBtn.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_LEFT_BTN, statisticYear.MouseLeftBtn.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_LEFT_BTN, statisticMonth.MouseLeftBtn.Value);
@@ -261,7 +261,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_RIGHT_BTN, statisticGlobal.MouseRightBtn.Value);
                         statisticGlobal.MouseRightBtn.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_RIGHT_BTN, statisticYear.MouseRightBtn.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_RIGHT_BTN, statisticMonth.MouseRightBtn.Value);
@@ -273,7 +273,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, statisticGlobal.MouseWheelForward.Value);
                         statisticGlobal.MouseWheelForward.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, statisticYear.MouseWheelForward.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_WHEEL_FORWARD, statisticMonth.MouseWheelForward.Value);
@@ -285,7 +285,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, statisticGlobal.MouseWheelBackward.Value);
                         statisticGlobal.MouseWheelBackward.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, statisticYear.MouseWheelBackward.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_WHEEL_BACKWARD, statisticMonth.MouseWheelBackward.Value);
@@ -297,7 +297,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_SIDE_FORWARD, statisticGlobal.MouseSideKeyForward.Value);
                         statisticGlobal.MouseSideKeyForward.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_SIDE_FORWARD, statisticYear.MouseSideKeyForward.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_SIDE_FORWARD, statisticMonth.MouseSideKeyForward.Value);
@@ -309,7 +309,7 @@ namespace KMS.src.core
                     {
                         SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, statisticGlobal.MouseSideKeyBackward.Value);
                         statisticGlobal.MouseSideKeyBackward.IsUpdated = false;
-                        if (yearTransaction)
+                        if (detailTransaction)
                         {
                             SQLiteManager.GetInstance.UpdateYear(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, statisticYear.MouseSideKeyBackward.Value);
                             SQLiteManager.GetInstance.UpdateMonth(Constants.TypeNumber.MOUSE_SIDE_BACKWARD, statisticMonth.MouseSideKeyBackward.Value);
@@ -321,7 +321,7 @@ namespace KMS.src.core
 
             if(globalTransaction)
                 SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.GLOBAL_RECORD);
-            if (yearTransaction)
+            if (detailTransaction)
                 SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.YEAR_RECORD);
 
             //hour-statistic data
@@ -399,7 +399,6 @@ namespace KMS.src.core
             Logger.v(TAG, "TimingStorage, now2 " + now.Minute + ":" + now.Second + "." + now.Millisecond);
         }
 
-
         /// <summary>
         /// 检查是否已经换日，若是，更新TimeManager中的时间，然后更换数据库或数据库并初始化。
         /// </summary>
@@ -472,6 +471,7 @@ namespace KMS.src.core
         private void SwitchDayStatistic()
         {
             ClearStatistic(statisticDay);
+            Logger.v(TAG, "day statistic cleared");
             SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryDayWhileSwitchDate();
             if (reader != null)
             {
@@ -485,6 +485,7 @@ namespace KMS.src.core
         private void SwitchMonthStatistic()
         {
             ClearStatistic(statisticMonth);
+            Logger.v(TAG, "month statistic cleared");
             SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryMonthWhileSwitchDate();
             if (reader != null)
             {
@@ -498,6 +499,7 @@ namespace KMS.src.core
         private void SwitchYearStatistic()
         {
             ClearStatistic(statisticYear);
+            Logger.v(TAG, "year statistic cleared");
             SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryYearWhileSwitchDate();
             if (reader != null)
             {
@@ -558,7 +560,6 @@ namespace KMS.src.core
                 rco.Value = 0;
                 rco.IsUpdated = false;
             }
-            Logger.v(TAG, "clear statistic finish");
         }
 
         internal void KeyboardEventHappen(int typeCode, byte fkey, DateTime time)
