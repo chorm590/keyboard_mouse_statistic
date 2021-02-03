@@ -36,6 +36,7 @@ namespace KMS.src.core
 
         private StatisticManager()
         {
+            Logger.v(TAG, "new StatisticManager()");
             //Statistic of today
             SttKeyboardTotalToday = new Record()
             {
@@ -70,9 +71,11 @@ namespace KMS.src.core
 
             if (SQLiteManager.GetInstance.Init())
             {
+                Logger.v(TAG, "SQLite init success");
                 QueryGlobalStatisticFromDB();
                 if ((statisticGlobal.KeyboardTotal.Value is 0) && (statisticGlobal.MouseTotal.Value is 0))
                 {
+                    Logger.v(TAG, "No global record found");
                     new Thread(() => {
                         DateTime niw = DateTime.Now;
                         Logger.v(TAG, "Init table begin, " + niw.Minute + ":" + niw.Second + "." + niw.Millisecond);
@@ -85,6 +88,7 @@ namespace KMS.src.core
                 }
                 else
                 {
+                    Logger.v(TAG, "There's global record, apply it");
                     //read statistic from detail database
                     new Thread(()=> {
                         DateTime niw = DateTime.Now;
@@ -147,6 +151,7 @@ namespace KMS.src.core
                 {
                     globalTransaction = true;
                     detailTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
+                    Logger.v(TAG, "keyboard, globaltransaction:" + globalTransaction + ",detail:" + detailTransaction);
 
                     SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.KEYBOARD_TOTAL, statisticGlobal.KeyboardTotal.Value);
                     statisticGlobal.KeyboardTotal.IsUpdated = false;
@@ -228,6 +233,7 @@ namespace KMS.src.core
             // [2/2]mouse event
             if (statisticGlobal.MouseTotal.IsUpdated)
             {
+                Logger.v(TAG, "mouse, globaltransaction:" + globalTransaction + ",detailtransaction:" + detailTransaction);
                 if (!globalTransaction)
                 {
                     globalTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.GLOBAL_RECORD);
@@ -238,6 +244,7 @@ namespace KMS.src.core
                     if (!detailTransaction)
                         detailTransaction = SQLiteManager.GetInstance.BeginTransaction(SQLiteManager.YEAR_RECORD);
 
+                    Logger.v(TAG, "mouse2, globaltransaction:" + globalTransaction + ",detailtransaction:" + detailTransaction);
                     //存储鼠标事件。
                     SQLiteManager.GetInstance.UpdateGlobal(Constants.TypeNumber.MOUSE_TOTAL, statisticGlobal.MouseTotal.Value);
                     statisticGlobal.MouseTotal.IsUpdated = false;
@@ -323,6 +330,8 @@ namespace KMS.src.core
                 SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.GLOBAL_RECORD);
             if (detailTransaction)
                 SQLiteManager.GetInstance.CommitTransaction(SQLiteManager.YEAR_RECORD);
+
+            Logger.v(TAG, "sqlite transaction commited");
 
             //hour-statistic data
             //为了避免事务的干扰，将小时统计统计数据放在这里存储。2021-01-15 14:30
@@ -479,6 +488,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticDay);
                 }
+                reader.Close();
             }
         }
 
@@ -493,6 +503,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticMonth);
                 }
+                reader.Close();
             }
         }
 
@@ -507,6 +518,7 @@ namespace KMS.src.core
                 {
                     ApplyKeyboardRecordFromDB(reader.GetInt16(0), reader.GetInt32(1), statisticYear);
                 }
+                reader.Close();
             }
         }
 
@@ -776,6 +788,7 @@ namespace KMS.src.core
 
         private void QueryGlobalStatisticFromDB()
         {
+            Logger.v(TAG, "QueryGlobalStatisticFromDB()");
             SQLiteDataReader reader = SQLiteManager.GetInstance.QueryGlobalStatistic();
             if (reader != null)
             {
@@ -789,7 +802,7 @@ namespace KMS.src.core
 
         private void QueryYearStatisticFromDB()
         {
-            SQLiteDataReader reader = SQLiteManager.GetInstance.QueryYearStatistic();
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryYearWhileSwitchDate();
             if (reader != null)
             {
                 while (reader.Read())
@@ -802,7 +815,7 @@ namespace KMS.src.core
 
         private void QueryMonthStatisticFromDB()
         {
-            SQLiteDataReader reader = SQLiteManager.GetInstance.QueryMonthStatistic();
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryMonthWhileSwitchDate();
             if (reader != null)
             {
                 while (reader.Read())
@@ -815,7 +828,7 @@ namespace KMS.src.core
 
         private void QueryDayStatisticFromDB()
         {
-            SQLiteDataReader reader = SQLiteManager.GetInstance.QueryDayStatistic();
+            SQLiteDataReader reader = SQLiteManager.GetInstance.TryQueryDayWhileSwitchDate();
             if (reader != null)
             {
                 while (reader.Read())
@@ -831,6 +844,7 @@ namespace KMS.src.core
         /// </summary>
         private void QueryHourStatisticFromDB()
         {
+            Logger.v(TAG, "QueryHourStatisticFromDB()");
             SQLiteDataReader reader = SQLiteManager.GetInstance.QueryHourStatistic();
             if (reader != null)
             {

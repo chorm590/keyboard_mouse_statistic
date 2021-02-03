@@ -5,14 +5,24 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <ApplicationIcon>icon_big.ico</ApplicationIcon>
+    <ApplicationIcon>res\icon_big.ico</ApplicationIcon>
 	<UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="res\icon_big.ico" />
+    <None Remove="res\icon_smal2.png" />
+    <None Remove="res\icon_small.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="System.Data.SQLite">
       <HintPath>dll\System.Data.SQLite.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="res\icon_big.ico" />
   </ItemGroup>
 
   <ItemGroup>

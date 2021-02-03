@@ -122,6 +122,7 @@ namespace KMS.src.db
         /// </summary>
         internal SQLiteDataReader TryQueryDayWhileSwitchDate()
         {
+            Logger.v(TAG, "TryQueryDayWhileSwitchDate()");
             // 检查指定日期记录是否存在。
             SQLiteDataReader reader = detailDatabase.ExecuteQuery(QueryDayTableSQL);
             if (reader is null)
@@ -294,6 +295,7 @@ namespace KMS.src.db
 
         private void InitDayTable()
         {
+            Logger.v(TAG, "InitDayTable()()");
             if (detailDatabase.BeginTransaction())
             {
                 InsertDayItem(Constants.TypeNumber.KEYBOARD_TOTAL);
@@ -413,67 +415,11 @@ namespace KMS.src.db
                 + " AND type=" + type);
         }
 
-        ///// <summary>
-        ///// 查找所有数据库文件
-        ///// </summary>
-        ///// <returns>包含各数据库文件路径的列表</returns>
-        //internal List<string> IterateDbs()
-        //{
-        //    if (Directory.Exists(DATABASE_DIR))
-        //    {
-        //        string[] files = Directory.GetFiles(DATABASE_DIR);
-        //        string[] dirs = Directory.GetDirectories(DATABASE_DIR);
-        //        string[] dirs2;
-        //        List<string> validDb = new List<string>();
-        //        string str;
-        //        Regex regex = new Regex("[1][9][7-9][0-9]|[2][0][0-9][0-9]");
-        //        foreach (string dir in dirs)
-        //        {
-        //            str = Toolset.GetBasename(dir);
-        //            if (str is null || str.Length == 0)
-        //                continue;
-
-        //            //Hummmmmm,2021-01-12 19:08
-        //            if (str.Length != 4)
-        //                continue;
-
-        //            if (!regex.IsMatch(str))
-        //            {
-        //                continue;
-        //            }
-
-        //            //directory valid
-        //            dirs2 = Directory.GetFiles(dir);
-        //            string str2;
-        //            foreach(string file in dirs2)
-        //            {
-        //                str2 = Toolset.GetBasename(file);
-        //                if (str2.StartsWith("kms" + str))
-        //                {
-        //                    if (str2.EndsWith(".db"))
-        //                    {
-        //                        validDb.Add(file);
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //        if (validDb.Count > 0)
-        //            return validDb;
-        //        else
-        //            return null;
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
-
         internal SQLiteDataReader QueryGlobalStatistic()
         {
             return Query(globalDatabase, GLOBAL_TABLE, QueryGlobalTableSQL);
         }
-
+        /*
         internal SQLiteDataReader QueryYearStatistic()
         {
             return Query(detailDatabase, YEAR_TABLE, QueryYearTableSQL);
@@ -487,7 +433,7 @@ namespace KMS.src.db
         internal SQLiteDataReader QueryDayStatistic()
         {
             return Query(detailDatabase, DAY_TABLE, QueryDayTableSQL);
-        }
+        }*/
 
         internal SQLiteDataReader QueryHourStatistic()
         {
