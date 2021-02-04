@@ -279,8 +279,6 @@ namespace KMS.src.core
             internal const int WM_MOUSEHWHEEL = 0x20e; //水平方向的滚动，一般鼠标没有这个事件。
         }
 
-
-
         internal static readonly Dictionary<ushort, Type> MouseKeys = new Dictionary<ushort, Type>
         {
             {TypeNumber.MOUSE_LEFT_BTN,                 new Type(TypeNumber.MOUSE_LEFT_BTN,         "鼠标左键") },
@@ -294,8 +292,8 @@ namespace KMS.src.core
 
         internal static class MouseDataHighOrder
         {
-            internal const int SIDE_BACKWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
-            internal const int SIDE_FORWARD = 0x2; //鼠标侧键后退标志。high-order in DWORD
+            internal const int SIDE_BACKWARD = 0x1; //鼠标侧键后退标志。high-order in DWORD
+            internal const int SIDE_FORWARD = 0x2; //鼠标侧键前标志。high-order in DWORD
         }
 
         internal static class Statistic
