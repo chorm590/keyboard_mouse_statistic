@@ -419,21 +419,6 @@ namespace KMS.src.db
         {
             return Query(globalDatabase, GLOBAL_TABLE, QueryGlobalTableSQL);
         }
-        /*
-        internal SQLiteDataReader QueryYearStatistic()
-        {
-            return Query(detailDatabase, YEAR_TABLE, QueryYearTableSQL);
-        }
-
-        internal SQLiteDataReader QueryMonthStatistic()
-        {
-            return Query(detailDatabase, MONTH_TABLE, QueryMonthTableSQL);
-        }
-
-        internal SQLiteDataReader QueryDayStatistic()
-        {
-            return Query(detailDatabase, DAY_TABLE, QueryDayTableSQL);
-        }*/
 
         internal SQLiteDataReader QueryHourStatistic()
         {
