@@ -294,8 +294,8 @@ namespace KMS.src.core
 
         internal static class MouseDataHighOrder
         {
-            internal const int SIDE_FORWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
-            internal const int SIDE_BACKWARD = 0x2; //鼠标侧键后退标志。high-order in DWORD
+            internal const int SIDE_BACKWARD = 0x1; //鼠标侧键前标志。high-order in DWORD
+            internal const int SIDE_FORWARD = 0x2; //鼠标侧键后退标志。high-order in DWORD
         }
 
         internal static class Statistic
